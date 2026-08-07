@@ -17,3 +17,11 @@ export function login(data: LoginRequest): Promise<LoginResponse> {
     body: JSON.stringify(data),
   });
 }
+
+// POST /auth/logout — best-effort; przy stateless JWT wylogowanie
+// i tak dzieje się po stronie frontu (czyszczenie tokenu)
+export function logout(): Promise<void> {
+  return apiFetch("/auth/logout", {
+    method: "POST",
+  });
+}

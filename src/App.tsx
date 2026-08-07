@@ -1,6 +1,11 @@
-// src/App.tsx
+import { AuthProvider } from "./context/AuthContext";
+
 function App() {
-  return <div>Platforma Treningowa — frontend startuje ✅</div>;
+  return (
+    <AuthProvider>
+      <div>Platforma Treningowa — frontend startuje ✅</div>
+    </AuthProvider>
+  );
 }
 
 export default App;
