@@ -1,4 +1,3 @@
-// src/services/profileApi.ts
 import { apiFetch } from "./apiClient";
 import { UserProfile } from "../types/profile";
 

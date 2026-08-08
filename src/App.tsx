@@ -10,18 +10,13 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* trasy publiczne */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
-          {/* trasy chronione — wszystko wewnątrz PrivateRoute */}
           <Route element={<PrivateRoute />}>
             <Route path="/kalendarz" element={<CalendarPage />} />
-            {/* tu wejdą kolejne: /dziennik itd. */}
           </Route>
 
-          {/* wejście na / lub nieznany adres -> do kalendarza
-              (a stamtąd PrivateRoute odeśle niezalogowanego na /login) */}
           <Route path="/" element={<Navigate to="/kalendarz" replace />} />
           <Route path="*" element={<Navigate to="/kalendarz" replace />} />
         </Routes>

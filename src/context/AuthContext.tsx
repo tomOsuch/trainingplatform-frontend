@@ -1,9 +1,15 @@
-// src/context/AuthContext.tsx
-import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
-import { LoginRequest, User } from '../types/auth';
-import * as authApi from '../services/authApi';
-import * as profileApi from '../services/profileApi';
-import { setAuthToken, setOnUnauthorized } from '../services/apiClient';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
+import { LoginRequest, User } from "../types/auth";
+import * as authApi from "../services/authApi";
+import * as profileApi from "../services/profileApi";
+import { setAuthToken, setOnUnauthorized } from "../services/apiClient";
 
 interface AuthContextValue {
   user: User | null;
@@ -20,21 +26,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
   const logout = useCallback(() => {
-    authApi.logout().catch(() => {}); // best-effort, błąd nas nie obchodzi
-    setAuthToken(null); // czyści token w apiClient
-    setToken(null); // czyści stan Reacta -> PrivateRoute przekieruje
+    authApi.logout().catch(() => {});
+    setAuthToken(null);
+    setToken(null);
     setUser(null);
   }, []);
 
   const login = useCallback(async (data: LoginRequest) => {
-    const res = await authApi.login(data); // 401/403 poleci do formularza
+    const res = await authApi.login(data);
 
-    setAuthToken(res.token); // od teraz każde żądanie ma Bearer token
+    setAuthToken(res.token);
     setToken(res.token);
     setUser({ userId: res.userId, email: res.email, role: res.role });
 
-    // dociągamy imię/nazwisko do Navbaru; jak się nie uda,
-    // zostajemy przy danych z logowania (email zamiast imienia)
     try {
       const profile = await profileApi.getProfile();
       setUser({
@@ -49,13 +53,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // rejestrujemy logout jako reakcję na 401 (wygaśnięcie tokenu)
   useEffect(() => {
     setOnUnauthorized(logout);
     return () => setOnUnauthorized(null);
   }, [logout]);
 
-  return <AuthContext.Provider value={{ user, token, isAuthenticated: token !== null, login, logout }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{ user, token, isAuthenticated: token !== null, login, logout }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth(): AuthContextValue {

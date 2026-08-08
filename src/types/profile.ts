@@ -1,7 +1,5 @@
-// src/types/profile.ts
 import { Role } from "./auth";
 
-// Odpowiedź z GET /profile — pełne dane zalogowanego użytkownika
 export interface UserProfile {
   userId: number;
   firstName: string;
