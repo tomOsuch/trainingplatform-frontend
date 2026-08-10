@@ -1,15 +1,9 @@
-import { getProfile } from "../services/profileApi";
+import { useEffect } from "react";
+import { getCategories } from "../services/categoriesApi";
+import { getPlans, createPlan } from "../services/trainingPlansApi";
 
 function CalendarPage() {
-  return (
-    <div>
-      <h1>Kalendarz — wkrótce</h1>
-      {/* TYMCZASOWE — do testu 401, usunąć po Tasku 9 */}
-      <button onClick={() => getProfile().then(console.log).catch(console.error)}>
-        Test: pobierz profil
-      </button>
-    </div>
-  );
+  return <h1>Kalendarz — wkrótce</h1>;
 }
 
 export default CalendarPage;
