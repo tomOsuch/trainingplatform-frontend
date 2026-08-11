@@ -1,0 +1,143 @@
+.calendar {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  padding: 16px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+
+  button {
+    cursor: pointer;
+    font-size: 13px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    border-radius: 7px;
+    padding: 6px 10px;
+
+    &:hover:not(:disabled) { background: #f3f4f6; }
+    &:disabled { opacity: 0.5; cursor: default; }
+  }
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.monthLabel {
+  font-size: 16px;
+  font-weight: 600;
+  min-width: 150px;
+  text-align: center;
+}
+
+.todayButton { margin-left: 4px; }
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.viewToggle {
+  display: inline-flex;
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+  overflow: hidden;
+
+  button {
+    border: none;
+    border-radius: 0;
+  }
+}
+
+.viewActive {
+  background: #2563eb !important;
+  color: #fff;
+}
+
+.addButton {
+  background: #2563eb !important;
+  color: #fff;
+  border-color: #2563eb !important;
+  font-weight: 600;
+
+  &:hover:not(:disabled) { background: #1d4ed8 !important; }
+}
+
+.error {
+  color: #dc2626;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 4px;
+
+  span {
+    text-align: center;
+    font-size: 12px;
+    color: #6b7280;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.cell {
+  min-height: 96px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 7px;
+  padding: 4px 6px;
+}
+
+.outside {
+  background: #fafafa;
+  .dayNumber { color: #c0c4cc; }
+}
+
+.today {
+  background: #eff6ff;
+  border: 2px solid #2563eb;
+}
+
+.dayNumber {
+  font-size: 12px;
+  color: #374151;
+}
+
+.todayNumber {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+  font-size: 12px;
+  align-items: center;
+  justify-content: center;
+}
+
+.planStub {
+  font-size: 11px;
+  color: #374151;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
