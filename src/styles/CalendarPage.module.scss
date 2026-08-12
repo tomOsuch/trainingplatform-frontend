@@ -141,3 +141,32 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.cell {
+  min-height: 96px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 7px;
+  padding: 4px 6px;
+  display: flex;          // nowe — pozwala dopchnąć pasek do dołu
+  flex-direction: column;
+}
+
+.addRow {
+  margin-top: auto;       // zawsze na dole komórki
+  opacity: 0;             // niewidoczny, ale rezerwuje miejsce (brak skakania layoutu)
+  border: 1px dashed #bfdbfe;
+  background: none;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 11px;
+  color: #2563eb;
+  cursor: pointer;
+  transition: opacity 0.12s;
+
+  &:hover { background: #eff6ff; }
+}
+
+.cell:hover .addRow {
+  opacity: 1;
+}
