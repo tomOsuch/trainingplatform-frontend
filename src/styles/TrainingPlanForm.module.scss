@@ -1,0 +1,115 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+
+  span:first-child {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  input, select, textarea {
+    padding: 9px 11px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+
+    &:focus {
+      outline: 2px solid #2563eb;
+      border-color: transparent;
+    }
+  }
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+}
+
+.categoryRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  select { flex: 1; }
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.fieldError {
+  color: #dc2626;
+  font-size: 12px;
+}
+
+.formError {
+  color: #dc2626;
+  font-size: 13px;
+  text-align: center;
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.save {
+  flex: 1;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover:not(:disabled) { background: #1d4ed8; }
+  &:disabled { opacity: 0.6; }
+}
+
+.cancel {
+  flex: 1;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 14px;
+  cursor: pointer;
+
+  &:hover { background: #f3f4f6; }
+}
+
+.delete {
+  background: #fff;
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+  border-radius: 8px;
+  padding: 9px;
+  font-size: 13px;
+  cursor: pointer;
+
+  &:hover { background: #fef2f2; }
+}
+
+.confirmBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+
+  button { flex: 1; }
+}

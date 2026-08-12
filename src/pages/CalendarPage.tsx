@@ -4,6 +4,10 @@ import PlanTile from '../components/PlanTile';
 import { getPlans } from '../services/trainingPlansApi';
 import { buildMonthGrid, MONTH_NAMES, WEEKDAY_NAMES } from '../utils/calendar';
 import styles from '../styles/CalendarPage.module.scss';
+import { WorkoutCategory } from '../types/workout';
+import { getCategories } from '../services/categoriesApi';
+import { toISODate } from '../utils/calendar';
+import TrainingPlanForm from '../components/TrainingPlanForm';
 
 function CalendarPage() {
   // "kotwica" = zawsze 1. dzień oglądanego miesiąca
@@ -13,15 +17,24 @@ function CalendarPage() {
   });
   const [plans, setPlans] = useState<TrainingPlan[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<WorkoutCategory[]>([]);
+  const [formDate, setFormDate] = useState<string | null>(null); // otwarty modal = ustawiona data
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const grid = useMemo(() => buildMonthGrid(anchor), [anchor]);
+
+  useEffect(() => {
+    getCategories()
+      .then(setCategories)
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     setError(null);
     getPlans(grid[0].iso, grid[41].iso)
       .then(setPlans)
       .catch((e) => setError(e.message ?? 'Nie udało się pobrać planów'));
-  }, [grid]);
+  }, [grid, refreshKey]);
 
   const plansByDay = useMemo(() => {
     const map = new Map<string, TrainingPlan[]>();
@@ -46,9 +59,7 @@ function CalendarPage() {
     setAnchor(new Date(now.getFullYear(), now.getMonth(), 1));
   };
 
-  const handleAddForDay = (iso: string) => {
-    console.log('TODO task 4/6: otwórz formularz z datą', iso);
-  };
+  const handleAddForDay = (iso: string) => setFormDate(iso);
 
   const handleSelectPlan = (plan: TrainingPlan) => {
     console.log('TODO task 5/6: otwórz szczegóły planu', plan.id);
@@ -79,7 +90,7 @@ function CalendarPage() {
               Tydzień
             </button>
           </div>
-          <button className={styles.addButton} disabled title="Wkrótce (task 4/6)">
+          <button className={styles.addButton} onClick={() => setFormDate(toISODate(new Date()))}>
             + Dodaj trening
           </button>
         </div>
@@ -118,6 +129,14 @@ function CalendarPage() {
           </div>
         ))}
       </div>
+      {formDate && (
+        <TrainingPlanForm
+          categories={categories}
+          initialDate={formDate}
+          onClose={() => setFormDate(null)}
+          onSaved={() => setRefreshKey((k) => k + 1)}
+        />
+      )}
     </div>
   );
 }
