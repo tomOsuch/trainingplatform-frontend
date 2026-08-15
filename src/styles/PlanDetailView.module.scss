@@ -1,0 +1,131 @@
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.categoryPill {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.info {
+  font-size: 14px;
+  color: #374151;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.notes { color: #6b7280; }
+
+.statusField {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  span {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  select {
+    padding: 9px 11px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+
+    &:focus {
+      outline: 2px solid #2563eb;
+      border-color: transparent;
+    }
+  }
+}
+
+.journalBox {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 9px;
+  padding: 12px;
+  font-size: 13px;
+  color: #1e40af;
+
+  p { margin-bottom: 8px; }
+}
+
+.journalButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.journalYes {
+  flex: 1;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover { background: #1d4ed8; }
+}
+
+.journalNo {
+  flex: 1;
+  background: none;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+  border-radius: 7px;
+  padding: 7px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.error {
+  color: #dc2626;
+  font-size: 13px;
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.edit {
+  flex: 1;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 14px;
+  cursor: pointer;
+
+  &:hover { background: #f3f4f6; }
+}
+
+.delete {
+  flex: 1;
+  background: #fff;
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 14px;
+  cursor: pointer;
+
+  &:hover { background: #fef2f2; }
+}

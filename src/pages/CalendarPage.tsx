@@ -8,6 +8,7 @@ import { WorkoutCategory } from '../types/workout';
 import { getCategories } from '../services/categoriesApi';
 import { toISODate } from '../utils/calendar';
 import TrainingPlanForm from '../components/TrainingPlanForm';
+import PlanDetailView from '../components/PlanDetailView';
 
 function CalendarPage() {
   // "kotwica" = zawsze 1. dzień oglądanego miesiąca
@@ -18,7 +19,9 @@ function CalendarPage() {
   const [plans, setPlans] = useState<TrainingPlan[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<WorkoutCategory[]>([]);
-  const [formDate, setFormDate] = useState<string | null>(null); // otwarty modal = ustawiona data
+  const [formDate, setFormDate] = useState<string | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<TrainingPlan | null>(null);
+  const [editPlan, setEditPlan] = useState<TrainingPlan | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const grid = useMemo(() => buildMonthGrid(anchor), [anchor]);
@@ -61,9 +64,7 @@ function CalendarPage() {
 
   const handleAddForDay = (iso: string) => setFormDate(iso);
 
-  const handleSelectPlan = (plan: TrainingPlan) => {
-    console.log('TODO task 5/6: otwórz szczegóły planu', plan.id);
-  };
+  const handleSelectPlan = (plan: TrainingPlan) => setSelectedPlan(plan);
 
   return (
     <div className={styles.calendar}>
@@ -134,6 +135,26 @@ function CalendarPage() {
           categories={categories}
           initialDate={formDate}
           onClose={() => setFormDate(null)}
+          onSaved={() => setRefreshKey((k) => k + 1)}
+        />
+      )}
+      {selectedPlan && (
+        <PlanDetailView
+          plan={selectedPlan}
+          onClose={() => setSelectedPlan(null)}
+          onChanged={() => setRefreshKey((k) => k + 1)}
+          onEdit={(p) => {
+            setSelectedPlan(null);
+            setEditPlan(p);
+          }}
+        />
+      )}
+
+      {editPlan && (
+        <TrainingPlanForm
+          categories={categories}
+          plan={editPlan}
+          onClose={() => setEditPlan(null)}
           onSaved={() => setRefreshKey((k) => k + 1)}
         />
       )}
