@@ -1,12 +1,13 @@
 import { apiFetch } from "./apiClient";
 import { PlanStatus, TrainingPlan, TrainingPlanRequest } from "../types/workout";
 
-export function getPlans(from?: string, to?: string): Promise<TrainingPlan[]> {
+export async function getPlans(from?: string, to?: string): Promise<TrainingPlan[]> {
   const params = new URLSearchParams();
   if (from) params.set("from", from);
   if (to) params.set("to", to);
   const qs = params.toString();
-  return apiFetch<TrainingPlan[]>(`/training-plans${qs ? `?${qs}` : ""}`);
+  const data = await apiFetch<TrainingPlan[]>(`/training-plans${qs ? `?${qs}` : ""}`);
+  return data ?? []; // pusta odpowiedź -> pusta lista
 }
 
 export function getPlan(id: number): Promise<TrainingPlan> {

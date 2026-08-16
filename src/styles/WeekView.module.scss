@@ -1,0 +1,117 @@
+$gutter: 56px;
+
+.week {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.header,
+.allDayRow {
+  display: grid;
+  grid-template-columns: $gutter repeat(7, 1fr);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.headerDay,
+.headerDayToday {
+  text-align: center;
+  font-size: 12px;
+  padding: 7px 0;
+  color: #6b7280;
+}
+
+.headerDayToday {
+  color: #2563eb;
+  font-weight: 700;
+  background: #eff6ff;
+}
+
+.gutterCorner,
+.gutterLabel {
+  border-right: 1px solid #e5e7eb;
+}
+
+.gutterLabel {
+  font-size: 10px;
+  color: #9ca3af;
+  padding: 4px;
+  text-align: right;
+}
+
+.allDayCell {
+  min-height: 26px;
+  padding: 3px;
+  border-left: 1px solid #f3f4f6;
+}
+
+.allDayChip {
+  display: block;
+  width: 100%;
+  border: 1px solid;
+  border-radius: 4px;
+  padding: 2px 5px;
+  margin-bottom: 2px;
+  font-size: 11px;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.scroll {
+  max-height: 560px;
+  overflow-y: auto;
+}
+
+.body {
+  display: grid;
+  grid-template-columns: $gutter repeat(7, 1fr);
+  position: relative;
+}
+
+.gutter {
+  border-right: 1px solid #e5e7eb;
+}
+
+.hourLabel {
+  font-size: 10px;
+  color: #9ca3af;
+  text-align: right;
+  padding-right: 5px;
+  transform: translateY(-6px);
+}
+
+.dayColumn,
+.dayColumnToday {
+  position: relative;
+  border-left: 1px solid #f3f4f6;
+}
+
+.dayColumnToday {
+  composes: dayColumn;
+  background: #f7fbff;
+}
+
+.hourLine {
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.block {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  border: 1px solid;
+  border-radius: 5px;
+  padding: 2px 5px;
+  font-size: 11px;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.cancelled {
+  text-decoration: line-through;
+}
