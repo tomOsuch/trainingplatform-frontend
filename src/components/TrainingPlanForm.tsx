@@ -1,28 +1,28 @@
-import { FormEvent, useState } from "react";
-import { TrainingPlan, TrainingPlanRequest, WorkoutCategory } from "../types/workout";
-import { createPlan, updatePlan, deletePlan } from "../services/trainingPlansApi";
-import { ApiRequestError } from "../services/apiClient";
-import { toISODate } from "../utils/calendar";
-import Modal from "./Modal";
-import styles from "../styles/TrainingPlanForm.module.scss";
+import { FormEvent, useState } from 'react';
+import { TrainingPlan, TrainingPlanRequest, WorkoutCategory } from '../types/workout';
+import { createPlan, updatePlan, deletePlan } from '../services/trainingPlansApi';
+import { ApiRequestError } from '../services/apiClient';
+import { toISODate } from '../utils/calendar';
+import Modal from './Modal';
+import styles from '../styles/TrainingPlanForm.module.scss';
 
 interface TrainingPlanFormProps {
   categories: WorkoutCategory[];
-  initialDate?: string;        // z paska "+ Dodaj" na dniu
-  plan?: TrainingPlan;         // obecność = tryb edycji
+  initialDate?: string; // z paska "+ Dodaj" na dniu
+  plan?: TrainingPlan; // obecność = tryb edycji
   onClose: () => void;
-  onSaved: () => void;         // CalendarPage odświeży plany
+  onSaved: () => void; // CalendarPage odświeży plany
 }
 
 function TrainingPlanForm({ categories, initialDate, plan, onClose, onSaved }: TrainingPlanFormProps) {
   const editMode = Boolean(plan);
 
-  const [title, setTitle] = useState(plan?.title ?? "");
-  const [categoryId, setCategoryId] = useState(String(plan?.categoryId ?? ""));
-  const [plannedDate, setPlannedDate] = useState(plan?.plannedDate ?? initialDate ?? "");
-  const [plannedTime, setPlannedTime] = useState(plan?.plannedTime?.slice(0, 5) ?? "");
-  const [durationMin, setDurationMin] = useState(plan?.durationMin ? String(plan.durationMin) : "");
-  const [notes, setNotes] = useState(plan?.notes ?? "");
+  const [title, setTitle] = useState(plan?.title ?? '');
+  const [categoryId, setCategoryId] = useState(String(plan?.categoryId ?? ''));
+  const [plannedDate, setPlannedDate] = useState(plan?.plannedDate ?? initialDate ?? '');
+  const [plannedTime, setPlannedTime] = useState(plan?.plannedTime?.slice(0, 5) ?? '');
+  const [durationMin, setDurationMin] = useState(plan?.durationMin ? String(plan.durationMin) : '');
+  const [notes, setNotes] = useState(plan?.notes ?? '');
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -32,14 +32,21 @@ function TrainingPlanForm({ categories, initialDate, plan, onClose, onSaved }: T
   const selectedColor = categories.find((c) => String(c.id) === categoryId)?.color;
 
   const validate = (): Record<string, string> => {
-    const e: Record<string, string> = {};
-    if (!title.trim()) e.title = "Podaj tytuł treningu";
-    if (!categoryId) e.categoryId = "Wybierz kategorię";
-    if (!plannedDate) e.plannedDate = "Wybierz datę";
-    else if (plannedDate < toISODate(new Date())) e.plannedDate = "Data nie może być przeszła";
-    if (durationMin && Number(durationMin) <= 0) e.durationMin = "Czas musi być większy od 0";
-    return e;
-  };
+  const e: Record<string, string> = {};
+  if (!title.trim()) e.title = "Podaj tytuł treningu";
+  if (!categoryId) e.categoryId = "Wybierz kategorię";
+
+  if (!plannedDate) {
+    e.plannedDate = "Wybierz datę";
+  } else if (plannedDate < toISODate(new Date()) && plannedDate !== plan?.plannedDate) {
+    // przeszła data blokuje tylko nowe plany i faktyczną zmianę daty;
+    // edycja innych pól w historycznym planie musi być możliwa
+    e.plannedDate = "Data nie może być przeszła";
+  }
+
+  if (durationMin && Number(durationMin) <= 0) e.durationMin = "Czas musi być większy od 0";
+  return e;
+};
 
   const handleSubmit = async (ev: FormEvent) => {
     ev.preventDefault();
@@ -65,7 +72,7 @@ function TrainingPlanForm({ categories, initialDate, plan, onClose, onSaved }: T
     } catch (err) {
       if (err instanceof ApiRequestError && err.errors) setErrors(err.errors);
       else if (err instanceof ApiRequestError) setFormError(err.message);
-      else setFormError("Coś poszło nie tak. Spróbuj ponownie.");
+      else setFormError('Coś poszło nie tak. Spróbuj ponownie.');
       setSubmitting(false);
     }
   };
@@ -77,13 +84,13 @@ function TrainingPlanForm({ categories, initialDate, plan, onClose, onSaved }: T
       onSaved();
       onClose();
     } catch (err) {
-      setFormError(err instanceof ApiRequestError ? err.message : "Nie udało się usunąć");
+      setFormError(err instanceof ApiRequestError ? err.message : 'Nie udało się usunąć');
       setSubmitting(false);
     }
   };
 
   return (
-    <Modal title={editMode ? "Edytuj trening" : "Nowy trening"} onClose={onClose}>
+    <Modal title={editMode ? 'Edytuj trening' : 'Nowy trening'} onClose={onClose}>
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
         <label className={styles.field}>
           <span>Tytuł *</span>
@@ -98,7 +105,9 @@ function TrainingPlanForm({ categories, initialDate, plan, onClose, onSaved }: T
             <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
               <option value="">— wybierz —</option>
               {categories.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
               ))}
             </select>
           </div>
@@ -133,9 +142,11 @@ function TrainingPlanForm({ categories, initialDate, plan, onClose, onSaved }: T
 
         <div className={styles.buttons}>
           <button type="submit" className={styles.save} disabled={submitting}>
-            {submitting ? "Zapisywanie..." : "Zapisz"}
+            {submitting ? 'Zapisywanie...' : 'Zapisz'}
           </button>
-          <button type="button" className={styles.cancel} onClick={onClose}>Anuluj</button>
+          <button type="button" className={styles.cancel} onClick={onClose}>
+            Anuluj
+          </button>
         </div>
 
         {editMode && !confirmDelete && (
