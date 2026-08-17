@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import CalendarPage from './pages/CalendarPage';
 import AppLayout from './components/AppLayout';
+import WorkoutLogPage from './pages/WorkoutLogPage';
 
 function App() {
   return (
@@ -17,7 +18,7 @@ function App() {
           <Route element={<PrivateRoute />}>
             <Route element={<AppLayout />}>
               <Route path="/kalendarz" element={<CalendarPage />} />
-              {/* przyszłe trasy: /dziennik itd. — automatycznie z Navbarem */}
+              <Route path="/dziennik" element={<WorkoutLogPage />} />
             </Route>
           </Route>
 
