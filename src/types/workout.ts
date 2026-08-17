@@ -28,3 +28,30 @@ export interface TrainingPlanRequest {
   durationMin?: number;  // > 0
   notes?: string;
 }
+
+export interface WorkoutLog {
+  id: number;
+  categoryId: number;
+  categoryName: string;
+  categoryColor: string;
+  planId: number | null;      // powiązanie z planem (null = trening niezaplanowany)
+  performedDate: string;      // "YYYY-MM-DD"
+  durationMin: number | null;
+  intensity: number | null;   // 1–10
+  notes: string | null;
+}
+
+export interface WorkoutLogRequest {
+  categoryId: number;
+  performedDate: string;  // nie może być przyszła (BR backendu)
+  planId?: number;
+  durationMin?: number;   // > 0
+  intensity?: number;     // 1–10
+  notes?: string;
+}
+
+export interface WorkoutLogFilters {
+  categoryId?: number;
+  from?: string;
+  to?: string;
+}
