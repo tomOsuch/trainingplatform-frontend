@@ -5,6 +5,7 @@ import { getCategories } from '../services/categoriesApi';
 import WorkoutLogRow from '../components/WorkoutLogRow';
 import styles from '../styles/WorkoutLogPage.module.scss';
 import WorkoutLogForm from '../components/WorkoutLogForm';
+import WorkoutLogDetail from '../components/WorkoutLogDetail';
 
 function WorkoutLogPage() {
   const [categoryId, setCategoryId] = useState('');
@@ -17,6 +18,8 @@ function WorkoutLogPage() {
   const [error, setError] = useState<string | null>(null);
 
   const [formOpen, setFormOpen] = useState(false);
+  const [selectedLog, setSelectedLog] = useState<WorkoutLog | null>(null);
+  const [editLog, setEditLog] = useState<WorkoutLog | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const filtersActive = Boolean(categoryId || from || to);
@@ -55,9 +58,7 @@ function WorkoutLogPage() {
     setTo('');
   };
 
-  const handleSelectLog = (log: WorkoutLog) => {
-    console.log('TODO task 5/5: szczegóły wpisu', log.id);
-  };
+  const handleSelectLog = (log: WorkoutLog) => setSelectedLog(log);
 
   const selectedColor = categories.find((c) => String(c.id) === categoryId)?.color;
 
@@ -113,6 +114,27 @@ function WorkoutLogPage() {
 
       {formOpen && (
         <WorkoutLogForm categories={categories} onClose={() => setFormOpen(false)} onSaved={() => setRefreshKey((k) => k + 1)} />
+      )}
+
+      {selectedLog && (
+        <WorkoutLogDetail
+          log={selectedLog}
+          onClose={() => setSelectedLog(null)}
+          onChanged={() => setRefreshKey((k) => k + 1)}
+          onEdit={(l) => {
+            setSelectedLog(null);
+            setEditLog(l);
+          }}
+        />
+      )}
+
+      {editLog && (
+        <WorkoutLogForm
+          categories={categories}
+          log={editLog}
+          onClose={() => setEditLog(null)}
+          onSaved={() => setRefreshKey((k) => k + 1)}
+        />
       )}
 
       <div className={styles.list}>

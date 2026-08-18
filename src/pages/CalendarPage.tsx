@@ -1,23 +1,18 @@
-import { useEffect, useMemo, useState } from "react";
-import { TrainingPlan, WorkoutCategory } from "../types/workout";
-import PlanTile from "../components/PlanTile";
-import WeekView from "../components/WeekView";
-import TrainingPlanForm from "../components/TrainingPlanForm";
-import PlanDetailView from "../components/PlanDetailView";
-import { getPlans } from "../services/trainingPlansApi";
-import { getCategories } from "../services/categoriesApi";
-import {
-  buildMonthGrid,
-  buildWeekGrid,
-  startOfWeek,
-  toISODate,
-  MONTH_NAMES,
-  WEEKDAY_NAMES,
-} from "../utils/calendar";
-import styles from "../styles/CalendarPage.module.scss";
+import { useEffect, useMemo, useState } from 'react';
+import { TrainingPlan, WorkoutCategory } from '../types/workout';
+import PlanTile from '../components/PlanTile';
+import WeekView from '../components/WeekView';
+import TrainingPlanForm from '../components/TrainingPlanForm';
+import PlanDetailView from '../components/PlanDetailView';
+import { getPlans } from '../services/trainingPlansApi';
+import { getCategories } from '../services/categoriesApi';
+import { buildMonthGrid, buildWeekGrid, startOfWeek, toISODate, MONTH_NAMES, WEEKDAY_NAMES } from '../utils/calendar';
+import styles from '../styles/CalendarPage.module.scss';
+import WorkoutLogForm from '../components/WorkoutLogForm';
+import { WorkoutLogRequest } from '../types/workout';
 
 function CalendarPage() {
-  const [view, setView] = useState<"month" | "week">("month");
+  const [view, setView] = useState<'month' | 'week'>('month');
 
   // "kotwica": 1. dzień miesiąca (widok miesięczny) lub poniedziałek (tygodniowy)
   const [anchor, setAnchor] = useState(() => {
@@ -34,21 +29,26 @@ function CalendarPage() {
   const [editPlan, setEditPlan] = useState<TrainingPlan | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  // szkic wpisu do dziennika tworzony z ukończonego planu
+  const [journalDraft, setJournalDraft] = useState<{
+    initial: Partial<WorkoutLogRequest>;
+    planTitle: string;
+  } | null>(null);
+
   // 42 dni dla miesiąca, 7 dla tygodnia
-  const grid = useMemo(
-    () => (view === "month" ? buildMonthGrid(anchor) : buildWeekGrid(anchor)),
-    [anchor, view]
-  );
+  const grid = useMemo(() => (view === 'month' ? buildMonthGrid(anchor) : buildWeekGrid(anchor)), [anchor, view]);
 
   useEffect(() => {
     setError(null);
     getPlans(grid[0].iso, grid[grid.length - 1].iso)
       .then(setPlans)
-      .catch((e) => setError(e.message ?? "Nie udało się pobrać planów"));
+      .catch((e) => setError(e.message ?? 'Nie udało się pobrać planów'));
   }, [grid, refreshKey]);
 
   useEffect(() => {
-    getCategories().then(setCategories).catch(() => {});
+    getCategories()
+      .then(setCategories)
+      .catch(() => {});
   }, []);
 
   const plansByDay = useMemo(() => {
@@ -58,39 +58,33 @@ function CalendarPage() {
       list.push(p);
       map.set(p.plannedDate, list);
     }
-    map.forEach((list) =>
-      list.sort((a, b) => (a.plannedTime ?? "99").localeCompare(b.plannedTime ?? "99"))
-    );
+    map.forEach((list) => list.sort((a, b) => (a.plannedTime ?? '99').localeCompare(b.plannedTime ?? '99')));
     return map;
   }, [plans]);
 
   // nawigacja: o miesiąc albo o tydzień, zależnie od widoku
   const shift = (dir: number) =>
     setAnchor((a) =>
-      view === "month"
-        ? new Date(a.getFullYear(), a.getMonth() + dir, 1)
-        : new Date(a.getFullYear(), a.getMonth(), a.getDate() + dir * 7)
+      view === 'month' ? new Date(a.getFullYear(), a.getMonth() + dir, 1) : new Date(a.getFullYear(), a.getMonth(), a.getDate() + dir * 7),
     );
 
   const goToToday = () => {
     const now = new Date();
-    setAnchor(view === "month" ? new Date(now.getFullYear(), now.getMonth(), 1) : startOfWeek(now));
+    setAnchor(view === 'month' ? new Date(now.getFullYear(), now.getMonth(), 1) : startOfWeek(now));
   };
 
   // przy zmianie widoku normalizujemy kotwicę do właściwego "początku"
-  const switchView = (next: "month" | "week") => {
+  const switchView = (next: 'month' | 'week') => {
     setView(next);
-    setAnchor((a) =>
-      next === "week" ? startOfWeek(a) : new Date(a.getFullYear(), a.getMonth(), 1)
-    );
+    setAnchor((a) => (next === 'week' ? startOfWeek(a) : new Date(a.getFullYear(), a.getMonth(), 1)));
   };
 
   const handleAddForDay = (iso: string) => setFormDate(iso);
   const handleSelectPlan = (plan: TrainingPlan) => setSelectedPlan(plan);
 
-  const dm = (d: Date) => `${d.getDate()}.${String(d.getMonth() + 1).padStart(2, "0")}`;
+  const dm = (d: Date) => `${d.getDate()}.${String(d.getMonth() + 1).padStart(2, '0')}`;
   const rangeLabel =
-    view === "month"
+    view === 'month'
       ? `${MONTH_NAMES[anchor.getMonth()]} ${anchor.getFullYear()}`
       : `${dm(grid[0].date)} – ${dm(grid[6].date)}.${grid[6].date.getFullYear()}`;
 
@@ -98,24 +92,24 @@ function CalendarPage() {
     <div className={styles.calendar}>
       <div className={styles.toolbar}>
         <div className={styles.nav}>
-          <button onClick={() => shift(-1)} aria-label="Poprzedni okres">‹</button>
+          <button onClick={() => shift(-1)} aria-label="Poprzedni okres">
+            ‹
+          </button>
           <span className={styles.monthLabel}>{rangeLabel}</span>
-          <button onClick={() => shift(1)} aria-label="Następny okres">›</button>
-          <button className={styles.todayButton} onClick={goToToday}>Dziś</button>
+          <button onClick={() => shift(1)} aria-label="Następny okres">
+            ›
+          </button>
+          <button className={styles.todayButton} onClick={goToToday}>
+            Dziś
+          </button>
         </div>
 
         <div className={styles.actions}>
           <div className={styles.viewToggle}>
-            <button
-              className={view === "month" ? styles.viewActive : undefined}
-              onClick={() => switchView("month")}
-            >
+            <button className={view === 'month' ? styles.viewActive : undefined} onClick={() => switchView('month')}>
               Miesiąc
             </button>
-            <button
-              className={view === "week" ? styles.viewActive : undefined}
-              onClick={() => switchView("week")}
-            >
+            <button className={view === 'week' ? styles.viewActive : undefined} onClick={() => switchView('week')}>
               Tydzień
             </button>
           </div>
@@ -127,7 +121,7 @@ function CalendarPage() {
 
       {error && <p className={styles.error}>{error}</p>}
 
-      {view === "month" ? (
+      {view === 'month' ? (
         <>
           <div className={styles.weekdays}>
             {WEEKDAY_NAMES.map((d) => (
@@ -139,11 +133,7 @@ function CalendarPage() {
             {grid.map((day) => (
               <div
                 key={day.iso}
-                className={[
-                  styles.cell,
-                  !day.inCurrentMonth ? styles.outside : "",
-                  day.isToday ? styles.today : "",
-                ].join(" ")}
+                className={[styles.cell, !day.inCurrentMonth ? styles.outside : '', day.isToday ? styles.today : ''].join(' ')}
               >
                 <div className={styles.cellHeader}>
                   {day.isToday ? (
@@ -157,11 +147,7 @@ function CalendarPage() {
                   <PlanTile key={p.id} plan={p} onClick={handleSelectPlan} />
                 ))}
 
-                <button
-                  className={styles.addRow}
-                  onClick={() => handleAddForDay(day.iso)}
-                  aria-label={`Dodaj trening ${day.iso}`}
-                >
+                <button className={styles.addRow} onClick={() => handleAddForDay(day.iso)} aria-label={`Dodaj trening ${day.iso}`}>
                   + Dodaj
                 </button>
               </div>
@@ -169,12 +155,7 @@ function CalendarPage() {
           </div>
         </>
       ) : (
-        <WeekView
-          days={grid}
-          plansByDay={plansByDay}
-          onSelectPlan={handleSelectPlan}
-          onAddForDay={handleAddForDay}
-        />
+        <WeekView days={grid} plansByDay={plansByDay} onSelectPlan={handleSelectPlan} onAddForDay={handleAddForDay} />
       )}
 
       {formDate && (
@@ -195,6 +176,18 @@ function CalendarPage() {
             setSelectedPlan(null);
             setEditPlan(p);
           }}
+          onAddJournalEntry={(p) => {
+            setSelectedPlan(null);
+            setJournalDraft({
+              initial: {
+                performedDate: p.plannedDate,
+                categoryId: p.categoryId,
+                planId: p.id,
+                ...(p.durationMin && { durationMin: p.durationMin }),
+              },
+              planTitle: p.title,
+            });
+          }}
         />
       )}
 
@@ -203,6 +196,16 @@ function CalendarPage() {
           categories={categories}
           plan={editPlan}
           onClose={() => setEditPlan(null)}
+          onSaved={() => setRefreshKey((k) => k + 1)}
+        />
+      )}
+      
+      {journalDraft && (
+        <WorkoutLogForm
+          categories={categories}
+          initial={journalDraft.initial}
+          planTitle={journalDraft.planTitle}
+          onClose={() => setJournalDraft(null)}
           onSaved={() => setRefreshKey((k) => k + 1)}
         />
       )}

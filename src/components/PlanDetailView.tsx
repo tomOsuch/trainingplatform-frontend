@@ -16,8 +16,9 @@ const STATUS_LABELS: Record<PlanStatus, string> = {
 interface PlanDetailViewProps {
   plan: TrainingPlan;
   onClose: () => void;
-  onEdit: (plan: TrainingPlan) => void; // otwiera formularz w trybie edycji
-  onChanged: () => void; // odświeża kalendarz
+  onEdit: (plan: TrainingPlan) => void;
+  onChanged: () => void;
+  onAddJournalEntry: (plan: TrainingPlan) => void; // NOWE
 }
 
 function formatDate(iso: string): string {
@@ -30,7 +31,7 @@ function formatDate(iso: string): string {
   }).format(new Date(y, m - 1, d));
 }
 
-function PlanDetailView({ plan: initial, onClose, onEdit, onChanged }: PlanDetailViewProps) {
+function PlanDetailView({ plan: initial, onClose, onEdit, onChanged, onAddJournalEntry }: PlanDetailViewProps) {
   const [plan, setPlan] = useState(initial);
   const [journalDialog, setJournalDialog] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -43,10 +44,10 @@ function PlanDetailView({ plan: initial, onClose, onEdit, onChanged }: PlanDetai
     try {
       await changeStatus(plan.id, status);
       setPlan((p) => ({ ...p, status })); // aktualizacja lokalna — modal od razu spójny
-      onChanged();                        // kalendarz w tle też się odświeży
-      setJournalDialog(status === "COMPLETED");
+      onChanged(); // kalendarz w tle też się odświeży
+      setJournalDialog(status === 'COMPLETED');
     } catch (err) {
-      setError(err instanceof ApiRequestError ? err.message : "Nie udało się zmienić statusu");
+      setError(err instanceof ApiRequestError ? err.message : 'Nie udało się zmienić statusu');
     } finally {
       setBusy(false);
     }
@@ -59,7 +60,7 @@ function PlanDetailView({ plan: initial, onClose, onEdit, onChanged }: PlanDetai
       onChanged();
       onClose();
     } catch (err) {
-      setError(err instanceof ApiRequestError ? err.message : "Nie udało się usunąć");
+      setError(err instanceof ApiRequestError ? err.message : 'Nie udało się usunąć');
       setBusy(false);
     }
   };
@@ -78,34 +79,36 @@ function PlanDetailView({ plan: initial, onClose, onEdit, onChanged }: PlanDetai
         </span>
 
         <div className={styles.info}>
-          <p>Data: {formatDate(plan.plannedDate)}{time ? `, ${time}` : ""}</p>
+          <p>
+            Data: {formatDate(plan.plannedDate)}
+            {time ? `, ${time}` : ''}
+          </p>
           {plan.durationMin && <p>Czas trwania: {plan.durationMin} min</p>}
           {plan.notes && <p className={styles.notes}>{plan.notes}</p>}
         </div>
 
         <label className={styles.statusField}>
           <span>Status</span>
-          <select
-            value={plan.status}
-            disabled={busy}
-            onChange={(e) => handleStatusChange(e.target.value as PlanStatus)}
-          >
+          <select value={plan.status} disabled={busy} onChange={(e) => handleStatusChange(e.target.value as PlanStatus)}>
             {(Object.keys(STATUS_LABELS) as PlanStatus[]).map((s) => (
-              <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+              <option key={s} value={s}>
+                {STATUS_LABELS[s]}
+              </option>
             ))}
           </select>
         </label>
 
         {journalDialog && (
           <div className={styles.journalBox}>
-            <p><strong>Trening ukończony!</strong> Dodać wpis do dziennika?</p>
+            <p>
+              <strong>Trening ukończony!</strong> Dodać wpis do dziennika?
+            </p>
             <div className={styles.journalButtons}>
               <button
                 className={styles.journalYes}
                 onClick={() => {
-                  // TODO moduł Dziennik: otworzy preuzupełniony formularz wpisu
-                  console.log("TODO Dziennik: nowy wpis dla planu", plan.id);
                   setJournalDialog(false);
+                  onAddJournalEntry(plan);
                 }}
               >
                 Tak, dodaj wpis
@@ -120,13 +123,21 @@ function PlanDetailView({ plan: initial, onClose, onEdit, onChanged }: PlanDetai
         {error && <p className={styles.error}>{error}</p>}
 
         <div className={styles.buttons}>
-          <button className={styles.edit} onClick={() => onEdit(plan)}>Edytuj</button>
+          <button className={styles.edit} onClick={() => onEdit(plan)}>
+            Edytuj
+          </button>
           {!confirmDelete ? (
-            <button className={styles.delete} onClick={() => setConfirmDelete(true)}>Usuń</button>
+            <button className={styles.delete} onClick={() => setConfirmDelete(true)}>
+              Usuń
+            </button>
           ) : (
             <>
-              <button className={styles.delete} onClick={handleDelete} disabled={busy}>Tak, usuń</button>
-              <button className={styles.edit} onClick={() => setConfirmDelete(false)}>Nie</button>
+              <button className={styles.delete} onClick={handleDelete} disabled={busy}>
+                Tak, usuń
+              </button>
+              <button className={styles.edit} onClick={() => setConfirmDelete(false)}>
+                Nie
+              </button>
             </>
           )}
         </div>
