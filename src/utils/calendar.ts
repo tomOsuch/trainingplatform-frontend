@@ -51,6 +51,20 @@ export function timeToMinutes(t: string | null): number | null {
   return h * 60 + m;
 }
 
+// "2026-08-15" -> "15.08.2026"
+export function formatDatePl(iso: string): string {
+  const [y, m, d] = iso.split("-");
+  return `${d}.${m}.${y}`;
+}
+
+// "2026-08-15" -> "sobota"
+export function weekdayPl(iso: string): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Intl.DateTimeFormat("pl-PL", { weekday: "long" }).format(
+    new Date(y, m - 1, d)
+  );
+}
+
 export const MONTH_NAMES = [
   'Styczeń',
   'Luty',

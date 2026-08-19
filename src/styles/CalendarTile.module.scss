@@ -3,7 +3,7 @@
   align-items: center;
   gap: 5px;
   width: 100%;
-  border: none;
+  border: 1px solid transparent;
   border-radius: 5px;
   padding: 3px 6px;
   margin-top: 3px;
@@ -11,10 +11,13 @@
   cursor: pointer;
   text-align: left;
 
-  &:hover {
-    filter: brightness(0.95);
-  }
+  &:hover { filter: brightness(0.96); }
 }
+
+.filled { border-style: solid; }
+.outlined { border-style: solid; }
+.dashed { border-style: dashed; }
+.muted { opacity: 0.8; }
 
 .dot {
   width: 6px;

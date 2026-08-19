@@ -4,7 +4,7 @@ export interface WorkoutCategory {
   id: number;
   name: string;
   color: string;
-  iconName: string; // np. "dance" — przyda się do ikon w UI
+  iconName: string; 
 }
 
 export interface TrainingPlan {
@@ -23,8 +23,65 @@ export interface TrainingPlan {
 export interface TrainingPlanRequest {
   title: string;
   categoryId: number;
-  plannedDate: string;   // nie może być przeszła (BR backendu)
+  plannedDate: string;  
   plannedTime?: string;
-  durationMin?: number;  // > 0
+  durationMin?: number; 
   notes?: string;
+}
+
+export interface WorkoutLog {
+  id: number;
+  categoryId: number;
+  categoryName: string;
+  categoryColor: string;
+  planId: number | null;     
+  performedDate: string;     
+  durationMin: number | null;
+  intensity: number | null;  
+  notes: string | null;
+}
+
+export interface WorkoutLogRequest {
+  categoryId: number;
+  performedDate: string; 
+  planId?: number;
+  durationMin?: number;  
+  intensity?: number;     
+  notes?: string;
+}
+
+export interface WorkoutLogFilters {
+  categoryId?: number;
+  from?: string;
+  to?: string;
+}
+
+export type CalendarItemState = "planned" | "done" | "skipped" | "cancelled";
+export interface CalendarItem {
+  key: string;            
+  kind: "plan" | "log";
+  id: number;
+  date: string;        
+  time: string | null;   
+  durationMin: number | null;
+  label: string;
+  color: string;
+  state: CalendarItemState;
+}
+
+export type JournalItemState = "done" | "skipped" | "cancelled";
+
+export interface JournalItem {
+  key: string;
+  kind: "log" | "plan";
+  id: number;
+  date: string;
+  label: string; 
+  categoryName: string;
+  categoryColor: string;
+  durationMin: number | null;
+  intensity: number | null; 
+  notes: string | null;
+  state: JournalItemState;
+  fromPlan: boolean;      
 }

@@ -58,3 +58,35 @@
   margin: 0 auto;
   padding: 24px 16px;
 }
+
+.left {
+  position: relative; // nad grafiką SVG
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.tab {
+  color: #c7dcfb;
+  font-size: 14px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  transition: background 0.12s, color 0.12s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+  }
+}
+
+.tabActive {
+  composes: tab;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  font-weight: 600;
+}

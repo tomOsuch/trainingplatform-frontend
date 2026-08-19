@@ -1,16 +1,11 @@
-import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import styles from "../styles/Navbar.module.scss";
+import { Link, NavLink } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import styles from '../styles/Navbar.module.scss';
 
 function NavbarArt() {
   // grafika w proporcjach paska (szeroka i niska), a nie baneru karty
   return (
-    <svg
-      className={styles.art}
-      viewBox="0 0 1600 60"
-      preserveAspectRatio="xMidYMid slice"
-      aria-hidden="true"
-    >
+    <svg className={styles.art} viewBox="0 0 1600 60" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
       <circle cx="300" cy="6" r="34" fill="#3b82f6" opacity="0.5" />
       <circle cx="1380" cy="56" r="40" fill="#3b82f6" opacity="0.5" />
       <circle cx="1120" cy="4" r="14" fill="#60a5fa" opacity="0.4" />
@@ -23,8 +18,12 @@ function NavbarArt() {
       </g>
       <polyline
         points="840,42 856,42 863,30 871,52 878,37 885,42 920,42"
-        fill="none" stroke="#bfdbfe" strokeWidth="3"
-        strokeLinecap="round" strokeLinejoin="round" opacity="0.6"
+        fill="none"
+        stroke="#bfdbfe"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity="0.6"
       />
     </svg>
   );
@@ -33,17 +32,26 @@ function NavbarArt() {
 function Navbar() {
   const { user, logout } = useAuth();
 
-  const displayName = user?.firstName
-    ? `${user.firstName} ${user.lastName ?? ""}`.trim()
-    : user?.email;
+  const displayName = user?.firstName ? `${user.firstName} ${user.lastName ?? ''}`.trim() : user?.email;
 
   return (
     <header className={styles.navbar}>
       <NavbarArt />
 
-      <Link to="/kalendarz" className={styles.brand}>
-        Platforma Treningowa
-      </Link>
+      <div className={styles.left}>
+        <Link to="/kalendarz" className={styles.brand}>
+          Platforma Treningowa
+        </Link>
+
+        <nav className={styles.tabs}>
+          <NavLink to="/kalendarz" className={({ isActive }) => (isActive ? styles.tabActive : styles.tab)}>
+            Kalendarz
+          </NavLink>
+          <NavLink to="/dziennik" className={({ isActive }) => (isActive ? styles.tabActive : styles.tab)}>
+            Dziennik
+          </NavLink>
+        </nav>
+      </div>
 
       <div className={styles.right}>
         <span className={styles.userName}>{displayName}</span>

@@ -115,3 +115,11 @@ $gutter: 56px;
 .cancelled {
   text-decoration: line-through;
 }
+
+.dashed {
+  border-style: dashed !important;
+}
+
+.muted {
+  opacity: 0.8;
+}
