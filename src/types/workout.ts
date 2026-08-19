@@ -55,3 +55,16 @@ export interface WorkoutLogFilters {
   from?: string;
   to?: string;
 }
+
+export type CalendarItemState = "planned" | "done" | "skipped" | "cancelled";
+export interface CalendarItem {
+  key: string;              // "plan-12" / "log-5" — unikalny w całej siatce
+  kind: "plan" | "log";
+  id: number;
+  date: string;             // YYYY-MM-DD
+  time: string | null;      // wpisy nie mają godziny
+  durationMin: number | null;
+  label: string;
+  color: string;
+  state: CalendarItemState;
+}

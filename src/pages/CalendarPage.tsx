@@ -1,15 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
-import { TrainingPlan, WorkoutCategory } from '../types/workout';
-import PlanTile from '../components/PlanTile';
+import { CalendarItem, TrainingPlan, WorkoutCategory, WorkoutLog, WorkoutLogRequest } from '../types/workout';
+import CalendarTile from '../components/CalendarTile';
 import WeekView from '../components/WeekView';
 import TrainingPlanForm from '../components/TrainingPlanForm';
 import PlanDetailView from '../components/PlanDetailView';
+import WorkoutLogForm from '../components/WorkoutLogForm';
+import WorkoutLogDetail from '../components/WorkoutLogDetail';
 import { getPlans } from '../services/trainingPlansApi';
+import { getLogs } from '../services/workoutLogsApi';
 import { getCategories } from '../services/categoriesApi';
+import { buildItemsByDay } from '../utils/calendarItems';
 import { buildMonthGrid, buildWeekGrid, startOfWeek, toISODate, MONTH_NAMES, WEEKDAY_NAMES } from '../utils/calendar';
 import styles from '../styles/CalendarPage.module.scss';
-import WorkoutLogForm from '../components/WorkoutLogForm';
-import { WorkoutLogRequest } from '../types/workout';
 
 function CalendarPage() {
   const [view, setView] = useState<'month' | 'week'>('month');
@@ -21,12 +23,15 @@ function CalendarPage() {
   });
 
   const [plans, setPlans] = useState<TrainingPlan[]>([]);
+  const [logs, setLogs] = useState<WorkoutLog[]>([]);
   const [categories, setCategories] = useState<WorkoutCategory[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const [formDate, setFormDate] = useState<string | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<TrainingPlan | null>(null);
   const [editPlan, setEditPlan] = useState<TrainingPlan | null>(null);
+  const [selectedLog, setSelectedLog] = useState<WorkoutLog | null>(null);
+  const [editLog, setEditLog] = useState<WorkoutLog | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   // szkic wpisu do dziennika tworzony z ukończonego planu
@@ -38,11 +43,18 @@ function CalendarPage() {
   // 42 dni dla miesiąca, 7 dla tygodnia
   const grid = useMemo(() => (view === 'month' ? buildMonthGrid(anchor) : buildWeekGrid(anchor)), [anchor, view]);
 
+  // plany i wpisy pobieramy równolegle dla całego widocznego zakresu
   useEffect(() => {
+    const from = grid[0].iso;
+    const to = grid[grid.length - 1].iso;
+
     setError(null);
-    getPlans(grid[0].iso, grid[grid.length - 1].iso)
-      .then(setPlans)
-      .catch((e) => setError(e.message ?? 'Nie udało się pobrać planów'));
+    Promise.all([getPlans(from, to), getLogs({ from, to })])
+      .then(([p, l]) => {
+        setPlans(p);
+        setLogs(l);
+      })
+      .catch((e) => setError(e.message ?? 'Nie udało się pobrać danych'));
   }, [grid, refreshKey]);
 
   useEffect(() => {
@@ -51,16 +63,8 @@ function CalendarPage() {
       .catch(() => {});
   }, []);
 
-  const plansByDay = useMemo(() => {
-    const map = new Map<string, TrainingPlan[]>();
-    for (const p of plans) {
-      const list = map.get(p.plannedDate) ?? [];
-      list.push(p);
-      map.set(p.plannedDate, list);
-    }
-    map.forEach((list) => list.sort((a, b) => (a.plannedTime ?? '99').localeCompare(b.plannedTime ?? '99')));
-    return map;
-  }, [plans]);
+  // wspólna mapa dni: plany + samodzielne wpisy (te z planId są pomijane)
+  const itemsByDay = useMemo(() => buildItemsByDay(plans, logs), [plans, logs]);
 
   // nawigacja: o miesiąc albo o tydzień, zależnie od widoku
   const shift = (dir: number) =>
@@ -80,7 +84,17 @@ function CalendarPage() {
   };
 
   const handleAddForDay = (iso: string) => setFormDate(iso);
-  const handleSelectPlan = (plan: TrainingPlan) => setSelectedPlan(plan);
+
+  // kliknięcie kafelka: odnajdujemy oryginalny obiekt po rodzaju i id
+  const handleSelectItem = (item: CalendarItem) => {
+    if (item.kind === 'plan') {
+      const plan = plans.find((p) => p.id === item.id);
+      if (plan) setSelectedPlan(plan);
+    } else {
+      const log = logs.find((l) => l.id === item.id);
+      if (log) setSelectedLog(log);
+    }
+  };
 
   const dm = (d: Date) => `${d.getDate()}.${String(d.getMonth() + 1).padStart(2, '0')}`;
   const rangeLabel =
@@ -143,8 +157,8 @@ function CalendarPage() {
                   )}
                 </div>
 
-                {(plansByDay.get(day.iso) ?? []).map((p) => (
-                  <PlanTile key={p.id} plan={p} onClick={handleSelectPlan} />
+                {(itemsByDay.get(day.iso) ?? []).map((item) => (
+                  <CalendarTile key={item.key} item={item} onClick={handleSelectItem} />
                 ))}
 
                 <button className={styles.addRow} onClick={() => handleAddForDay(day.iso)} aria-label={`Dodaj trening ${day.iso}`}>
@@ -155,7 +169,7 @@ function CalendarPage() {
           </div>
         </>
       ) : (
-        <WeekView days={grid} plansByDay={plansByDay} onSelectPlan={handleSelectPlan} onAddForDay={handleAddForDay} />
+        <WeekView days={grid} itemsByDay={itemsByDay} onSelectItem={handleSelectItem} onAddForDay={handleAddForDay} />
       )}
 
       {formDate && (
@@ -199,13 +213,34 @@ function CalendarPage() {
           onSaved={() => setRefreshKey((k) => k + 1)}
         />
       )}
-      
+
       {journalDraft && (
         <WorkoutLogForm
           categories={categories}
           initial={journalDraft.initial}
           planTitle={journalDraft.planTitle}
           onClose={() => setJournalDraft(null)}
+          onSaved={() => setRefreshKey((k) => k + 1)}
+        />
+      )}
+
+      {selectedLog && (
+        <WorkoutLogDetail
+          log={selectedLog}
+          onClose={() => setSelectedLog(null)}
+          onChanged={() => setRefreshKey((k) => k + 1)}
+          onEdit={(l) => {
+            setSelectedLog(null);
+            setEditLog(l);
+          }}
+        />
+      )}
+
+      {editLog && (
+        <WorkoutLogForm
+          categories={categories}
+          log={editLog}
+          onClose={() => setEditLog(null)}
           onSaved={() => setRefreshKey((k) => k + 1)}
         />
       )}

@@ -1,65 +1,72 @@
-import { useEffect, useRef } from 'react';
-import { TrainingPlan } from '../types/workout';
-import { CalendarDay, timeToMinutes } from '../utils/calendar';
-import { hexToRgba, darkenHex } from '../utils/color';
-import styles from '../styles/WeekView.module.scss';
+import { useEffect, useRef } from "react";
+import { CalendarItem } from "../types/workout";
+import { CalendarDay, timeToMinutes } from "../utils/calendar";
+import { hexToRgba, darkenHex, lightenHex } from "../utils/color";
+import styles from "../styles/WeekView.module.scss";
 
-const HOUR_HEIGHT = 44; // px na godzinę
-const DEFAULT_DURATION = 60; // gdy plan nie ma durationMin
-const WEEKDAYS = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd'];
+const HOUR_HEIGHT = 44;
+const DEFAULT_DURATION = 60;
+const WEEKDAYS = ["Pn", "Wt", "Śr", "Cz", "Pt", "So", "Nd"];
+const GRAY = "#94A3B8";
 
 interface WeekViewProps {
   days: CalendarDay[];
-  plansByDay: Map<string, TrainingPlan[]>;
-  onSelectPlan: (plan: TrainingPlan) => void;
+  itemsByDay: Map<string, CalendarItem[]>;
+  onSelectItem: (item: CalendarItem) => void;
   onAddForDay: (iso: string) => void;
 }
 
-function WeekView({ days, plansByDay, onSelectPlan, onAddForDay }: WeekViewProps) {
+function WeekView({ days, itemsByDay, onSelectItem, onAddForDay }: WeekViewProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // auto-scroll: do pierwszego treningu tygodnia, w ostatecznosci na 7:00
   useEffect(() => {
     const times = days
-      .flatMap((d) => plansByDay.get(d.iso) ?? [])
-      .map((p) => timeToMinutes(p.plannedTime))
+      .flatMap((d) => itemsByDay.get(d.iso) ?? [])
+      .map((i) => timeToMinutes(i.time))
       .filter((m): m is number => m !== null);
 
     const target = times.length ? Math.min(...times) : 7 * 60;
     if (scrollRef.current) {
       scrollRef.current.scrollTop = Math.max(0, (target / 60) * HOUR_HEIGHT - HOUR_HEIGHT);
     }
-  }, [days, plansByDay]);
+  }, [days, itemsByDay]);
 
-  const timed = (iso: string) => (plansByDay.get(iso) ?? []).filter((p) => p.plannedTime);
-  const allDay = (iso: string) => (plansByDay.get(iso) ?? []).filter((p) => !p.plannedTime);
+  const timed = (iso: string) => (itemsByDay.get(iso) ?? []).filter((i) => i.time);
+  const allDay = (iso: string) => (itemsByDay.get(iso) ?? []).filter((i) => !i.time);
 
-  const renderBlock = (plan: TrainingPlan, positioned: boolean) => {
-    const cancelled = plan.status === 'CANCELLED';
-    const color = cancelled ? '#94A3B8' : plan.categoryColor;
-    const icon = plan.status === 'COMPLETED' ? ' ✓' : plan.status === 'SKIPPED' ? ' ✗' : '';
-    const start = timeToMinutes(plan.plannedTime) ?? 0;
-    const duration = plan.durationMin ?? DEFAULT_DURATION;
+  const renderBlock = (item: CalendarItem, positioned: boolean) => {
+    const cancelled = item.state === "cancelled";
+    const color = cancelled ? GRAY : item.color;
+    const filled = item.state === "done";
+    const dashed = item.state === "skipped" || cancelled;
+
+    const icon = item.state === "done" ? " ✓" : item.state === "skipped" ? " ✗" : "";
+    const start = timeToMinutes(item.time) ?? 0;
+    const duration = item.durationMin ?? DEFAULT_DURATION;
 
     return (
       <button
-        key={plan.id}
-        className={positioned ? styles.block : styles.allDayChip}
+        key={item.key}
+        className={[
+          positioned ? styles.block : styles.allDayChip,
+          dashed ? styles.dashed : "",
+          item.state === "skipped" ? styles.muted : "",
+        ].join(" ")}
         style={{
-          background: hexToRgba(color, 0.16),
-          borderColor: color,
+          background: filled ? hexToRgba(color, 0.16) : "#fff",
+          borderColor: filled ? color : lightenHex(color, dashed ? 0.6 : 0.45),
           color: darkenHex(color),
           ...(positioned && {
             top: (start / 60) * HOUR_HEIGHT,
             height: Math.max((duration / 60) * HOUR_HEIGHT - 2, 18),
           }),
         }}
-        onClick={() => onSelectPlan(plan)}
-        title={plan.title}
+        onClick={() => onSelectItem(item)}
+        title={item.label}
       >
         <span className={cancelled ? styles.cancelled : undefined}>
-          {plan.plannedTime ? `${plan.plannedTime.slice(0, 5)} ` : ''}
-          {plan.title}
+          {item.time ? `${item.time.slice(0, 5)} ` : ""}
+          {item.label}
           {icon}
         </span>
       </button>
@@ -81,7 +88,7 @@ function WeekView({ days, plansByDay, onSelectPlan, onAddForDay }: WeekViewProps
         <div className={styles.gutterLabel}>cały dzień</div>
         {days.map((d) => (
           <div key={d.iso} className={styles.allDayCell}>
-            {allDay(d.iso).map((p) => renderBlock(p, false))}
+            {allDay(d.iso).map((i) => renderBlock(i, false))}
           </div>
         ))}
       </div>
@@ -91,7 +98,7 @@ function WeekView({ days, plansByDay, onSelectPlan, onAddForDay }: WeekViewProps
           <div className={styles.gutter}>
             {Array.from({ length: 24 }, (_, h) => (
               <div key={h} className={styles.hourLabel} style={{ height: HOUR_HEIGHT }}>
-                {String(h).padStart(2, '0')}:00
+                {String(h).padStart(2, "0")}:00
               </div>
             ))}
           </div>
@@ -106,7 +113,7 @@ function WeekView({ days, plansByDay, onSelectPlan, onAddForDay }: WeekViewProps
               {Array.from({ length: 24 }, (_, h) => (
                 <div key={h} className={styles.hourLine} style={{ height: HOUR_HEIGHT }} />
               ))}
-              {timed(d.iso).map((p) => renderBlock(p, true))}
+              {timed(d.iso).map((i) => renderBlock(i, true))}
             </div>
           ))}
         </div>
