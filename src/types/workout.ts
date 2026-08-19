@@ -4,7 +4,7 @@ export interface WorkoutCategory {
   id: number;
   name: string;
   color: string;
-  iconName: string; // np. "dance" — przyda się do ikon w UI
+  iconName: string; 
 }
 
 export interface TrainingPlan {
@@ -23,9 +23,9 @@ export interface TrainingPlan {
 export interface TrainingPlanRequest {
   title: string;
   categoryId: number;
-  plannedDate: string;   // nie może być przeszła (BR backendu)
+  plannedDate: string;  
   plannedTime?: string;
-  durationMin?: number;  // > 0
+  durationMin?: number; 
   notes?: string;
 }
 
@@ -34,19 +34,19 @@ export interface WorkoutLog {
   categoryId: number;
   categoryName: string;
   categoryColor: string;
-  planId: number | null;      // powiązanie z planem (null = trening niezaplanowany)
-  performedDate: string;      // "YYYY-MM-DD"
+  planId: number | null;     
+  performedDate: string;     
   durationMin: number | null;
-  intensity: number | null;   // 1–10
+  intensity: number | null;  
   notes: string | null;
 }
 
 export interface WorkoutLogRequest {
   categoryId: number;
-  performedDate: string;  // nie może być przyszła (BR backendu)
+  performedDate: string; 
   planId?: number;
-  durationMin?: number;   // > 0
-  intensity?: number;     // 1–10
+  durationMin?: number;  
+  intensity?: number;     
   notes?: string;
 }
 
@@ -58,13 +58,30 @@ export interface WorkoutLogFilters {
 
 export type CalendarItemState = "planned" | "done" | "skipped" | "cancelled";
 export interface CalendarItem {
-  key: string;              // "plan-12" / "log-5" — unikalny w całej siatce
+  key: string;            
   kind: "plan" | "log";
   id: number;
-  date: string;             // YYYY-MM-DD
-  time: string | null;      // wpisy nie mają godziny
+  date: string;        
+  time: string | null;   
   durationMin: number | null;
   label: string;
   color: string;
   state: CalendarItemState;
+}
+
+export type JournalItemState = "done" | "skipped" | "cancelled";
+
+export interface JournalItem {
+  key: string;
+  kind: "log" | "plan";
+  id: number;
+  date: string;
+  label: string; 
+  categoryName: string;
+  categoryColor: string;
+  durationMin: number | null;
+  intensity: number | null; 
+  notes: string | null;
+  state: JournalItemState;
+  fromPlan: boolean;      
 }
