@@ -8,7 +8,7 @@ function logToItem(l: WorkoutLog): JournalItem {
     kind: 'log',
     id: l.id,
     date: l.performedDate,
-    label: l.categoryName,
+    label: l.title ?? l.categoryName,
     categoryName: l.categoryName,
     categoryColor: l.categoryColor,
     durationMin: l.durationMin,

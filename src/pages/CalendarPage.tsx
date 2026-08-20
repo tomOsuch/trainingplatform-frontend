@@ -194,6 +194,7 @@ function CalendarPage() {
             setSelectedPlan(null);
             setJournalDraft({
               initial: {
+                title: p.title,
                 performedDate: p.plannedDate,
                 categoryId: p.categoryId,
                 planId: p.id,

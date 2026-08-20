@@ -31,6 +31,7 @@ export interface TrainingPlanRequest {
 
 export interface WorkoutLog {
   id: number;
+  title: string | null;
   categoryId: number;
   categoryName: string;
   categoryColor: string;
@@ -43,6 +44,7 @@ export interface WorkoutLog {
 }
 
 export interface WorkoutLogRequest {
+  title?: string;
   categoryId: number;
   performedDate: string;
   performedTime?: string; 
