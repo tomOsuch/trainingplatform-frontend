@@ -22,16 +22,18 @@ export function planToItem(p: TrainingPlan): CalendarItem {
 }
 
 export function logToItem(l: WorkoutLog): CalendarItem {
+  const base = l.title ?? l.categoryName;
+
   return {
     key: `log-${l.id}`,
-    kind: 'log',
+    kind: "log",
     id: l.id,
     date: l.performedDate,
     time: l.performedTime,
     durationMin: l.durationMin,
-    label: l.performedTime || !l.durationMin ? l.categoryName : `${l.categoryName} ${l.durationMin}′`,
+    label: l.performedTime || !l.durationMin ? base : `${base} ${l.durationMin}′`,
     color: l.categoryColor,
-    state: 'done',
+    state: "done",
   };
 }
 

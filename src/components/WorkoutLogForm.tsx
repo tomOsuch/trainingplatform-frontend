@@ -19,6 +19,7 @@ function WorkoutLogForm({ categories, log, initial, planTitle, onClose, onSaved 
   const editMode = Boolean(log);
   const today = toISODate(new Date());
 
+  const [title, setTitle] = useState(log?.title ?? initial?.title ?? '');
   const [performedDate, setPerformedDate] = useState(log?.performedDate ?? initial?.performedDate ?? today);
   const [performedTime, setPerformedTime] = useState(log?.performedTime?.slice(0, 5) ?? initial?.performedTime?.slice(0, 5) ?? '');
   const [categoryId, setCategoryId] = useState(String(log?.categoryId ?? initial?.categoryId ?? ''));
@@ -58,6 +59,7 @@ function WorkoutLogForm({ categories, log, initial, planTitle, onClose, onSaved 
 
     const payload: WorkoutLogRequest = {
       categoryId: Number(categoryId),
+      ...(title.trim() && { title: title.trim() }),
       performedDate,
       intensity,
       ...(planId && { planId }),
@@ -96,6 +98,12 @@ function WorkoutLogForm({ categories, log, initial, planTitle, onClose, onSaved 
     <Modal title={editMode ? 'Edytuj wpis' : 'Nowy wpis'} onClose={onClose}>
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
         {planTitle && <div className={styles.planBadge}>Powiązany z planem: {planTitle}</div>}
+
+        <label className={styles.field}>
+          <span>Tytuł</span>
+          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="np. Salsa — zajęcia grupowe" />
+          {errors.title && <span className={styles.fieldError}>{errors.title}</span>}
+        </label>
 
         <div className={styles.row}>
           <label className={styles.field}>

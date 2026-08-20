@@ -102,6 +102,7 @@ function WorkoutLogPage() {
   const openDraftFromPlan = (plan: TrainingPlan) =>
     setDraft({
       initial: {
+        title: plan.title,
         performedDate: plan.plannedDate,
         categoryId: plan.categoryId,
         planId: plan.id,
