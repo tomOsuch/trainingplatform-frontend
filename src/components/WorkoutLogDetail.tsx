@@ -48,6 +48,7 @@ function WorkoutLogDetail({ log, onClose, onEdit, onChanged }: WorkoutLogDetailP
         <div className={styles.info}>
           <p>
             Data: {weekdayPl(log.performedDate)}, {formatDatePl(log.performedDate)}
+            {log.performedTime ? `, ${log.performedTime.slice(0, 5)}` : ''}
           </p>
           {log.durationMin && <p>Czas trwania: {log.durationMin} min</p>}
         </div>

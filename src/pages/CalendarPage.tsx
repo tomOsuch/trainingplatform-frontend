@@ -198,6 +198,7 @@ function CalendarPage() {
                 categoryId: p.categoryId,
                 planId: p.id,
                 ...(p.durationMin && { durationMin: p.durationMin }),
+                ...(p.plannedTime && { performedTime: p.plannedTime.slice(0, 5) }),
               },
               planTitle: p.title,
             });

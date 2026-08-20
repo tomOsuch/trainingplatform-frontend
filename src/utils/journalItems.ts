@@ -16,6 +16,7 @@ function logToItem(l: WorkoutLog): JournalItem {
     notes: l.notes,
     state: 'done',
     fromPlan: l.planId !== null,
+    time: l.performedTime,
   };
 }
 
@@ -33,6 +34,7 @@ function planToItem(p: TrainingPlan, state: JournalItemState): JournalItem {
     notes: p.notes,
     state,
     fromPlan: false,
+    time: p.plannedTime,
   };
 }
 

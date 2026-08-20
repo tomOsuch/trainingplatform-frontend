@@ -35,7 +35,8 @@ export interface WorkoutLog {
   categoryName: string;
   categoryColor: string;
   planId: number | null;     
-  performedDate: string;     
+  performedDate: string;
+  performedTime: string | null;     
   durationMin: number | null;
   intensity: number | null;  
   notes: string | null;
@@ -43,7 +44,8 @@ export interface WorkoutLog {
 
 export interface WorkoutLogRequest {
   categoryId: number;
-  performedDate: string; 
+  performedDate: string;
+  performedTime?: string; 
   planId?: number;
   durationMin?: number;  
   intensity?: number;     
@@ -83,5 +85,6 @@ export interface JournalItem {
   intensity: number | null; 
   notes: string | null;
   state: JournalItemState;
-  fromPlan: boolean;      
+  fromPlan: boolean;     
+  time: string | null; 
 }
