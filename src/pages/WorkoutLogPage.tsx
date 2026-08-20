@@ -106,6 +106,7 @@ function WorkoutLogPage() {
         categoryId: plan.categoryId,
         planId: plan.id,
         ...(plan.durationMin && { durationMin: plan.durationMin }),
+        ...(plan.plannedTime && { performedTime: plan.plannedTime.slice(0, 5) }),
       },
       planTitle: plan.title,
     });

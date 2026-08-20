@@ -164,3 +164,10 @@
 
   button { flex: 1; }
 }
+
+.row {
+  display: flex;
+  gap: 10px;
+
+  .field { flex: 1; }
+}

@@ -23,7 +23,10 @@ function WorkoutLogRow({ item, onClick, onFillDetails }: WorkoutLogRowProps) {
       <button type="button" className={styles.rowMain} onClick={() => onClick(item)}>
         <div className={styles.dateCol}>
           <span className={styles.date}>{formatDatePl(item.date)}</span>
-          <span className={styles.weekday}>{weekdayPl(item.date)}</span>
+          <span className={styles.weekday}>
+            {weekdayPl(item.date)}
+            {item.time ? `, ${item.time.slice(0, 5)}` : ''}
+          </span>
         </div>
 
         <span

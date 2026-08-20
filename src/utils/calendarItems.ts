@@ -1,22 +1,16 @@
-import {
-  CalendarItem,
-  CalendarItemState,
-  PlanStatus,
-  TrainingPlan,
-  WorkoutLog,
-} from "../types/workout";
+import { CalendarItem, CalendarItemState, PlanStatus, TrainingPlan, WorkoutLog } from '../types/workout';
 
 const PLAN_STATE: Record<PlanStatus, CalendarItemState> = {
-  PLANNED: "planned",
-  COMPLETED: "done",
-  SKIPPED: "skipped",
-  CANCELLED: "cancelled",
+  PLANNED: 'planned',
+  COMPLETED: 'done',
+  SKIPPED: 'skipped',
+  CANCELLED: 'cancelled',
 };
 
 export function planToItem(p: TrainingPlan): CalendarItem {
   return {
     key: `plan-${p.id}`,
-    kind: "plan",
+    kind: 'plan',
     id: p.id,
     date: p.plannedDate,
     time: p.plannedTime,
@@ -30,25 +24,19 @@ export function planToItem(p: TrainingPlan): CalendarItem {
 export function logToItem(l: WorkoutLog): CalendarItem {
   return {
     key: `log-${l.id}`,
-    kind: "log",
+    kind: 'log',
     id: l.id,
     date: l.performedDate,
-    time: null,
+    time: l.performedTime,
     durationMin: l.durationMin,
-    label: l.durationMin ? `${l.categoryName} ${l.durationMin}′` : l.categoryName,
+    label: l.performedTime || !l.durationMin ? l.categoryName : `${l.categoryName} ${l.durationMin}′`,
     color: l.categoryColor,
-    state: "done", 
+    state: 'done',
   };
 }
 
-export function buildItemsByDay(
-  plans: TrainingPlan[],
-  logs: WorkoutLog[]
-): Map<string, CalendarItem[]> {
-  const items = [
-    ...plans.map(planToItem),
-    ...logs.filter((l) => l.planId === null).map(logToItem),
-  ];
+export function buildItemsByDay(plans: TrainingPlan[], logs: WorkoutLog[]): Map<string, CalendarItem[]> {
+  const items = [...plans.map(planToItem), ...logs.filter((l) => l.planId === null).map(logToItem)];
 
   const map = new Map<string, CalendarItem[]>();
   for (const it of items) {
@@ -57,9 +45,7 @@ export function buildItemsByDay(
     map.set(it.date, list);
   }
 
-  map.forEach((list) =>
-    list.sort((a, b) => (a.time ?? "99").localeCompare(b.time ?? "99"))
-  );
+  map.forEach((list) => list.sort((a, b) => (a.time ?? '99').localeCompare(b.time ?? '99')));
 
   return map;
 }
