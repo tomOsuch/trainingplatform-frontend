@@ -1,10 +1,22 @@
 import { Role } from "./auth";
 
 export interface UserProfile {
-  userId: number;
+  id: number;
+  email: string;
   firstName: string;
   lastName: string;
-  email: string;
-  birthDate: string | null; // format ISO "YYYY-MM-DD", może być puste
+  birthDate: string | null; // "YYYY-MM-DD"
   role: Role;
+}
+
+export interface UpdateProfileRequest {
+  firstName: string;
+  lastName: string;
+  birthDate?: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
 }
