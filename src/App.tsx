@@ -6,6 +6,7 @@ import RegisterPage from './pages/RegisterPage';
 import CalendarPage from './pages/CalendarPage';
 import AppLayout from './components/AppLayout';
 import WorkoutLogPage from './pages/WorkoutLogPage';
+import ProfilePage from "./pages/ProfilePage";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
             <Route element={<AppLayout />}>
               <Route path="/kalendarz" element={<CalendarPage />} />
               <Route path="/dziennik" element={<WorkoutLogPage />} />
+              <Route path="/profil" element={<ProfilePage />} />
             </Route>
           </Route>
 

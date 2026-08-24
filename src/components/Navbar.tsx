@@ -50,6 +50,9 @@ function Navbar() {
           <NavLink to="/dziennik" className={({ isActive }) => (isActive ? styles.tabActive : styles.tab)}>
             Dziennik
           </NavLink>
+          <NavLink to="/profil" className={({ isActive }) => (isActive ? styles.tabActive : styles.tab)}>
+            Profil
+          </NavLink>
         </nav>
       </div>
 
