@@ -11,6 +11,8 @@ import { getLogs } from '../services/workoutLogsApi';
 import { getCategories } from '../services/categoriesApi';
 import { buildItemsByDay } from '../utils/calendarItems';
 import { buildMonthGrid, buildWeekGrid, startOfWeek, toISODate, MONTH_NAMES, WEEKDAY_NAMES } from '../utils/calendar';
+import { formatDatePl, weekdayPl } from "../utils/calendar";
+import Modal from "../components/Modal";
 import styles from '../styles/CalendarPage.module.scss';
 
 function CalendarPage() {
@@ -22,6 +24,8 @@ function CalendarPage() {
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });
 
+  const MAX_TILES_PER_DAY = 3;
+  const [dayModal, setDayModal] = useState<string | null>(null);
   const [plans, setPlans] = useState<TrainingPlan[]>([]);
   const [logs, setLogs] = useState<WorkoutLog[]>([]);
   const [categories, setCategories] = useState<WorkoutCategory[]>([]);
@@ -96,6 +100,12 @@ function CalendarPage() {
     }
   };
 
+  const visibleItems = (iso: string) =>
+    (itemsByDay.get(iso) ?? []).slice(0, MAX_TILES_PER_DAY);
+
+  const hiddenCount = (iso: string) =>
+    Math.max((itemsByDay.get(iso) ?? []).length - MAX_TILES_PER_DAY, 0);
+
   const dm = (d: Date) => `${d.getDate()}.${String(d.getMonth() + 1).padStart(2, '0')}`;
   const rangeLabel =
     view === 'month'
@@ -157,9 +167,18 @@ function CalendarPage() {
                   )}
                 </div>
 
-                {(itemsByDay.get(day.iso) ?? []).map((item) => (
+                {visibleItems(day.iso).map((item) => (
                   <CalendarTile key={item.key} item={item} onClick={handleSelectItem} />
                 ))}
+
+                {hiddenCount(day.iso) > 0 && (
+                  <button
+                    className={styles.moreButton}
+                    onClick={() => setDayModal(day.iso)}
+                  >
+                    +{hiddenCount(day.iso)} więcej
+                  </button>
+                )}
 
                 <button className={styles.addRow} onClick={() => handleAddForDay(day.iso)} aria-label={`Dodaj trening ${day.iso}`}>
                   + Dodaj
