@@ -3,11 +3,12 @@
   align-items: center;
   gap: 5px;
   width: 100%;
+  min-width: 0;                                        // klucz: kafelek nie rozpycha kolumny
   border: 1px solid transparent;
   border-radius: 5px;
-  padding: 3px 6px;
+  padding: clamp(1px, 0.3vw, 3px) clamp(3px, 0.5vw, 6px);
   margin-top: 3px;
-  font-size: 11px;
+  font-size: clamp(9px, 0.85vw, 11px);
   cursor: pointer;
   text-align: left;
 
@@ -28,9 +29,13 @@
 
 .text {
   flex: 1;
+  min-width: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; // najwyżej dwie linie, potem wielokropek
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere; // łamie też długie wyrazy bez spacji
+  line-height: 1.25;
 }
 
 .cancelledText {
