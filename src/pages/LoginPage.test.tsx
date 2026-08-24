@@ -44,20 +44,42 @@ describe('LoginPage', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  test('przy 401 pokazuje ogólny komunikat bez wskazania pola', async () => {
-    mockFetch({ status: 401, body: { message: 'Bad credentials' } });
+    test("przy 401 pokazuje ogólny komunikat, nie przekierowuje i nie wylogowuje", async () => {
+    mockFetch({ status: 401, body: { message: "Bad credentials" } });
     renderLogin();
 
-    await userEvent.type(screen.getByLabelText('Email'), 'jan@example.com');
-    await userEvent.type(screen.getByLabelText('Hasło'), 'zle-haslo');
-    await userEvent.click(screen.getByRole('button', { name: 'Zaloguj się' }));
+    await userEvent.type(screen.getByLabelText("Email"), "jan@example.com");
+    await userEvent.type(screen.getByLabelText("Hasło"), "zle-haslo");
+    await userEvent.click(screen.getByRole("button", { name: "Zaloguj się" }));
 
-    // findBy* czeka na pojawienie się elementu — komunikat przychodzi po odpowiedzi z API
-    expect(await screen.findByText('Nieprawidłowy email lub hasło')).toBeInTheDocument();
+    expect(await screen.findByText("Nieprawidłowy email lub hasło")).toBeInTheDocument();
 
-    // kluczowe: komunikat nie może zdradzać, które pole jest błędne
     expect(screen.queryByText(/hasło jest/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/email nie istnieje/i)).not.toBeInTheDocument();
+
+    expect(screen.getByRole("button", { name: "Zaloguj się" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Kalendarz" })).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Email")).toHaveValue("jan@example.com");
+  });
+
+    test("po nieudanej próbie kolejne logowanie działa poprawnie", async () => {
+    mockFetch(
+      { status: 401, body: { message: "Bad credentials" } },
+      { status: 200, body: sampleLoginResponse },
+      { status: 200, body: sampleProfile }
+    );
+    renderLogin();
+
+    await userEvent.type(screen.getByLabelText("Email"), "jan@example.com");
+    await userEvent.type(screen.getByLabelText("Hasło"), "zle");
+    await userEvent.click(screen.getByRole("button", { name: "Zaloguj się" }));
+    await screen.findByText("Nieprawidłowy email lub hasło");
+
+    await userEvent.clear(screen.getByLabelText("Hasło"));
+    await userEvent.type(screen.getByLabelText("Hasło"), "haslo123");
+    await userEvent.click(screen.getByRole("button", { name: "Zaloguj się" }));
+
+    expect(await screen.findByRole("heading", { name: "Kalendarz" })).toBeInTheDocument();
   });
 
   test('przy 403 informuje o nieaktywnym koncie', async () => {
