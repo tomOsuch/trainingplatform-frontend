@@ -53,6 +53,11 @@ function Navbar() {
           <NavLink to="/profil" className={({ isActive }) => (isActive ? styles.tabActive : styles.tab)}>
             Profil
           </NavLink>
+          {user?.role === 'ADMIN' && (
+            <NavLink to="/administracja" className={({ isActive }) => (isActive ? styles.tabActive : styles.tab)}>
+              Administracja
+            </NavLink>
+          )}
         </nav>
       </div>
 

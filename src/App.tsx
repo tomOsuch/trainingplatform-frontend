@@ -9,6 +9,8 @@ import WorkoutLogPage from './pages/WorkoutLogPage';
 import ProfilePage from './pages/ProfilePage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import AdminRoute from './components/AdminRoute';
+import AdminPage from './pages/AdminPage';
 
 function App() {
   return (
@@ -25,6 +27,9 @@ function App() {
               <Route path="/kalendarz" element={<CalendarPage />} />
               <Route path="/dziennik" element={<WorkoutLogPage />} />
               <Route path="/profil" element={<ProfilePage />} />
+              <Route element={<AdminRoute />}>
+                <Route path="/administracja" element={<AdminPage />} />
+              </Route>
             </Route>
           </Route>
 
