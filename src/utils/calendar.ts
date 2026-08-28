@@ -65,6 +65,12 @@ export function weekdayPl(iso: string): string {
   );
 }
 
+export function formatDateTimePl(isoDateTime: string): string {
+  const [datePart, timePart = ""] = isoDateTime.split("T");
+  const [y, m, d] = datePart.split("-");
+  return `${d}.${m}.${y}${timePart ? `, ${timePart.slice(0, 5)}` : ""}`;
+}
+
 export const MONTH_NAMES = [
   'Styczeń',
   'Luty',
