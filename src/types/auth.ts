@@ -1,10 +1,11 @@
-export type Role = "USER" | "ADMIN";
+export type Role = 'USER' | 'ADMIN';
 
 export interface RegisterRequest {
   firstName: string;
   lastName: string;
   email: string;
   password: string;
+  token: string;
 }
 
 export interface LoginRequest {
@@ -14,7 +15,7 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   token: string;
-  type: "Bearer";
+  type: 'Bearer';
   userId: number;
   email: string;
   role: Role;
@@ -26,4 +27,9 @@ export interface User {
   role: Role;
   firstName?: string;
   lastName?: string;
+}
+
+export interface InvitationInfo {
+  email: string;
+  expiresAt: string; // "2026-09-03T14:22:11.482"
 }

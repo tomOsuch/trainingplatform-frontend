@@ -1,5 +1,6 @@
 import { apiFetch } from "./apiClient";
 import { LoginRequest, LoginResponse, RegisterRequest } from "../types/auth";
+import { InvitationInfo } from "../types/auth";
 
 export function register(data: RegisterRequest): Promise<void> {
   return apiFetch("/auth/register", {
@@ -19,4 +20,8 @@ export function logout(): Promise<void> {
   return apiFetch("/auth/logout", {
     method: "POST",
   });
+}
+
+export function getInvitation(token: string): Promise<InvitationInfo> {
+  return apiFetch<InvitationInfo>(`/auth/invitation?token=${encodeURIComponent(token)}`);
 }
