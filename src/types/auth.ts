@@ -33,3 +33,17 @@ export interface InvitationInfo {
   email: string;
   expiresAt: string; // "2026-09-03T14:22:11.482"
 }
+
+export interface PasswordResetRequest {
+  email: string;
+}
+
+export interface PasswordResetInfo {
+  email: string;
+  expiresAt: string;
+}
+
+export interface PasswordResetConfirmRequest {
+  token: string;
+  password: string;
+}

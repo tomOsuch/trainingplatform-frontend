@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { ApiRequestError } from "../services/apiClient";
 import AuthBanner from "../components/AuthBanner";
@@ -8,6 +8,8 @@ import styles from "../styles/AuthForm.module.scss";
 function LoginPage() {
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const flashMessage = (location.state as { message?: string } | null)?.message;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -70,6 +72,7 @@ function LoginPage() {
             />
           </label>
 
+          {flashMessage && <p className={styles.success}>{flashMessage}</p>}
           {formError && <p className={styles.formError}>{formError}</p>}
 
           <button type="submit" disabled={submitting}>
@@ -78,6 +81,10 @@ function LoginPage() {
 
           <p className={styles.switchLink}>
             Nie masz konta? <Link to="/register">Zarejestruj się</Link>
+          </p>
+          
+          <p className={styles.switchLink}>
+            <Link to="/forgot-password">Nie pamiętam hasła</Link>
           </p>
         </form>
       </div>
