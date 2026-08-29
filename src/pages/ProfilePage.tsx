@@ -1,10 +1,11 @@
-import { FormEvent, useEffect, useState } from "react";
-import { UserProfile } from "../types/profile";
-import { getProfile, updateProfile, changePassword } from "../services/profileApi";
-import { ApiRequestError } from "../services/apiClient";
-import { useAuth } from "../context/AuthContext";
-import { toISODate } from "../utils/calendar";
-import styles from "../styles/ProfilePage.module.scss";
+import { FormEvent, useEffect, useState } from 'react';
+import { UserProfile } from '../types/profile';
+import { getProfile, updateProfile, changePassword } from '../services/profileApi';
+import { ApiRequestError } from '../services/apiClient';
+import { useAuth } from '../context/AuthContext';
+import { toISODate } from '../utils/calendar';
+import styles from '../styles/ProfilePage.module.scss';
+import DeleteAccountDialog from '../components/DeleteAccountDialog';
 
 function ProfilePage() {
   const { refreshProfile } = useAuth();
@@ -13,22 +14,23 @@ function ProfilePage() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   // --- karta 1: dane osobowe ---
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [birthDate, setBirthDate] = useState("");
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [birthDate, setBirthDate] = useState('');
   const [dataErrors, setDataErrors] = useState<Record<string, string>>({});
   const [dataMessage, setDataMessage] = useState<string | null>(null);
   const [dataError, setDataError] = useState<string | null>(null);
   const [savingData, setSavingData] = useState(false);
 
   // --- karta 2: zmiana hasła ---
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [passErrors, setPassErrors] = useState<Record<string, string>>({});
   const [passMessage, setPassMessage] = useState<string | null>(null);
   const [passError, setPassError] = useState<string | null>(null);
   const [savingPass, setSavingPass] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   useEffect(() => {
     getProfile()
@@ -36,9 +38,9 @@ function ProfilePage() {
         setProfile(p);
         setFirstName(p.firstName);
         setLastName(p.lastName);
-        setBirthDate(p.birthDate ?? "");
+        setBirthDate(p.birthDate ?? '');
       })
-      .catch((e) => setLoadError(e.message ?? "Nie udało się pobrać profilu"));
+      .catch((e) => setLoadError(e.message ?? 'Nie udało się pobrać profilu'));
   }, []);
 
   const handleDataSubmit = async (e: FormEvent) => {
@@ -47,10 +49,10 @@ function ProfilePage() {
     setDataError(null);
 
     const errs: Record<string, string> = {};
-    if (firstName.trim().length < 2) errs.firstName = "Imię musi mieć co najmniej 2 znaki";
-    if (lastName.trim().length < 2) errs.lastName = "Nazwisko musi mieć co najmniej 2 znaki";
+    if (firstName.trim().length < 2) errs.firstName = 'Imię musi mieć co najmniej 2 znaki';
+    if (lastName.trim().length < 2) errs.lastName = 'Nazwisko musi mieć co najmniej 2 znaki';
     if (birthDate && birthDate > toISODate(new Date())) {
-      errs.birthDate = "Data urodzenia nie może być przyszła";
+      errs.birthDate = 'Data urodzenia nie może być przyszła';
     }
     if (Object.keys(errs).length > 0) return setDataErrors(errs);
 
@@ -64,11 +66,11 @@ function ProfilePage() {
       });
       setProfile(updated);
       await refreshProfile(); // odświeża imię w Navbarze
-      setDataMessage("Dane zostały zapisane");
+      setDataMessage('Dane zostały zapisane');
     } catch (err) {
       if (err instanceof ApiRequestError && err.errors) setDataErrors(err.errors);
       else if (err instanceof ApiRequestError) setDataError(err.message);
-      else setDataError("Nie udało się zapisać zmian");
+      else setDataError('Nie udało się zapisać zmian');
     } finally {
       setSavingData(false);
     }
@@ -80,24 +82,24 @@ function ProfilePage() {
     setPassError(null);
 
     const errs: Record<string, string> = {};
-    if (!currentPassword) errs.currentPassword = "Podaj obecne hasło";
-    if (newPassword.length < 8) errs.newPassword = "Hasło musi mieć co najmniej 8 znaków";
-    if (confirmPassword !== newPassword) errs.confirmPassword = "Hasła muszą być identyczne";
+    if (!currentPassword) errs.currentPassword = 'Podaj obecne hasło';
+    if (newPassword.length < 8) errs.newPassword = 'Hasło musi mieć co najmniej 8 znaków';
+    if (confirmPassword !== newPassword) errs.confirmPassword = 'Hasła muszą być identyczne';
     if (Object.keys(errs).length > 0) return setPassErrors(errs);
 
     setPassErrors({});
     setSavingPass(true);
     try {
       await changePassword({ currentPassword, newPassword, confirmPassword });
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-      setPassMessage("Hasło zostało zmienione");
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setPassMessage('Hasło zostało zmienione');
     } catch (err) {
       if (err instanceof ApiRequestError && err.errors) setPassErrors(err.errors);
       else if (err instanceof ApiRequestError && err.status === 400) {
-        setPassError("Obecne hasło jest nieprawidłowe");
-      } else setPassError("Nie udało się zmienić hasła");
+        setPassError('Obecne hasło jest nieprawidłowe');
+      } else setPassError('Nie udało się zmienić hasła');
     } finally {
       setSavingPass(false);
     }
@@ -123,33 +125,27 @@ function ProfilePage() {
             <label className={styles.field}>
               <span>Imię</span>
               <input value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-              {dataErrors.firstName && (
-                <span className={styles.fieldError}>{dataErrors.firstName}</span>
-              )}
+              {dataErrors.firstName && <span className={styles.fieldError}>{dataErrors.firstName}</span>}
             </label>
 
             <label className={styles.field}>
               <span>Nazwisko</span>
               <input value={lastName} onChange={(e) => setLastName(e.target.value)} />
-              {dataErrors.lastName && (
-                <span className={styles.fieldError}>{dataErrors.lastName}</span>
-              )}
+              {dataErrors.lastName && <span className={styles.fieldError}>{dataErrors.lastName}</span>}
             </label>
           </div>
 
           <label className={styles.field}>
             <span>Data urodzenia</span>
             <input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
-            {dataErrors.birthDate && (
-              <span className={styles.fieldError}>{dataErrors.birthDate}</span>
-            )}
+            {dataErrors.birthDate && <span className={styles.fieldError}>{dataErrors.birthDate}</span>}
           </label>
 
           {dataError && <p className={styles.formError}>{dataError}</p>}
           {dataMessage && <p className={styles.success}>{dataMessage}</p>}
 
           <button type="submit" className={styles.primary} disabled={savingData}>
-            {savingData ? "Zapisywanie..." : "Zapisz zmiany"}
+            {savingData ? 'Zapisywanie...' : 'Zapisz zmiany'}
           </button>
         </form>
       </section>
@@ -165,23 +161,14 @@ function ProfilePage() {
               onChange={(e) => setCurrentPassword(e.target.value)}
               autoComplete="current-password"
             />
-            {passErrors.currentPassword && (
-              <span className={styles.fieldError}>{passErrors.currentPassword}</span>
-            )}
+            {passErrors.currentPassword && <span className={styles.fieldError}>{passErrors.currentPassword}</span>}
           </label>
 
           <div className={styles.row}>
             <label className={styles.field}>
               <span>Nowe hasło</span>
-              <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                autoComplete="new-password"
-              />
-              {passErrors.newPassword && (
-                <span className={styles.fieldError}>{passErrors.newPassword}</span>
-              )}
+              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} autoComplete="new-password" />
+              {passErrors.newPassword && <span className={styles.fieldError}>{passErrors.newPassword}</span>}
             </label>
 
             <label className={styles.field}>
@@ -192,9 +179,7 @@ function ProfilePage() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 autoComplete="new-password"
               />
-              {passErrors.confirmPassword && (
-                <span className={styles.fieldError}>{passErrors.confirmPassword}</span>
-              )}
+              {passErrors.confirmPassword && <span className={styles.fieldError}>{passErrors.confirmPassword}</span>}
             </label>
           </div>
 
@@ -202,10 +187,21 @@ function ProfilePage() {
           {passMessage && <p className={styles.success}>{passMessage}</p>}
 
           <button type="submit" className={styles.primary} disabled={savingPass}>
-            {savingPass ? "Zapisywanie..." : "Zmień hasło"}
+            {savingPass ? 'Zapisywanie...' : 'Zmień hasło'}
           </button>
         </form>
       </section>
+      <section className={[styles.card, styles.dangerCard].join(' ')}>
+        <h2>Strefa niebezpieczna</h2>
+        <p className={styles.dangerText}>
+          Usunięcie konta jest nieodwracalne — znikną wszystkie treningi i wpisy w dzienniku. Nie ma możliwości przywrócenia danych.
+        </p>
+        <button className={styles.dangerButton} onClick={() => setDeleteOpen(true)}>
+          Usuń konto
+        </button>
+      </section>
+
+      {deleteOpen && <DeleteAccountDialog email={profile.email} onClose={() => setDeleteOpen(false)} />}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { Role } from "./auth";
+import { Role } from './auth';
 
 export interface UserProfile {
   id: number;
@@ -19,4 +19,8 @@ export interface ChangePasswordRequest {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
+}
+
+export interface DeleteAccountRequest {
+  password: string;
 }

@@ -11,6 +11,7 @@ interface AuthContextValue {
   login: (data: LoginRequest) => Promise<void>;
   logout: () => void;
   refreshProfile: () => Promise<void>;
+  clearSession: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -19,12 +20,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
 
-  const logout = useCallback(() => {
-    authApi.logout().catch(() => {});
+  const clearSession = useCallback(() => {
     setAuthToken(null);
     setToken(null);
     setUser(null);
   }, []);
+
+  const logout = useCallback(() => {
+    authApi.logout().catch(() => {});
+    clearSession();
+  }, [clearSession]);
 
   const refreshProfile = useCallback(async () => {
     try {
@@ -58,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [logout]);
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated: token !== null, login, logout, refreshProfile }}>
+    <AuthContext.Provider value={{ user, token, isAuthenticated: token !== null, login, logout, refreshProfile, clearSession }}>
       {children}
     </AuthContext.Provider>
   );
