@@ -160,7 +160,7 @@ function AdminPage() {
                   <td>
                     <span className={[styles.badge, STATUS_CLASS[inv.status]].join(' ')}>{STATUS_LABELS[inv.status]}</span>
                   </td>
-                  <td className={styles.muted}>{inv.invitedByEmail}</td>
+                  <td className={styles.muted}>{inv.invitedByEmail ?? 'konto usunięte'}</td>
                   <td className={styles.muted}>{formatDateTimePl(inv.expiresAt)}</td>
                   <td className={styles.actionCell}>
                     {inv.status === 'PENDING' &&
