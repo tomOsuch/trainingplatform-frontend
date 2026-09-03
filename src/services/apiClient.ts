@@ -1,16 +1,21 @@
-import { ApiError } from "../types/api";
+import { ApiError } from '../types/api';
+import { LoginResponse } from '../types/auth';
+import { API_BASE_URL } from '../config';
 
-const BASE_URL = "http://localhost:8080/api";
+const AUTH_PREFIX = '/auth/';
 
 let authToken: string | null = null;
-let onUnauthorized: (() => void) | null = null;
+let onSessionEnd: ((message?: string) => void) | null = null;
+let refreshPromise: Promise<RefreshResult> | null = null;
+
+type RefreshResult = { ok: true; session: LoginResponse } | { ok: false; message: string | null };
 
 export function setAuthToken(token: string | null): void {
   authToken = token;
 }
 
-export function setOnUnauthorized(handler: (() => void) | null): void {
-  onUnauthorized = handler;
+export function setOnSessionEnd(handler: ((message?: string) => void) | null): void {
+  onSessionEnd = handler;
 }
 
 export class ApiRequestError extends Error {
@@ -26,44 +31,89 @@ export class ApiRequestError extends Error {
   }
 }
 
-export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+function rawFetch(path: string, options: RequestInit): Promise<Response> {
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
     ...(options.headers as Record<string, string>),
   };
 
-  const hadToken = authToken !== null;
   if (authToken) {
     headers.Authorization = `Bearer ${authToken}`;
   }
 
-  const response = await fetch(`${BASE_URL}${path}`, { ...options, headers });
+  return fetch(`${API_BASE_URL}${path}`, {
+    ...options,
+    headers,
+    credentials: 'include',
+  });
+}
 
-  if (response.status === 401 && hadToken) {
-    onUnauthorized?.();
+async function doRefresh(): Promise<RefreshResult> {
+  const response = await rawFetch('/auth/refresh', { method: 'POST' });
+
+  if (response.ok) {
+    const session = (await response.json()) as LoginResponse;
+    setAuthToken(session.token); // nowy token obowiązuje od razu, także dla ponowienia
+    return { ok: true, session };
   }
 
-   if (!response.ok) {
+  let message: string | null = null;
+  try {
+    message = ((await response.json()) as ApiError).message ?? null;
+  } catch {}
+  return { ok: false, message };
+}
+
+function refreshOnce(): Promise<RefreshResult> {
+  if (!refreshPromise) {
+    refreshPromise = doRefresh().finally(() => {
+      refreshPromise = null;
+    });
+  }
+  return refreshPromise;
+}
+
+export async function restoreSession(): Promise<LoginResponse | null> {
+  const result = await refreshOnce();
+  return result.ok ? result.session : null;
+}
+
+async function toResult<T>(response: Response): Promise<T> {
+  if (!response.ok) {
     let apiError: ApiError | null = null;
     try {
       apiError = await response.json();
-    } catch {
-      // odpowiedź bez JSON-a
-    }
+    } catch {}
 
-    // Retry-After przychodzi przy 429; nagłówek jest tekstem, więc parsujemy
-    const retryHeader = response.headers.get("Retry-After");
+    const retryHeader = response.headers.get('Retry-After');
     const retryAfter = retryHeader ? Number(retryHeader) : undefined;
 
     throw new ApiRequestError(
       response.status,
-      apiError?.message ?? "Wystąpił nieoczekiwany błąd",
+      apiError?.message ?? 'Wystąpił nieoczekiwany błąd',
       apiError?.errors,
-      Number.isFinite(retryAfter) ? retryAfter : undefined
+      Number.isFinite(retryAfter) ? retryAfter : undefined,
     );
   }
 
   const text = await response.text();
   if (!text) return undefined as T;
   return JSON.parse(text) as T;
+}
+
+export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+  let response = await rawFetch(path, options);
+
+  if (response.status === 401 && !path.startsWith(AUTH_PREFIX)) {
+    const result = await refreshOnce();
+
+    if (result.ok) {
+      response = await rawFetch(path, options);
+    } else {
+      setAuthToken(null);
+      onSessionEnd?.(result.message ?? undefined);
+    }
+  }
+
+  return toResult<T>(response);
 }

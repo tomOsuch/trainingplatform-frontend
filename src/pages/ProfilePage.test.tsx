@@ -1,7 +1,20 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { Route, Routes, useLocation } from "react-router-dom";
 import { renderWithProviders, mockFetch } from "../test-utils";
 import ProfilePage from "./ProfilePage";
+
+// zastępnik logowania — pokazuje komunikat przekazany przez navigate(state)
+function LoginStub() {
+  const location = useLocation();
+  const message = (location.state as { message?: string } | null)?.message;
+  return (
+    <div>
+      <h1>Logowanie</h1>
+      {message && <p>{message}</p>}
+    </div>
+  );
+}
 
 const profile = {
   id: 1,
@@ -83,18 +96,28 @@ describe("ProfilePage", () => {
     expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
 
-  test("po zmianie hasła czyści pola i potwierdza", async () => {
+  // Po A5 zmiana hasła unieważnia wszystkie sesje, także bieżącą —
+  // użytkownik musi wylądować na logowaniu, a nie zostać na profilu
+  test("po zmianie hasła przenosi na logowanie z komunikatem", async () => {
     mockFetch({ status: 200, body: profile }, { status: 200 });
-    renderWithProviders(<ProfilePage />);
+
+    renderWithProviders(
+      <Routes>
+        <Route path="/profil" element={<ProfilePage />} />
+        <Route path="/login" element={<LoginStub />} />
+      </Routes>,
+      { route: "/profil" }
+    );
 
     await userEvent.type(await screen.findByLabelText(/^Obecne hasło/), "stare123");
     await userEvent.type(screen.getByLabelText(/^Nowe hasło/), "nowe12345");
     await userEvent.type(screen.getByLabelText(/^Potwierdź nowe hasło/), "nowe12345");
     await userEvent.click(screen.getByRole("button", { name: "Zmień hasło" }));
 
-    expect(await screen.findByText("Hasło zostało zmienione")).toBeInTheDocument();
-    expect(screen.getByLabelText(/^Obecne hasło/)).toHaveValue("");
-    expect(screen.getByLabelText(/^Nowe hasło/)).toHaveValue("");
+    expect(await screen.findByRole("heading", { name: "Logowanie" })).toBeInTheDocument();
+    expect(
+      screen.getByText("Hasło zostało zmienione. Zaloguj się nowym hasłem.")
+    ).toBeInTheDocument();
   });
 
   test("informuje o nieprawidłowym obecnym haśle", async () => {
