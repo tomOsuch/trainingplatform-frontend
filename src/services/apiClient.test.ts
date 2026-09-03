@@ -6,6 +6,7 @@ import {
   ApiRequestError,
 } from "./apiClient";
 import { mockFetch, sampleLoginResponse } from "../test-utils";
+import { API_BASE_URL } from "../config";
 
 // ścieżki wywołań fetch — do sprawdzania, co i ile razy poszło na serwer
 const calledPaths = (spy: jest.SpyInstance) =>
@@ -27,7 +28,7 @@ describe("apiClient", () => {
       await apiFetch("/profile");
 
       const [url, options] = fetchSpy.mock.calls[0];
-      expect(url).toBe("http://localhost:8080/api/profile");
+      expect(url).toBe(`${API_BASE_URL}/profile`);
       expect((options!.headers as Record<string, string>).Authorization).toBe("Bearer token-abc");
     });
 
@@ -64,9 +65,9 @@ describe("apiClient", () => {
 
       expect(result).toEqual({ id: 1 });
       expect(calledPaths(fetchSpy)).toEqual([
-        "http://localhost:8080/api/profile",
-        "http://localhost:8080/api/auth/refresh",
-        "http://localhost:8080/api/profile",
+        `${API_BASE_URL}/profile`,
+        `${API_BASE_URL}/auth/refresh`,
+        `${API_BASE_URL}/profile`,
       ]);
 
       // ponowienie musi użyć nowego tokenu, nie starego
@@ -87,7 +88,7 @@ describe("apiClient", () => {
 
       expect(error).toBeInstanceOf(ApiRequestError);
       expect(error.status).toBe(401);
-      expect(calledPaths(fetchSpy)).toEqual(["http://localhost:8080/api/auth/login"]);
+      expect(calledPaths(fetchSpy)).toEqual([`${API_BASE_URL}/auth/login`]);
       expect(onSessionEnd).not.toHaveBeenCalled();
     });
 
@@ -148,7 +149,7 @@ describe("apiClient", () => {
       const session = await restoreSession();
 
       expect(session).toEqual(sampleLoginResponse);
-      expect(calledPaths(fetchSpy)).toEqual(["http://localhost:8080/api/auth/refresh"]);
+      expect(calledPaths(fetchSpy)).toEqual([`${API_BASE_URL}/auth/refresh`]);
 
       // token z odtworzonej sesji trafia do kolejnych żądań
       mockFetch({ status: 200, body: {} });

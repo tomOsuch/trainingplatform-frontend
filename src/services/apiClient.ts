@@ -1,7 +1,7 @@
 import { ApiError } from '../types/api';
 import { LoginResponse } from '../types/auth';
+import { API_BASE_URL } from '../config';
 
-const BASE_URL = 'http://localhost:8080/api';
 const AUTH_PREFIX = '/auth/';
 
 let authToken: string | null = null;
@@ -41,7 +41,7 @@ function rawFetch(path: string, options: RequestInit): Promise<Response> {
     headers.Authorization = `Bearer ${authToken}`;
   }
 
-  return fetch(`${BASE_URL}${path}`, {
+  return fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers,
     credentials: 'include',
