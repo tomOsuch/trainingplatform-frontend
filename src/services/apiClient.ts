@@ -16,11 +16,13 @@ export function setOnUnauthorized(handler: (() => void) | null): void {
 export class ApiRequestError extends Error {
   status: number;
   errors?: Record<string, string>;
+  retryAfter?: number;
 
-  constructor(status: number, message: string, errors?: Record<string, string>) {
+  constructor(status: number, message: string, errors?: Record<string, string>, retryAfter?: number) {
     super(message);
     this.status = status;
     this.errors = errors;
+    this.retryAfter = retryAfter;
   }
 }
 
@@ -41,17 +43,23 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
     onUnauthorized?.();
   }
 
-  if (!response.ok) {
+   if (!response.ok) {
     let apiError: ApiError | null = null;
     try {
       apiError = await response.json();
     } catch {
       // odpowiedź bez JSON-a
     }
+
+    // Retry-After przychodzi przy 429; nagłówek jest tekstem, więc parsujemy
+    const retryHeader = response.headers.get("Retry-After");
+    const retryAfter = retryHeader ? Number(retryHeader) : undefined;
+
     throw new ApiRequestError(
       response.status,
       apiError?.message ?? "Wystąpił nieoczekiwany błąd",
-      apiError?.errors
+      apiError?.errors,
+      Number.isFinite(retryAfter) ? retryAfter : undefined
     );
   }
 

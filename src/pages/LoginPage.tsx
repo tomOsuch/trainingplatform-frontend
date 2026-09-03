@@ -1,18 +1,21 @@
-import { FormEvent, useState } from "react";
-import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { ApiRequestError } from "../services/apiClient";
-import AuthBanner from "../components/AuthBanner";
-import styles from "../styles/AuthForm.module.scss";
+import { FormEvent, useState } from 'react';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { ApiRequestError } from '../services/apiClient';
+import AuthBanner from '../components/AuthBanner';
+import styles from '../styles/AuthForm.module.scss';
+import { useRetryAfter } from '../hooks/useRetryAfter';
+import { formatWaitTime } from '../utils/format';
 
 function LoginPage() {
   const { login, isAuthenticated } = useAuth();
+  const { blocked, secondsLeft, blockFor } = useRetryAfter();
   const navigate = useNavigate();
   const location = useLocation();
   const flashMessage = (location.state as { message?: string } | null)?.message;
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -24,22 +27,27 @@ function LoginPage() {
     e.preventDefault();
     setFormError(null);
 
+    if (blocked) return;
+
     if (!email.trim() || !password) {
-      setFormError("Podaj email i hasło");
+      setFormError('Podaj email i hasło');
       return;
     }
 
     setSubmitting(true);
     try {
       await login({ email: email.trim(), password });
-      navigate("/kalendarz", { replace: true });
+      navigate('/kalendarz', { replace: true });
     } catch (err) {
       if (err instanceof ApiRequestError && err.status === 401) {
-        setFormError("Nieprawidłowy email lub hasło");
+        setFormError('Nieprawidłowy email lub hasło');
       } else if (err instanceof ApiRequestError && err.status === 403) {
-        setFormError("Konto jest nieaktywne");
+        setFormError('Konto jest nieaktywne');
+      } else if (err instanceof ApiRequestError && err.status === 429) {
+        setFormError(err.message);
+        if (err.retryAfter) blockFor(err.retryAfter);
       } else {
-        setFormError("Coś poszło nie tak. Spróbuj ponownie.");
+        setFormError('Coś poszło nie tak. Spróbuj ponownie.');
       }
       setSubmitting(false);
     }
@@ -54,35 +62,30 @@ function LoginPage() {
 
           <label className={styles.field}>
             <span>Email</span>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
-            />
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
           </label>
 
           <label className={styles.field}>
             <span>Hasło</span>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-            />
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
           </label>
 
           {flashMessage && <p className={styles.success}>{flashMessage}</p>}
-          {formError && <p className={styles.formError}>{formError}</p>}
+          {formError && (
+            <p className={styles.formError}>
+              {formError}
+              {blocked && ` Spróbuj ponownie za ${formatWaitTime(secondsLeft)}.`}
+            </p>
+          )}
 
-          <button type="submit" disabled={submitting}>
+          <button type="submit" disabled={submitting || blocked}>
             {submitting ? "Logowanie..." : "Zaloguj się"}
           </button>
 
           <p className={styles.switchLink}>
             Nie masz konta? <Link to="/register">Zarejestruj się</Link>
           </p>
-          
+
           <p className={styles.switchLink}>
             <Link to="/forgot-password">Nie pamiętam hasła</Link>
           </p>
