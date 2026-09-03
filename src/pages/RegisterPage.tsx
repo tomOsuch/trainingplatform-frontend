@@ -47,7 +47,7 @@ function validate(values: FormValues): Record<string, string> {
 }
 
 function RegisterPage() {
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, restoring } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
@@ -74,6 +74,8 @@ function RegisterPage() {
         }),
       );
   }, [token]);
+
+  if (restoring) return null; // trwa odtwarzanie sesji — nie migamy formularzem
 
   if (isAuthenticated) {
     return <Navigate to="/kalendarz" replace />;

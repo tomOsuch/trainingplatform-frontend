@@ -8,7 +8,7 @@ import { useRetryAfter } from '../hooks/useRetryAfter';
 import { formatWaitTime } from '../utils/format';
 
 function LoginPage() {
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, restoring, sessionMessage } = useAuth();
   const { blocked, secondsLeft, blockFor } = useRetryAfter();
   const navigate = useNavigate();
   const location = useLocation();
@@ -18,6 +18,8 @@ function LoginPage() {
   const [password, setPassword] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  if (restoring) return null;
 
   if (isAuthenticated) {
     return <Navigate to="/kalendarz" replace />;
@@ -70,6 +72,7 @@ function LoginPage() {
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
           </label>
 
+          {sessionMessage && <p className={styles.notice}>{sessionMessage}</p>}
           {flashMessage && <p className={styles.success}>{flashMessage}</p>}
           {formError && (
             <p className={styles.formError}>
@@ -79,7 +82,7 @@ function LoginPage() {
           )}
 
           <button type="submit" disabled={submitting || blocked}>
-            {submitting ? "Logowanie..." : "Zaloguj się"}
+            {submitting ? 'Logowanie...' : 'Zaloguj się'}
           </button>
 
           <p className={styles.switchLink}>

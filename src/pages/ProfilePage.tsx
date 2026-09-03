@@ -6,14 +6,15 @@ import { useAuth } from '../context/AuthContext';
 import { toISODate } from '../utils/calendar';
 import styles from '../styles/ProfilePage.module.scss';
 import DeleteAccountDialog from '../components/DeleteAccountDialog';
+import { useNavigate } from 'react-router-dom';
 
 function ProfilePage() {
-  const { refreshProfile } = useAuth();
+  const { refreshProfile, clearSession } = useAuth();
+  const navigate = useNavigate();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  // --- karta 1: dane osobowe ---
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [birthDate, setBirthDate] = useState('');
@@ -22,12 +23,10 @@ function ProfilePage() {
   const [dataError, setDataError] = useState<string | null>(null);
   const [savingData, setSavingData] = useState(false);
 
-  // --- karta 2: zmiana hasła ---
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passErrors, setPassErrors] = useState<Record<string, string>>({});
-  const [passMessage, setPassMessage] = useState<string | null>(null);
   const [passError, setPassError] = useState<string | null>(null);
   const [savingPass, setSavingPass] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -78,7 +77,6 @@ function ProfilePage() {
 
   const handlePasswordSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setPassMessage(null);
     setPassError(null);
 
     const errs: Record<string, string> = {};
@@ -91,10 +89,12 @@ function ProfilePage() {
     setSavingPass(true);
     try {
       await changePassword({ currentPassword, newPassword, confirmPassword });
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-      setPassMessage('Hasło zostało zmienione');
+
+      clearSession();
+      navigate('/login', {
+        replace: true,
+        state: { message: 'Hasło zostało zmienione. Zaloguj się nowym hasłem.' },
+      });
     } catch (err) {
       if (err instanceof ApiRequestError && err.errors) setPassErrors(err.errors);
       else if (err instanceof ApiRequestError && err.status === 400) {
@@ -184,7 +184,6 @@ function ProfilePage() {
           </div>
 
           {passError && <p className={styles.formError}>{passError}</p>}
-          {passMessage && <p className={styles.success}>{passMessage}</p>}
 
           <button type="submit" className={styles.primary} disabled={savingPass}>
             {savingPass ? 'Zapisywanie...' : 'Zmień hasło'}

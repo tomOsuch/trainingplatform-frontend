@@ -11,25 +11,34 @@ export function renderWithProviders(ui: ReactElement, { route = '/', ...options 
   return render(ui, {
     wrapper: ({ children }) => (
       <MemoryRouter initialEntries={[route]}>
-        <AuthProvider>{children}</AuthProvider>
+        {}
+        <AuthProvider restoreOnMount={false}>{children}</AuthProvider>
       </MemoryRouter>
     ),
     ...options,
   });
 }
 
-type MockResponse = { status?: number; body?: unknown };
+type MockResponse = {
+  status?: number;
+  body?: unknown;
+  headers?: Record<string, string>;
+};
 
 export function mockFetch(...responses: MockResponse[]) {
   const spy = jest.spyOn(global, 'fetch');
 
-  responses.forEach(({ status = 200, body }) => {
+  responses.forEach(({ status = 200, body, headers = {} }) => {
+    // porównanie nazw nagłówków bez względu na wielkość liter, jak w prawdziwym Headers
+    const lookup = Object.fromEntries(Object.entries(headers).map(([k, v]) => [k.toLowerCase(), v]));
+
     spy.mockResolvedValueOnce({
       ok: status >= 200 && status < 300,
       status,
+      headers: { get: (name: string) => lookup[name.toLowerCase()] ?? null },
       text: async () => (body === undefined ? '' : JSON.stringify(body)),
       json: async () => body,
-    } as Response);
+    } as unknown as Response);
   });
 
   return spy;
