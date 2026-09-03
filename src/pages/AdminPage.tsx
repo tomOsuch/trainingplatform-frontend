@@ -5,6 +5,8 @@ import { createInvitation, getInvitations, revokeInvitation } from '../services/
 import { ApiRequestError } from '../services/apiClient';
 import { formatDateTimePl } from '../utils/calendar';
 import styles from '../styles/AdminPage.module.scss';
+import { useRetryAfter } from '../hooks/useRetryAfter';
+import { formatWaitTime } from '../utils/format';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -36,6 +38,7 @@ function AdminPage() {
 
   const [confirmRevokeId, setConfirmRevokeId] = useState<number | null>(null);
   const [rowError, setRowError] = useState<string | null>(null);
+  const { blocked, secondsLeft, blockFor } = useRetryAfter();
 
   const load = useCallback(() => {
     setLoading(true);
@@ -52,6 +55,7 @@ function AdminPage() {
     e.preventDefault();
     setFormError(null);
     setFormMessage(null);
+    if (blocked) return;
 
     if (!EMAIL_REGEX.test(email.trim())) {
       setEmailError('Podaj poprawny adres email');
@@ -68,7 +72,10 @@ function AdminPage() {
       load();
     } catch (err) {
       if (err instanceof ApiRequestError && err.errors?.email) setEmailError(err.errors.email);
-      else if (err instanceof ApiRequestError) setFormError(err.message);
+      else if (err instanceof ApiRequestError && err.status === 429) {
+        setFormError(err.message);
+        if (err.retryAfter) blockFor(err.retryAfter);
+      } else if (err instanceof ApiRequestError) setFormError(err.message);
       else setFormError('Nie udało się wystawić zaproszenia');
     } finally {
       setSending(false);
@@ -108,12 +115,17 @@ function AdminPage() {
             </select>
           </label>
 
-          <button type="submit" className={styles.primary} disabled={sending}>
+          <button type="submit" className={styles.primary} disabled={sending || blocked}>
             {sending ? 'Wysyłanie...' : 'Wyślij zaproszenie'}
           </button>
         </form>
 
-        {formError && <p className={styles.formError}>{formError}</p>}
+                {formError && (
+          <p className={styles.formError}>
+            {formError}
+            {blocked && ` Spróbuj ponownie za ${formatWaitTime(secondsLeft)}.`}
+          </p>
+        )}
         {formMessage && <p className={styles.success}>{formMessage}</p>}
 
         <p className={styles.hint}>

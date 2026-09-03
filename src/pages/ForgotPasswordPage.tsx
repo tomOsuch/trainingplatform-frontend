@@ -4,6 +4,8 @@ import { ApiRequestError } from '../services/apiClient';
 import * as authApi from '../services/authApi';
 import AuthBanner from '../components/AuthBanner';
 import styles from '../styles/AuthForm.module.scss';
+import { useRetryAfter } from '../hooks/useRetryAfter';
+import { formatWaitTime } from '../utils/format';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -13,6 +15,7 @@ function ForgotPasswordPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
+  const { blocked, secondsLeft, blockFor } = useRetryAfter();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -31,6 +34,9 @@ function ForgotPasswordPage() {
     } catch (err) {
       if (err instanceof ApiRequestError && err.errors?.email) {
         setFieldError(err.errors.email);
+      } else if (err instanceof ApiRequestError && err.status === 429) {
+        setFormError(err.message);
+        if (err.retryAfter) blockFor(err.retryAfter);
       } else {
         setFormError('Nie udało się wysłać linku. Spróbuj ponownie.');
       }
@@ -73,9 +79,14 @@ function ForgotPasswordPage() {
             {fieldError && <span className={styles.fieldError}>{fieldError}</span>}
           </label>
 
-          {formError && <p className={styles.formError}>{formError}</p>}
+          {formError && (
+            <p className={styles.formError}>
+              {formError}
+              {blocked && ` Spróbuj ponownie za ${formatWaitTime(secondsLeft)}.`}
+            </p>
+          )}
 
-          <button type="submit" disabled={submitting}>
+          <button type="submit" disabled={submitting || blocked}>
             {submitting ? 'Wysyłanie...' : 'Wyślij link'}
           </button>
 
