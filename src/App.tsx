@@ -11,6 +11,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import AdminRoute from './components/AdminRoute';
 import AdminPage from './pages/AdminPage';
+import GoalsPage from './pages/GoalsPage';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
             <Route element={<AppLayout />}>
               <Route path="/kalendarz" element={<CalendarPage />} />
               <Route path="/dziennik" element={<WorkoutLogPage />} />
+              <Route path="/cele" element={<GoalsPage />} />
               <Route path="/profil" element={<ProfilePage />} />
               <Route element={<AdminRoute />}>
                 <Route path="/administracja" element={<AdminPage />} />

@@ -1,0 +1,238 @@
+.page {
+    max-width: 900px; // szerzej podpis odrywa się wizualnie od paska
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+
+    h1 {
+        font-size: 20px;
+    }
+}
+
+.addButton {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 8px 15px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+        background: #1d4ed8;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: default;
+    }
+}
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.statusToggle {
+    display: inline-flex;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #fff;
+
+    button {
+        border: none;
+        background: none;
+        padding: 7px 13px;
+        font-size: 12px;
+        cursor: pointer;
+
+        &:hover {
+            background: #f3f4f6;
+        }
+    }
+}
+
+.statusActive {
+    background: #2563eb !important;
+    color: #fff;
+}
+
+.count {
+    margin-left: auto;
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+.error {
+    color: #dc2626;
+    font-size: 14px;
+}
+
+.empty {
+    text-align: center;
+    color: #6b7280;
+    font-size: 14px;
+    padding: 32px 0;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+
+    @media (max-width: 700px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.card {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #fff;
+}
+
+// próg osiągnięty — karta prosi o decyzję, więc się wyróżnia
+.cardReached {
+    border-color: #bfdbfe;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+.cardMuted {
+    opacity: 0.75;
+}
+
+.cardTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 999px;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.badge {
+    font-size: 11px;
+    font-weight: 600;
+    color: #1d4ed8;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    padding: 3px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.badgeDone {
+    font-size: 11px;
+    font-weight: 600;
+    color: #6b7280;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    padding: 3px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #111;
+}
+
+// kontur = zamiar (wartość docelowa), wypełnienie = fakt (postęp z dziennika)
+.track {
+    height: 10px;
+    border-radius: 999px;
+    background: #fff;
+    border: 1px solid;
+    overflow: hidden;
+}
+
+.fill {
+    height: 100%;
+    border-radius: 999px;
+}
+
+.progressLine {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.values {
+    font-size: 13px;
+    font-weight: 600;
+    color: #111;
+}
+
+.percent {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.metaWarn {
+    color: #b45309;
+}
+
+.metaOpen {
+    color: #9ca3af;
+    font-style: italic;
+}
+
+.achieveButton {
+    align-self: flex-start;
+    background: #fff;
+    border: 1px solid #bfdbfe;
+    color: #2563eb;
+    border-radius: 6px;
+    padding: 6px 11px;
+    font-size: 12px;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+        background: #eff6ff;
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: default;
+    }
+}

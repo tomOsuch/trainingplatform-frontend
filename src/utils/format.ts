@@ -1,4 +1,4 @@
-function plural(n: number, one: string, few: string, many: string): string {
+export function plural(n: number, one: string, few: string, many: string): string {
   if (n === 1) return one;
   const last = n % 10;
   const lastTwo = n % 100;
@@ -9,7 +9,7 @@ function plural(n: number, one: string, few: string, many: string): string {
 export function formatWaitTime(seconds: number): string {
   if (seconds >= 60) {
     const minutes = Math.ceil(seconds / 60);
-    return `${minutes} ${plural(minutes, "minutę", "minuty", "minut")}`;
+    return `${minutes} ${plural(minutes, 'minutę', 'minuty', 'minut')}`;
   }
-  return `${seconds} ${plural(seconds, "sekundę", "sekundy", "sekund")}`;
+  return `${seconds} ${plural(seconds, 'sekundę', 'sekundy', 'sekund')}`;
 }
