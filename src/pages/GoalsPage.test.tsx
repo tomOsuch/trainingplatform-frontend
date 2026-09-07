@@ -1,5 +1,4 @@
-/* eslint-disable testing-library/no-node-access */
-import { screen, within } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders, mockFetch } from '../test-utils';
 import GoalsPage from './GoalsPage';
@@ -57,17 +56,17 @@ const achievedGoal: Goal = {
   achievedValue: 18,
 };
 
-const cardFor = (title: string): HTMLElement => {
-  const card = screen.getByText(title).closest('div');
-  if (!card) throw new Error(`Nie znaleziono karty celu "${title}"`);
-  return card.parentElement as HTMLElement;
-};
+// strona pobiera też kategorie do formularza — każdy render potrzebuje tej odpowiedzi
+const withCategories = (...goals: Goal[]) => [
+  { status: 200, body: goals },
+  { status: 200, body: [] },
+];
 
 describe('GoalsPage', () => {
   afterEach(() => jest.restoreAllMocks());
 
   test('pobiera aktywne cele i pokazuje postęp z jednostką', async () => {
-    const spy = mockFetch({ status: 200, body: [base, openGoal] });
+    const spy = mockFetch(...withCategories(base, openGoal));
     renderWithProviders(<GoalsPage />);
 
     expect(await screen.findByText('720 / 1200 minut')).toBeInTheDocument();
@@ -76,7 +75,7 @@ describe('GoalsPage', () => {
   });
 
   test('cel bez terminu i bez kategorii ma własne podpisy', async () => {
-    mockFetch({ status: 200, body: [openGoal] });
+    mockFetch(...withCategories(openGoal));
     renderWithProviders(<GoalsPage />);
 
     expect(await screen.findByText('bez terminu')).toBeInTheDocument();
@@ -86,6 +85,7 @@ describe('GoalsPage', () => {
   test('cel z osiągniętym progiem ma plakietkę i zamyka się przyciskiem', async () => {
     const spy = mockFetch(
       { status: 200, body: [reached] },
+      { status: 200, body: [] }, // kategorie
       { status: 200, body: { ...reached, achievedAt: '2026-09-06T09:00:00', achievedValue: 20 } },
       { status: 200, body: [] }, // odświeżenie listy aktywnych po zamknięciu
     );
@@ -94,16 +94,19 @@ describe('GoalsPage', () => {
     expect(await screen.findByText('Cel osiągnięty')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Oznacz jako osiągnięty' }));
 
-    const [url, options] = spy.mock.calls[1];
-    expect(url).toContain('/goals/2/status');
-    expect(options?.method).toBe('PATCH');
-    expect(options?.body).toBe(JSON.stringify({ status: 'ACHIEVED' }));
+    const patch = spy.mock.calls.find(([url]) => String(url).includes('/goals/2/status'));
+    expect(patch?.[1]?.method).toBe('PATCH');
+    expect(patch?.[1]?.body).toBe(JSON.stringify({ status: 'ACHIEVED' }));
 
     expect(await screen.findByText('Nie masz jeszcze żadnych celów. Dodaj pierwszy!')).toBeInTheDocument();
   });
 
   test('przełącznik pobiera osiągnięte i pokazuje migawkę postępu', async () => {
-    const spy = mockFetch({ status: 200, body: [base] }, { status: 200, body: [achievedGoal] });
+    const spy = mockFetch(
+      { status: 200, body: [base] },
+      { status: 200, body: [] }, // kategorie
+      { status: 200, body: [achievedGoal] },
+    );
     renderWithProviders(<GoalsPage />);
 
     await screen.findByText('720 / 1200 minut');
@@ -112,11 +115,26 @@ describe('GoalsPage', () => {
     // 18 z migawki, nie 999 z currentValue
     expect(await screen.findByText('18 / 20 sesji')).toBeInTheDocument();
     expect(screen.getByText('osiągnięty 4 września')).toBeInTheDocument();
-    expect(spy.mock.calls[1][0]).toContain('/goals?status=achieved');
+
+    const achievedCall = spy.mock.calls.find(([url]) => String(url).includes('status=achieved'));
+    expect(achievedCall).toBeDefined();
+  });
+
+  test('cel osiągnięty nie ma wejścia w edycję', async () => {
+    mockFetch({ status: 200, body: [base] }, { status: 200, body: [] }, { status: 200, body: [achievedGoal] });
+    renderWithProviders(<GoalsPage />);
+
+    await screen.findByText('720 / 1200 minut');
+    expect(screen.getByRole('button', { name: 'Edytuj' })).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Osiągnięte' }));
+
+    await screen.findByText('18 / 20 sesji');
+    expect(screen.queryByRole('button', { name: 'Edytuj' })).not.toBeInTheDocument();
   });
 
   test('pusta sekcja osiągniętych ma własny komunikat', async () => {
-    mockFetch({ status: 200, body: [base] }, { status: 200, body: [] });
+    mockFetch({ status: 200, body: [base] }, { status: 200, body: [] }, { status: 200, body: [] });
     renderWithProviders(<GoalsPage />);
 
     await screen.findByText('720 / 1200 minut');
@@ -126,7 +144,7 @@ describe('GoalsPage', () => {
   });
 
   test('błąd pobrania pokazuje komunikat z API', async () => {
-    mockFetch({ status: 500, body: { message: 'Coś poszło nie tak' } });
+    mockFetch({ status: 500, body: { message: 'Coś poszło nie tak' } }, { status: 200, body: [] });
     renderWithProviders(<GoalsPage />);
 
     expect(await screen.findByText('Coś poszło nie tak')).toBeInTheDocument();

@@ -236,3 +236,23 @@
         cursor: default;
     }
 }
+
+.cardActions {
+    display: flex;
+    gap: 8px;
+    margin-top: 2px;
+}
+
+.editButton {
+    background: #fff;
+    border: 1px solid #d1d5db;
+    color: #374151;
+    border-radius: 6px;
+    padding: 6px 11px;
+    font-size: 12px;
+    cursor: pointer;
+
+    &:hover {
+        background: #f3f4f6;
+    }
+}
