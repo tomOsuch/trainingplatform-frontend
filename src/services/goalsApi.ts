@@ -1,10 +1,14 @@
 import { apiFetch } from './apiClient';
-import { Goal, GoalRequest, GoalStatusChange, GoalStatusFilter } from '../types/goal';
+import { Goal, GoalDetails, GoalRequest, GoalStatusChange, GoalStatusFilter } from '../types/goal';
 
 export async function getGoals(status?: GoalStatusFilter): Promise<Goal[]> {
   const qs = status ? `?status=${status}` : '';
   const data = await apiFetch<Goal[]>(`/goals${qs}`);
   return data ?? [];
+}
+
+export function getGoal(id: number): Promise<GoalDetails> {
+  return apiFetch<GoalDetails>(`/goals/${id}`);
 }
 
 export function changeGoalStatus(id: number, status: GoalStatusChange): Promise<Goal> {

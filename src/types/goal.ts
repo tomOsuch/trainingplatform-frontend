@@ -30,3 +30,16 @@ export interface GoalRequest {
   startDate: string;
   endDate?: string;
 }
+
+export interface GoalEntry {
+  id: number;
+  title: string | null;
+  performedDate: string;
+  durationMin: number | null;
+  categoryName: string;
+  categoryColor: string;
+}
+
+export interface GoalDetails extends Goal {
+  entries: GoalEntry[];
+}
