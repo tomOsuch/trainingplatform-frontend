@@ -1,13 +1,13 @@
-import { useEffect, useRef } from "react";
-import { CalendarItem } from "../types/workout";
-import { CalendarDay, timeToMinutes } from "../utils/calendar";
-import { hexToRgba, darkenHex, lightenHex } from "../utils/color";
-import styles from "../styles/WeekView.module.scss";
+import { useEffect, useRef } from 'react';
+import { CalendarItem } from '../types/workout';
+import { CalendarDay, timeToMinutes } from '../utils/calendar';
+import { hexToRgba, darkenHex, lightenHex } from '../utils/color';
+import styles from '../styles/WeekView.module.scss';
+import { layoutDay, PositionedItem } from '../utils/weekLayout';
 
 const HOUR_HEIGHT = 44;
-const DEFAULT_DURATION = 60;
-const WEEKDAYS = ["Pn", "Wt", "Śr", "Cz", "Pt", "So", "Nd"];
-const GRAY = "#94A3B8";
+const WEEKDAYS = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd'];
+const GRAY = '#94A3B8';
 
 interface WeekViewProps {
   days: CalendarDay[];
@@ -34,38 +34,39 @@ function WeekView({ days, itemsByDay, onSelectItem, onAddForDay }: WeekViewProps
   const timed = (iso: string) => (itemsByDay.get(iso) ?? []).filter((i) => i.time);
   const allDay = (iso: string) => (itemsByDay.get(iso) ?? []).filter((i) => !i.time);
 
-  const renderBlock = (item: CalendarItem, positioned: boolean) => {
-    const cancelled = item.state === "cancelled";
+  const renderBlock = (item: CalendarItem, placement?: PositionedItem) => {
+    const cancelled = item.state === 'cancelled';
     const color = cancelled ? GRAY : item.color;
-    const filled = item.state === "done";
-    const dashed = item.state === "skipped" || cancelled;
+    const filled = item.state === 'done';
+    const dashed = item.state === 'skipped' || cancelled;
 
-    const icon = item.state === "done" ? " ✓" : item.state === "skipped" ? " ✗" : "";
-    const start = timeToMinutes(item.time) ?? 0;
-    const duration = item.durationMin ?? DEFAULT_DURATION;
+    const icon = item.state === 'done' ? ' ✓' : item.state === 'skipped' ? ' ✗' : '';
 
     return (
       <button
         key={item.key}
         className={[
-          positioned ? styles.block : styles.allDayChip,
-          dashed ? styles.dashed : "",
-          item.state === "skipped" ? styles.muted : "",
-        ].join(" ")}
+          placement ? styles.block : styles.allDayChip,
+          dashed ? styles.dashed : '',
+          item.state === 'skipped' ? styles.muted : '',
+        ].join(' ')}
         style={{
-          background: filled ? hexToRgba(color, 0.16) : "#fff",
+          background: filled ? hexToRgba(color, 0.16) : '#fff',
           borderColor: filled ? color : lightenHex(color, dashed ? 0.6 : 0.45),
           color: darkenHex(color),
-          ...(positioned && {
-            top: (start / 60) * HOUR_HEIGHT,
-            height: Math.max((duration / 60) * HOUR_HEIGHT - 2, 18),
+          ...(placement && {
+            top: (placement.startMin / 60) * HOUR_HEIGHT,
+            height: Math.max(((placement.endMin - placement.startMin) / 60) * HOUR_HEIGHT - 2, 18),
+
+            left: `calc(${(placement.column / placement.columns) * 100}% + 2px)`,
+            width: `calc(${100 / placement.columns}% - 4px)`,
           }),
         }}
         onClick={() => onSelectItem(item)}
         title={item.label}
       >
         <span className={cancelled ? styles.cancelled : undefined}>
-          {item.time ? `${item.time.slice(0, 5)} ` : ""}
+          {item.time ? `${item.time.slice(0, 5)} ` : ''}
           {item.label}
           {icon}
         </span>
@@ -88,7 +89,7 @@ function WeekView({ days, itemsByDay, onSelectItem, onAddForDay }: WeekViewProps
         <div className={styles.gutterLabel}>cały dzień</div>
         {days.map((d) => (
           <div key={d.iso} className={styles.allDayCell}>
-            {allDay(d.iso).map((i) => renderBlock(i, false))}
+            {allDay(d.iso).map((i) => renderBlock(i))}
           </div>
         ))}
       </div>
@@ -98,7 +99,7 @@ function WeekView({ days, itemsByDay, onSelectItem, onAddForDay }: WeekViewProps
           <div className={styles.gutter}>
             {Array.from({ length: 24 }, (_, h) => (
               <div key={h} className={styles.hourLabel} style={{ height: HOUR_HEIGHT }}>
-                {String(h).padStart(2, "0")}:00
+                {String(h).padStart(2, '0')}:00
               </div>
             ))}
           </div>
@@ -113,7 +114,7 @@ function WeekView({ days, itemsByDay, onSelectItem, onAddForDay }: WeekViewProps
               {Array.from({ length: 24 }, (_, h) => (
                 <div key={h} className={styles.hourLine} style={{ height: HOUR_HEIGHT }} />
               ))}
-              {timed(d.iso).map((i) => renderBlock(i, true))}
+              {layoutDay(timed(d.iso)).map((p) => renderBlock(p.item, p))}
             </div>
           ))}
         </div>
