@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Goal, GoalStatusFilter } from '../types/goal';
 import { WorkoutCategory } from '../types/workout';
 import { changeGoalStatus, getGoals } from '../services/goalsApi';
@@ -30,6 +31,7 @@ function GoalsPage() {
 
   const [formOpen, setFormOpen] = useState(false);
   const [editGoal, setEditGoal] = useState<Goal | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setLoading(true);
@@ -100,7 +102,14 @@ function GoalsPage() {
 
       <div className={styles.grid}>
         {items.map((goal) => (
-          <GoalCard key={goal.id} goal={goal} onAchieve={handleAchieve} onEdit={setEditGoal} busy={busyId === goal.id} />
+          <GoalCard
+            key={goal.id}
+            goal={goal}
+            onOpen={(g) => navigate(`/cele/${g.id}`)}
+            onAchieve={handleAchieve}
+            onEdit={setEditGoal}
+            busy={busyId === goal.id}
+          />
         ))}
       </div>
 
