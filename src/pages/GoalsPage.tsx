@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Goal, GoalStatusFilter } from '../types/goal';
+import { WorkoutCategory } from '../types/workout';
 import { changeGoalStatus, getGoals } from '../services/goalsApi';
+import { getCategories } from '../services/categoriesApi';
 import { sortGoals } from '../utils/goal';
 import { plural } from '../utils/format';
 import GoalCard from '../components/GoalCard';
+import GoalForm from '../components/GoalForm';
 import styles from '../styles/GoalsPage.module.scss';
 
 const TABS: { key: GoalStatusFilter; label: string }[] = [
@@ -19,10 +22,14 @@ const EMPTY_TEXT: Record<GoalStatusFilter, string> = {
 function GoalsPage() {
   const [status, setStatus] = useState<GoalStatusFilter>('active');
   const [goals, setGoals] = useState<Goal[]>([]);
+  const [categories, setCategories] = useState<WorkoutCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  const [formOpen, setFormOpen] = useState(false);
+  const [editGoal, setEditGoal] = useState<Goal | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -33,8 +40,17 @@ function GoalsPage() {
       .finally(() => setLoading(false));
   }, [status, refreshKey]);
 
+  // kategorie pobieramy raz — słownik nie zmienia się w trakcie pracy z listą
+  useEffect(() => {
+    getCategories()
+      .then(setCategories)
+      .catch(() => {});
+  }, []);
+
   // backend nie deklaruje kolejności — porządek ustalamy u siebie
   const items = useMemo(() => sortGoals(goals), [goals]);
+
+  const refresh = () => setRefreshKey((k) => k + 1);
 
   const handleAchieve = async (goal: Goal) => {
     setBusyId(goal.id);
@@ -42,8 +58,8 @@ function GoalsPage() {
     try {
       await changeGoalStatus(goal.id, 'ACHIEVED');
       // cel znika z listy aktywnych i dostaje migawkę postępu — pełne odświeżenie
-      // zamiast sklejania stanu lokalnie, bo zmienia się i wartość, i przynależność do sekcji
-      setRefreshKey((k) => k + 1);
+      // zamiast sklejania stanu lokalnie
+      refresh();
     } catch (e) {
       setError((e as Error).message ?? 'Nie udało się zamknąć celu');
     } finally {
@@ -57,8 +73,7 @@ function GoalsPage() {
     <div className={styles.page}>
       <div className={styles.header}>
         <h1>Cele</h1>
-        {/* podłączone w D7 — formularz jeszcze nie istnieje */}
-        <button className={styles.addButton} disabled title="Formularz celu dochodzi w D7">
+        <button className={styles.addButton} onClick={() => setFormOpen(true)}>
           + Dodaj cel
         </button>
       </div>
@@ -85,9 +100,13 @@ function GoalsPage() {
 
       <div className={styles.grid}>
         {items.map((goal) => (
-          <GoalCard key={goal.id} goal={goal} onAchieve={handleAchieve} busy={busyId === goal.id} />
+          <GoalCard key={goal.id} goal={goal} onAchieve={handleAchieve} onEdit={setEditGoal} busy={busyId === goal.id} />
         ))}
       </div>
+
+      {formOpen && <GoalForm categories={categories} onClose={() => setFormOpen(false)} onSaved={refresh} />}
+
+      {editGoal && <GoalForm categories={categories} goal={editGoal} onClose={() => setEditGoal(null)} onSaved={refresh} />}
     </div>
   );
 }

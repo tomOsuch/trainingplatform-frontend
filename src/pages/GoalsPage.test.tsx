@@ -1,13 +1,12 @@
-/* eslint-disable testing-library/no-node-access */
-import { screen, within } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWithProviders, mockFetch } from '../test-utils';
-import GoalsPage from './GoalsPage';
+import { renderWithProviders, mockFetch, sampleCategories } from '../test-utils';
+import GoalForm from '../components/GoalForm';
 import { Goal } from '../types/goal';
 
-const base: Goal = {
-  id: 1,
-  title: 'Przetańczyć 20 godzin we wrześniu',
+const existing: Goal = {
+  id: 7,
+  title: 'Przetańczyć 20 godzin',
   description: null,
   categoryId: 1,
   categoryName: 'Taniec',
@@ -22,113 +21,118 @@ const base: Goal = {
   achievedValue: null,
 };
 
-const reached: Goal = {
-  ...base,
-  id: 2,
-  title: '20 treningów gimnastyki',
-  metric: 'SESSIONS',
-  targetValue: 20,
-  currentValue: 20,
-  targetReached: true,
-};
+const noop = () => {};
+const save = () => userEvent.click(screen.getByRole('button', { name: 'Zapisz' }));
 
-const openGoal: Goal = {
-  ...base,
-  id: 3,
-  title: '50 treningów siłowych',
-  categoryId: null,
-  categoryName: null,
-  categoryColor: null,
-  metric: 'SESSIONS',
-  targetValue: 50,
-  currentValue: 7,
-  endDate: null,
-};
+// komunikat błędu renderuje się wewnątrz <label>, więc getByLabelText musi być regexem
+const field = (label: string) => screen.getByLabelText(new RegExp(`^${label}`));
 
-const achievedGoal: Goal = {
-  ...base,
-  id: 4,
-  title: '15 treningów w wakacje',
-  metric: 'SESSIONS',
-  targetValue: 20,
-  currentValue: 999, // celowo: po zamknięciu liczy się wyłącznie migawka
-  targetReached: false,
-  achievedAt: '2026-09-04T10:12:00',
-  achievedValue: 18,
-};
-
-const cardFor = (title: string): HTMLElement => {
-  const card = screen.getByText(title).closest('div');
-  if (!card) throw new Error(`Nie znaleziono karty celu "${title}"`);
-  return card.parentElement as HTMLElement;
-};
-
-describe('GoalsPage', () => {
+describe('GoalForm', () => {
   afterEach(() => jest.restoreAllMocks());
 
-  test('pobiera aktywne cele i pokazuje postęp z jednostką', async () => {
-    const spy = mockFetch({ status: 200, body: [base, openGoal] });
-    renderWithProviders(<GoalsPage />);
+  test('nie wysyła żądania przy pustym tytule i zerowej wartości', async () => {
+    const spy = mockFetch();
+    renderWithProviders(<GoalForm categories={sampleCategories} onClose={noop} onSaved={noop} />);
 
-    expect(await screen.findByText('720 / 1200 minut')).toBeInTheDocument();
-    expect(screen.getByText('7 / 50 sesji')).toBeInTheDocument();
-    expect(spy.mock.calls[0][0]).toContain('/goals?status=active');
+    await userEvent.type(field('Wartość docelowa'), '0');
+    await save();
+
+    expect(await screen.findByText('Podaj tytuł celu')).toBeInTheDocument();
+    expect(screen.getByText('Wartość docelowa musi być większa od 0')).toBeInTheDocument();
+    expect(spy).not.toHaveBeenCalled();
   });
 
-  test('cel bez terminu i bez kategorii ma własne podpisy', async () => {
-    mockFetch({ status: 200, body: [openGoal] });
-    renderWithProviders(<GoalsPage />);
+  test('termin wcześniejszy niż data początkowa blokuje zapis', async () => {
+    const spy = mockFetch();
+    renderWithProviders(<GoalForm categories={sampleCategories} goal={existing} onClose={noop} onSaved={noop} />);
 
-    expect(await screen.findByText('bez terminu')).toBeInTheDocument();
-    expect(screen.getByText('Wszystkie kategorie')).toBeInTheDocument();
+    await userEvent.clear(field('Termin'));
+    await userEvent.type(field('Termin'), '2026-08-01');
+    await save();
+
+    expect(await screen.findByText('Termin nie może być wcześniejszy niż data początkowa')).toBeInTheDocument();
+    expect(spy).not.toHaveBeenCalled();
   });
 
-  test('cel z osiągniętym progiem ma plakietkę i zamyka się przyciskiem', async () => {
-    const spy = mockFetch(
-      { status: 200, body: [reached] },
-      { status: 200, body: { ...reached, achievedAt: '2026-09-06T09:00:00', achievedValue: 20 } },
-      { status: 200, body: [] }, // odświeżenie listy aktywnych po zamknięciu
-    );
-    renderWithProviders(<GoalsPage />);
+  test('miniony termin tylko ostrzega i nie blokuje zapisu', async () => {
+    const spy = mockFetch({ status: 200, body: existing });
+    renderWithProviders(<GoalForm categories={sampleCategories} goal={existing} onClose={noop} onSaved={noop} />);
 
-    expect(await screen.findByText('Cel osiągnięty')).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: 'Oznacz jako osiągnięty' }));
+    // cel z terminem 30.09.2026 — po tej dacie ostrzeżenie pojawia się samo;
+    // tu wymuszamy je datą z pewnością przeszłą
+    await userEvent.clear(field('Od'));
+    await userEvent.type(field('Od'), '2020-01-01');
+    await userEvent.clear(field('Termin'));
+    await userEvent.type(field('Termin'), '2020-02-01');
 
-    const [url, options] = spy.mock.calls[1];
-    expect(url).toContain('/goals/2/status');
-    expect(options?.method).toBe('PATCH');
-    expect(options?.body).toBe(JSON.stringify({ status: 'ACHIEVED' }));
+    expect(await screen.findByText('Wybrany termin już minął.')).toBeInTheDocument();
 
-    expect(await screen.findByText('Nie masz jeszcze żadnych celów. Dodaj pierwszy!')).toBeInTheDocument();
+    await save();
+    expect(spy).toHaveBeenCalled();
   });
 
-  test('przełącznik pobiera osiągnięte i pokazuje migawkę postępu', async () => {
-    const spy = mockFetch({ status: 200, body: [base] }, { status: 200, body: [achievedGoal] });
-    renderWithProviders(<GoalsPage />);
+  test('przełącznik miary zmienia jednostkę i zachowuje wartość', async () => {
+    mockFetch();
+    renderWithProviders(<GoalForm categories={sampleCategories} onClose={noop} onSaved={noop} />);
 
-    await screen.findByText('720 / 1200 minut');
-    await userEvent.click(screen.getByRole('button', { name: 'Osiągnięte' }));
+    await userEvent.type(field('Wartość docelowa'), '20');
+    expect(screen.getByText('sesji')).toBeInTheDocument();
 
-    // 18 z migawki, nie 999 z currentValue
-    expect(await screen.findByText('18 / 20 sesji')).toBeInTheDocument();
-    expect(screen.getByText('osiągnięty 4 września')).toBeInTheDocument();
-    expect(spy.mock.calls[1][0]).toContain('/goals?status=achieved');
+    await userEvent.click(screen.getByRole('button', { name: 'Liczba minut' }));
+
+    expect(screen.getByText('minut')).toBeInTheDocument();
+    expect(field('Wartość docelowa')).toHaveValue(20);
   });
 
-  test('pusta sekcja osiągniętych ma własny komunikat', async () => {
-    mockFetch({ status: 200, body: [base] }, { status: 200, body: [] });
-    renderWithProviders(<GoalsPage />);
+  test('tryb dodawania wysyła POST z wybraną miarą', async () => {
+    const spy = mockFetch({ status: 201, body: existing });
+    renderWithProviders(<GoalForm categories={sampleCategories} onClose={noop} onSaved={noop} />);
 
-    await screen.findByText('720 / 1200 minut');
-    await userEvent.click(screen.getByRole('button', { name: 'Osiągnięte' }));
+    await userEvent.type(field('Tytuł'), '20 treningów');
+    await userEvent.type(field('Wartość docelowa'), '20');
+    await save();
 
-    expect(await screen.findByText('Nie masz jeszcze osiągniętych celów.')).toBeInTheDocument();
+    const [url, options] = spy.mock.calls[0];
+    expect(url).toContain('/goals');
+    expect(options?.method).toBe('POST');
+    expect(JSON.parse(String(options?.body))).toMatchObject({
+      title: '20 treningów',
+      metric: 'SESSIONS',
+      targetValue: 20,
+    });
   });
 
-  test('błąd pobrania pokazuje komunikat z API', async () => {
-    mockFetch({ status: 500, body: { message: 'Coś poszło nie tak' } });
-    renderWithProviders(<GoalsPage />);
+  test('tryb edycji wysyła PUT pod adres celu', async () => {
+    const spy = mockFetch({ status: 200, body: existing });
+    renderWithProviders(<GoalForm categories={sampleCategories} goal={existing} onClose={noop} onSaved={noop} />);
 
-    expect(await screen.findByText('Coś poszło nie tak')).toBeInTheDocument();
+    await save();
+
+    const [url, options] = spy.mock.calls[0];
+    expect(url).toContain('/goals/7');
+    expect(options?.method).toBe('PUT');
+  });
+
+  test('błędy walidacji z backendu trafiają pod pola', async () => {
+    mockFetch({ status: 400, body: { message: 'Błąd walidacji', errors: { targetValue: 'Wartość docelowa musi być większa od 0' } } });
+    renderWithProviders(<GoalForm categories={sampleCategories} goal={existing} onClose={noop} onSaved={noop} />);
+
+    await save();
+
+    expect(await screen.findByText('Wartość docelowa musi być większa od 0')).toBeInTheDocument();
+  });
+
+  test('usunięcie wymaga potwierdzenia i informuje o treningach', async () => {
+    const spy = mockFetch({ status: 204 });
+    renderWithProviders(<GoalForm categories={sampleCategories} goal={existing} onClose={noop} onSaved={noop} />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Usuń cel' }));
+    expect(screen.getByText('Na pewno usunąć? Treningi z dziennika zostają.')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Tak, usuń' }));
+
+    const [url, options] = spy.mock.calls[0];
+    expect(url).toContain('/goals/7');
+    expect(options?.method).toBe('DELETE');
   });
 });

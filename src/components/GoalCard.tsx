@@ -9,10 +9,11 @@ const NEUTRAL = '#9CA3AF';
 interface GoalCardProps {
   goal: Goal;
   onAchieve: (goal: Goal) => void;
+  onEdit: (goal: Goal) => void;
   busy: boolean;
 }
 
-function GoalCard({ goal, onAchieve, busy }: GoalCardProps) {
+function GoalCard({ goal, onAchieve, onEdit, busy }: GoalCardProps) {
   const achieved = isAchieved(goal);
   const color = goal.categoryColor ?? ACCENT;
   const width = progressWidth(goal);
@@ -72,11 +73,18 @@ function GoalCard({ goal, onAchieve, busy }: GoalCardProps) {
         )}
       </div>
 
-      {awaitingClose && (
-        <button type="button" className={styles.achieveButton} onClick={() => onAchieve(goal)} disabled={busy}>
-          {busy ? 'Zamykanie…' : 'Oznacz jako osiągnięty'}
-        </button>
-      )}
+      <div className={styles.cardActions}>
+        {!achieved && (
+          <button type="button" className={styles.editButton} onClick={() => onEdit(goal)}>
+            Edytuj
+          </button>
+        )}
+        {awaitingClose && (
+          <button type="button" className={styles.achieveButton} onClick={() => onAchieve(goal)} disabled={busy}>
+            {busy ? 'Zamykanie…' : 'Oznacz jako osiągnięty'}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
