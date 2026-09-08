@@ -1,5 +1,5 @@
 import { Goal } from '../types/goal';
-import { plural } from './format';
+import { formatDuration, plural } from './format';
 
 const MONTHS_GENITIVE = [
   'stycznia',
@@ -23,7 +23,7 @@ export function isAchieved(goal: Goal): boolean {
 }
 
 export function progressValue(goal: Goal): number {
-  return isAchieved(goal) ? goal.achievedValue ?? 0 : goal.currentValue;
+  return isAchieved(goal) ? (goal.achievedValue ?? 0) : goal.currentValue;
 }
 
 export function progressPercent(goal: Goal): number {
@@ -36,17 +36,18 @@ export function progressWidth(goal: Goal): number {
 }
 
 export function unitLabel(goal: Goal, value: number): string {
-  return goal.metric === "MINUTES"
-    ? plural(value, "minuta", "minuty", "minut")
-    : plural(value, "sesja", "sesje", "sesji");
+  return goal.metric === 'MINUTES' ? plural(value, 'minuta', 'minuty', 'minut') : plural(value, 'sesja', 'sesje', 'sesji');
 }
 
 export function formatProgress(goal: Goal): string {
+  if (goal.metric === 'MINUTES') {
+    return `${formatDuration(progressValue(goal))} / ${formatDuration(goal.targetValue)}`;
+  }
   return `${progressValue(goal)} / ${goal.targetValue} ${unitLabel(goal, goal.targetValue)}`;
 }
 
 function parseISO(iso: string): Date {
-  const [y, m, d] = iso.split("-").map(Number);
+  const [y, m, d] = iso.split('-').map(Number);
   return new Date(y, m - 1, d);
 }
 
@@ -69,31 +70,31 @@ export function deadlineLabel(goal: Goal, today: Date = new Date()): DeadlineInf
 
   if (days < 0) {
     const n = Math.abs(days);
-    return { text: `termin minął ${n} ${plural(n, "dzień", "dni", "dni")} temu`, overdue: true };
+    return { text: `termin minął ${n} ${plural(n, 'dzień', 'dni', 'dni')} temu`, overdue: true };
   }
-  if (days === 0) return { text: "dziś ostatni dzień", overdue: false };
-  if (days === 1) return { text: "został 1 dzień", overdue: false };
+  if (days === 0) return { text: 'dziś ostatni dzień', overdue: false };
+  if (days === 1) return { text: 'został 1 dzień', overdue: false };
   return { text: `zostało ${days} dni`, overdue: false };
 }
 
 function dayMonth(iso: string, withYear: boolean): string {
-  const [y, m, d] = iso.split("-").map(Number);
-  return `${d} ${MONTHS_GENITIVE[m - 1]}${withYear ? ` ${y}` : ""}`;
+  const [y, m, d] = iso.split('-').map(Number);
+  return `${d} ${MONTHS_GENITIVE[m - 1]}${withYear ? ` ${y}` : ''}`;
 }
 
 export function periodLabel(goal: Goal, today: Date = new Date()): string {
-  const [startYear, startMonth, startDay] = goal.startDate.split("-").map(Number);
+  const [startYear, startMonth, startDay] = goal.startDate.split('-').map(Number);
   const currentYear = today.getFullYear();
 
   if (!goal.endDate) {
     return `od ${dayMonth(goal.startDate, startYear !== currentYear)}`;
   }
 
-  const [endYear, endMonth, endDay] = goal.endDate.split("-").map(Number);
+  const [endYear, endMonth, endDay] = goal.endDate.split('-').map(Number);
   const withYear = startYear !== currentYear || endYear !== currentYear;
 
   if (startYear === endYear && startMonth === endMonth) {
-    return `${startDay}–${endDay} ${MONTHS_GENITIVE[endMonth - 1]}${withYear ? ` ${endYear}` : ""}`;
+    return `${startDay}–${endDay} ${MONTHS_GENITIVE[endMonth - 1]}${withYear ? ` ${endYear}` : ''}`;
   }
 
   return `${dayMonth(goal.startDate, withYear)} – ${dayMonth(goal.endDate, withYear)}`;
@@ -107,7 +108,7 @@ export function achievedLabel(goal: Goal): string | null {
 export function sortGoals(goals: Goal[]): Goal[] {
   return [...goals].sort((a, b) => {
     if (isAchieved(a) && isAchieved(b)) {
-      return (b.achievedAt ?? "").localeCompare(a.achievedAt ?? "");
+      return (b.achievedAt ?? '').localeCompare(a.achievedAt ?? '');
     }
     if (a.targetReached !== b.targetReached) return a.targetReached ? -1 : 1;
     if (!a.endDate) return b.endDate ? 1 : 0;

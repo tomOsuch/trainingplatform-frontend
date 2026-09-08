@@ -45,8 +45,8 @@ describe('postęp celu', () => {
   test('jednostka odmienia się od wartości docelowej', () => {
     expect(formatProgress(goal({ currentValue: 5, targetValue: 20 }))).toBe('5 / 20 sesji');
     expect(formatProgress(goal({ currentValue: 1, targetValue: 2 }))).toBe('1 / 2 sesje');
-    expect(formatProgress(goal({ metric: 'MINUTES', currentValue: 720, targetValue: 1200 }))).toBe('720 / 1200 minut');
-    expect(formatProgress(goal({ metric: 'MINUTES', currentValue: 0, targetValue: 1 }))).toBe('0 / 1 minuta');
+    expect(formatProgress(goal({ metric: 'MINUTES', currentValue: 720, targetValue: 1200 }))).toBe('12h / 20h');
+    expect(formatProgress(goal({ metric: 'MINUTES', currentValue: 0, targetValue: 1 }))).toBe('0 min / 1 min');
   });
 });
 

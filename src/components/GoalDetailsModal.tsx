@@ -5,6 +5,7 @@ import { hexToRgba, darkenHex } from '../utils/color';
 import { formatDatePl, weekdayPl } from '../utils/calendar';
 import { plural } from '../utils/format';
 import { achievedLabel, deadlineLabel, formatProgress, isAchieved, periodLabel, progressPercent, progressWidth } from '../utils/goal';
+import { formatDuration } from '../utils/format';
 import Modal from './Modal';
 import styles from '../styles/GoalDetailsModal.module.scss';
 
@@ -164,7 +165,7 @@ function GoalDetailsModal({ goal, onClose, onEdit, onOpenEntry, onChanged }: Goa
                   {entry.categoryName}
                 </span>
                 <span className={styles.entryTitle}>{entry.title ?? entry.categoryName}</span>
-                <span className={styles.entryDuration}>{entry.durationMin ? `${entry.durationMin} min` : '—'}</span>
+                <span className={styles.entryDuration}>{entry.durationMin ? formatDuration(entry.durationMin) : '—'}</span>
               </button>
             ))}
           </div>

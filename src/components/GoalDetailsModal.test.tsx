@@ -34,13 +34,15 @@ const open = (props: Partial<React.ComponentProps<typeof GoalDetailsModal>> = {}
 describe('GoalDetailsModal', () => {
   afterEach(() => jest.restoreAllMocks());
 
-  test('pokazuje dane celu natychmiast, jeszcze przed odpowiedzią z listą treningów', () => {
+   test('pokazuje dane celu natychmiast, jeszcze przed odpowiedzią z listą treningów', async () => {
     mockFetch({ status: 200, body: { entries } });
     open();
 
     expect(screen.getByText('20 treningów gimnastyki')).toBeInTheDocument();
     expect(screen.getByText('12 / 20 sesji')).toBeInTheDocument();
     expect(screen.getByText('60%')).toBeInTheDocument();
+
+    expect(await screen.findByText('Poranna sesja')).toBeInTheDocument();
   });
 
   test('dociąga i pokazuje wliczone treningi', async () => {

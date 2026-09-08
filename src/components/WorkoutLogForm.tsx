@@ -3,6 +3,7 @@ import { WorkoutCategory, WorkoutLog, WorkoutLogRequest } from '../types/workout
 import { createLog, updateLog, deleteLog } from '../services/workoutLogsApi';
 import { ApiRequestError } from '../services/apiClient';
 import { toISODate } from '../utils/calendar';
+import { formatDuration, parseDuration } from '../utils/format';
 import Modal from './Modal';
 import styles from '../styles/WorkoutLogForm.module.scss';
 
@@ -35,6 +36,7 @@ function WorkoutLogForm({ categories, log, initial, planTitle, onClose, onSaved 
   // planId niesiemy przez cały czas życia formularza — pochodzi z wpisu albo z planu
   const planId = log?.planId ?? initial?.planId ?? undefined;
   const selectedColor = categories.find((c) => String(c.id) === categoryId)?.color;
+  const parsedDuration = durationMin.trim() ? parseDuration(durationMin) : null;
 
   const validate = (): Record<string, string> => {
     const e: Record<string, string> = {};
@@ -47,7 +49,11 @@ function WorkoutLogForm({ categories, log, initial, planTitle, onClose, onSaved 
       e.performedDate = 'Data nie może być przyszła';
     }
 
-    if (durationMin && Number(durationMin) <= 0) e.durationMin = 'Czas musi być większy od 0';
+    if (durationMin.trim() && parsedDuration === null) {
+      e.durationMin = 'Podaj czas jak „45min" albo „2h 45min"';
+    } else if (parsedDuration !== null && parsedDuration <= 0) {
+      e.durationMin = 'Czas musi być większy od 0';
+    }
     return e;
   };
 
@@ -63,7 +69,7 @@ function WorkoutLogForm({ categories, log, initial, planTitle, onClose, onSaved 
       performedDate,
       intensity,
       ...(planId && { planId }),
-      ...(durationMin && { durationMin: Number(durationMin) }),
+      ...(parsedDuration && { durationMin: parsedDuration }),
       ...(notes.trim() && { notes: notes.trim() }),
       ...(performedTime && { performedTime }),
     };
@@ -136,8 +142,14 @@ function WorkoutLogForm({ categories, log, initial, planTitle, onClose, onSaved 
         </label>
 
         <label className={styles.field}>
-          <span>Czas trwania (min)</span>
-          <input type="number" min="1" value={durationMin} onChange={(e) => setDurationMin(e.target.value)} />
+          <span>Czas trwania</span>
+          <input
+            type="text"
+            inputMode="text"
+            placeholder="np. 45min albo 2h 45min"
+            value={durationMin}
+            onChange={(e) => setDurationMin(e.target.value)}
+          />
           {errors.durationMin && <span className={styles.fieldError}>{errors.durationMin}</span>}
         </label>
 

@@ -12,7 +12,7 @@ const base: Goal = {
   categoryName: 'Taniec',
   categoryColor: '#9B59B6',
   metric: 'MINUTES',
-  targetValue: 1200,
+  targetValue: 1200, // 20 godzin — tytuł celu mówi o godzinach, więc dane muszą się zgadzać
   currentValue: 720,
   startDate: '2026-09-01',
   endDate: '2026-09-30',
@@ -69,7 +69,7 @@ describe('GoalsPage', () => {
     const spy = mockFetch(...withCategories(base, openGoal));
     renderWithProviders(<GoalsPage />);
 
-    expect(await screen.findByText('720 / 1200 minut')).toBeInTheDocument();
+    expect(await screen.findByText('12h / 20h')).toBeInTheDocument();
     expect(screen.getByText('7 / 50 sesji')).toBeInTheDocument();
     expect(spy.mock.calls[0][0]).toContain('/goals?status=active');
   });
@@ -109,7 +109,7 @@ describe('GoalsPage', () => {
     );
     renderWithProviders(<GoalsPage />);
 
-    await screen.findByText('720 / 1200 minut');
+    await screen.findByText('12h / 20h');
     await userEvent.click(screen.getByRole('button', { name: 'Osiągnięte' }));
 
     // 18 z migawki, nie 999 z currentValue
@@ -124,7 +124,7 @@ describe('GoalsPage', () => {
     mockFetch({ status: 200, body: [base] }, { status: 200, body: [] }, { status: 200, body: [achievedGoal] });
     renderWithProviders(<GoalsPage />);
 
-    await screen.findByText('720 / 1200 minut');
+    await screen.findByText('12h / 20h');
     expect(screen.getByRole('button', { name: 'Edytuj' })).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: 'Osiągnięte' }));
@@ -137,7 +137,7 @@ describe('GoalsPage', () => {
     mockFetch({ status: 200, body: [base] }, { status: 200, body: [] }, { status: 200, body: [] });
     renderWithProviders(<GoalsPage />);
 
-    await screen.findByText('720 / 1200 minut');
+    await screen.findByText('12h / 20h');
     await userEvent.click(screen.getByRole('button', { name: 'Osiągnięte' }));
 
     expect(await screen.findByText('Nie masz jeszcze osiągniętych celów.')).toBeInTheDocument();
