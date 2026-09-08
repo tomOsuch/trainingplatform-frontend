@@ -1,4 +1,5 @@
 import { CalendarItem, CalendarItemState, PlanStatus, TrainingPlan, WorkoutLog } from '../types/workout';
+import { formatDuration } from './format';
 
 const PLAN_STATE: Record<PlanStatus, CalendarItemState> = {
   PLANNED: 'planned',
@@ -31,7 +32,7 @@ export function logToItem(l: WorkoutLog): CalendarItem {
     date: l.performedDate,
     time: l.performedTime,
     durationMin: l.durationMin,
-    label: l.performedTime || !l.durationMin ? base : `${base} ${l.durationMin}′`,
+    label: l.performedTime || !l.durationMin ? base : `${base} ${formatDuration(l.durationMin)}`,
     color: l.categoryColor,
     state: "done",
   };

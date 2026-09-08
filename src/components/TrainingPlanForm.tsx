@@ -3,6 +3,7 @@ import { TrainingPlan, TrainingPlanRequest, WorkoutCategory } from '../types/wor
 import { createPlan, updatePlan, deletePlan } from '../services/trainingPlansApi';
 import { ApiRequestError } from '../services/apiClient';
 import { toISODate } from '../utils/calendar';
+import { formatDuration, parseDuration } from '../utils/format';
 import Modal from './Modal';
 import styles from '../styles/TrainingPlanForm.module.scss';
 
@@ -21,7 +22,7 @@ function TrainingPlanForm({ categories, initialDate, plan, onClose, onSaved }: T
   const [categoryId, setCategoryId] = useState(String(plan?.categoryId ?? ''));
   const [plannedDate, setPlannedDate] = useState(plan?.plannedDate ?? initialDate ?? '');
   const [plannedTime, setPlannedTime] = useState(plan?.plannedTime?.slice(0, 5) ?? '');
-  const [durationMin, setDurationMin] = useState(plan?.durationMin ? String(plan.durationMin) : '');
+  const [durationMin, setDurationMin] = useState(plan?.durationMin ? formatDuration(plan.durationMin) : '');
   const [notes, setNotes] = useState(plan?.notes ?? '');
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -30,23 +31,28 @@ function TrainingPlanForm({ categories, initialDate, plan, onClose, onSaved }: T
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const selectedColor = categories.find((c) => String(c.id) === categoryId)?.color;
+  const parsedDuration = durationMin.trim() ? parseDuration(durationMin) : null;
 
   const validate = (): Record<string, string> => {
-  const e: Record<string, string> = {};
-  if (!title.trim()) e.title = "Podaj tytuł treningu";
-  if (!categoryId) e.categoryId = "Wybierz kategorię";
+    const e: Record<string, string> = {};
+    if (!title.trim()) e.title = 'Podaj tytuł treningu';
+    if (!categoryId) e.categoryId = 'Wybierz kategorię';
 
-  if (!plannedDate) {
-    e.plannedDate = "Wybierz datę";
-  } else if (plannedDate < toISODate(new Date()) && plannedDate !== plan?.plannedDate) {
-    // przeszła data blokuje tylko nowe plany i faktyczną zmianę daty;
-    // edycja innych pól w historycznym planie musi być możliwa
-    e.plannedDate = "Data nie może być przeszła";
-  }
+    if (!plannedDate) {
+      e.plannedDate = 'Wybierz datę';
+    } else if (plannedDate < toISODate(new Date()) && plannedDate !== plan?.plannedDate) {
+      // przeszła data blokuje tylko nowe plany i faktyczną zmianę daty;
+      // edycja innych pól w historycznym planie musi być możliwa
+      e.plannedDate = 'Data nie może być przeszła';
+    }
 
-  if (durationMin && Number(durationMin) <= 0) e.durationMin = "Czas musi być większy od 0";
-  return e;
-};
+    if (durationMin.trim() && parsedDuration === null) {
+      e.durationMin = 'Podaj czas jak „45min" albo „2h 45min"';
+    } else if (parsedDuration !== null && parsedDuration <= 0) {
+      e.durationMin = 'Czas musi być większy od 0';
+    }
+    return e;
+  };
 
   const handleSubmit = async (ev: FormEvent) => {
     ev.preventDefault();
@@ -59,7 +65,7 @@ function TrainingPlanForm({ categories, initialDate, plan, onClose, onSaved }: T
       categoryId: Number(categoryId),
       plannedDate,
       ...(plannedTime && { plannedTime }),
-      ...(durationMin && { durationMin: Number(durationMin) }),
+      ...(parsedDuration && { durationMin: parsedDuration }),
       ...(notes.trim() && { notes: notes.trim() }),
     };
 
@@ -128,8 +134,14 @@ function TrainingPlanForm({ categories, initialDate, plan, onClose, onSaved }: T
         </div>
 
         <label className={styles.field}>
-          <span>Czas trwania (min)</span>
-          <input type="number" min="1" value={durationMin} onChange={(e) => setDurationMin(e.target.value)} />
+          <span>Czas trwania</span>
+          <input
+            type="text"
+            inputMode="text"
+            placeholder="np. 45min albo 2h 45min"
+            value={durationMin}
+            onChange={(e) => setDurationMin(e.target.value)}
+          />
           {errors.durationMin && <span className={styles.fieldError}>{errors.durationMin}</span>}
         </label>
 

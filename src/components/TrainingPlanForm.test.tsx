@@ -92,7 +92,7 @@ describe('TrainingPlanForm', () => {
 
     expect(screen.getByLabelText(/^Tytuł/)).toHaveValue("Salsa");
     expect(screen.getByLabelText(/^Data/)).toHaveValue(pastPlan.plannedDate);
-    expect(screen.getByLabelText(/^Czas trwania/)).toHaveValue(60);
+    expect(screen.getByLabelText(/^Czas trwania/)).toHaveValue('1h');
     expect(screen.getByRole("button", { name: "Usuń trening" })).toBeInTheDocument();
   });
 

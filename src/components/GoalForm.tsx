@@ -4,6 +4,7 @@ import { WorkoutCategory } from '../types/workout';
 import { createGoal, updateGoal, deleteGoal } from '../services/goalsApi';
 import { ApiRequestError } from '../services/apiClient';
 import { toISODate } from '../utils/calendar';
+import { formatDuration, parseDuration } from '../utils/format';
 import Modal from './Modal';
 import styles from '../styles/GoalForm.module.scss';
 
@@ -26,7 +27,9 @@ function GoalForm({ categories, goal, onClose, onSaved }: GoalFormProps) {
   const [description, setDescription] = useState(goal?.description ?? '');
   const [categoryId, setCategoryId] = useState(goal?.categoryId ? String(goal.categoryId) : '');
   const [metric, setMetric] = useState<GoalMetric>(goal?.metric ?? 'SESSIONS');
-  const [targetValue, setTargetValue] = useState(goal ? String(goal.targetValue) : '');
+  const [targetValue, setTargetValue] = useState(
+    goal ? (goal.metric === 'MINUTES' ? formatDuration(goal.targetValue) : String(goal.targetValue)) : '',
+  );
   const [startDate, setStartDate] = useState(goal?.startDate ?? toISODate(new Date()));
   const [endDate, setEndDate] = useState(goal?.endDate ?? '');
 
@@ -36,6 +39,7 @@ function GoalForm({ categories, goal, onClose, onSaved }: GoalFormProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const unit = METRICS.find((m) => m.key === metric)!.unit;
+  const targetMinutes = metric === 'MINUTES' ? parseDuration(targetValue) : null;
   const selectedColor = categories.find((c) => String(c.id) === categoryId)?.color;
 
   const deadlinePassed = Boolean(endDate) && endDate < toISODate(new Date());
@@ -46,9 +50,15 @@ function GoalForm({ categories, goal, onClose, onSaved }: GoalFormProps) {
     if (!title.trim()) e.title = 'Podaj tytuł celu';
     if (!startDate) e.startDate = 'Wybierz datę początkową';
 
-    const value = Number(targetValue);
-    if (!targetValue || !Number.isInteger(value) || value <= 0) {
-      e.targetValue = 'Wartość docelowa musi być większa od 0';
+    if (metric === 'MINUTES') {
+      if (!targetValue.trim() || targetMinutes === null || targetMinutes <= 0) {
+        e.targetValue = 'Podaj czas jak „45min" albo „2h 45min"';
+      }
+    } else {
+      const value = Number(targetValue);
+      if (!targetValue || !Number.isInteger(value) || value <= 0) {
+        e.targetValue = 'Wartość docelowa musi być większa od 0';
+      }
     }
 
     if (endDate && startDate && endDate < startDate) {
@@ -68,7 +78,7 @@ function GoalForm({ categories, goal, onClose, onSaved }: GoalFormProps) {
     const payload: GoalRequest = {
       title: title.trim(),
       metric,
-      targetValue: Number(targetValue),
+      targetValue: metric === 'MINUTES' ? targetMinutes! : Number(targetValue),
       startDate,
       ...(description.trim() && { description: description.trim() }),
       ...(categoryId && { categoryId: Number(categoryId) }),
@@ -148,8 +158,18 @@ function GoalForm({ categories, goal, onClose, onSaved }: GoalFormProps) {
         <label className={styles.field}>
           <span>Wartość docelowa *</span>
           <div className={styles.valueRow}>
-            <input type="number" min="1" step="1" value={targetValue} onChange={(e) => setTargetValue(e.target.value)} />
-            <span className={styles.unit}>{unit}</span>
+            <input
+              type="text"
+              inputMode="text"
+              placeholder={metric === 'MINUTES' ? 'np. 20h albo 90min' : 'np. 20'}
+              value={targetValue}
+              onChange={(e) => setTargetValue(e.target.value)}
+            />
+            {/* przy minutach zamiast jednostki pokazujemy odczytaną wartość — widać od razu,
+                że „2h45" zostało zrozumiane jako 2 godziny 45 minut */}
+            <span className={styles.unit}>
+              {metric === 'MINUTES' ? (targetMinutes ? formatDuration(targetMinutes) : 'np. 2h 45min') : unit}
+            </span>
           </div>
           {errors.targetValue && <span className={styles.fieldError}>{errors.targetValue}</span>}
         </label>

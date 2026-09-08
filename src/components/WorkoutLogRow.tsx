@@ -1,6 +1,7 @@
 import { JournalItem } from '../types/workout';
 import { hexToRgba, darkenHex, lightenHex } from '../utils/color';
 import { formatDatePl, weekdayPl } from '../utils/calendar';
+import { formatDuration } from '../utils/format';
 import styles from '../styles/WorkoutLogPage.module.scss';
 
 interface WorkoutLogRowProps {
@@ -52,7 +53,7 @@ function WorkoutLogRow({ item, onClick, onFillDetails }: WorkoutLogRowProps) {
         <div className={styles.mainCol}>
           <span className={cancelled ? styles.labelCancelled : styles.label}>{item.label}</span>
           <span className={styles.notes}>
-            {item.durationMin ? `${item.durationMin} min` : '—'}
+            {item.durationMin ? formatDuration(item.durationMin) : '—'}
             {item.fromPlan && <span className={styles.fromPlan}> · z planu</span>}
             {item.state === 'skipped' && <span className={styles.stateNote}> · pominięty</span>}
             {cancelled && <span className={styles.stateNote}> · anulowany</span>}

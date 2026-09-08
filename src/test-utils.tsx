@@ -29,7 +29,7 @@ export function mockFetch(...responses: MockResponse[]) {
   const spy = jest.spyOn(global, 'fetch');
 
   responses.forEach(({ status = 200, body, headers = {} }) => {
-    // porównanie nazw nagłówków bez względu na wielkość liter, jak w prawdziwym Headers
+
     const lookup = Object.fromEntries(Object.entries(headers).map(([k, v]) => [k.toLowerCase(), v]));
 
     spy.mockResolvedValueOnce({

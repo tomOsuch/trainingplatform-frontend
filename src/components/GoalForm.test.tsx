@@ -58,8 +58,6 @@ describe('GoalForm', () => {
     const spy = mockFetch({ status: 200, body: existing });
     renderWithProviders(<GoalForm categories={sampleCategories} goal={existing} onClose={noop} onSaved={noop} />);
 
-    // cel z terminem 30.09.2026 — po tej dacie ostrzeżenie pojawia się samo;
-    // tu wymuszamy je datą z pewnością przeszłą
     await userEvent.clear(field('Od'));
     await userEvent.type(field('Od'), '2020-01-01');
     await userEvent.clear(field('Termin'));
@@ -80,8 +78,8 @@ describe('GoalForm', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Liczba minut' }));
 
-    expect(screen.getByText('minut')).toBeInTheDocument();
-    expect(field('Wartość docelowa')).toHaveValue(20);
+    expect(screen.getByText('20 min')).toBeInTheDocument();
+    expect(field('Wartość docelowa')).toHaveValue('20');
   });
 
   test('tryb dodawania wysyła POST z wybraną miarą', async () => {

@@ -1,10 +1,11 @@
 .page {
-  max-width: 1100px;
+  max-width: var(--page-max);
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 16px;
 
-  > h1 {
+  >h1 {
     font-size: 22px;
   }
 }
@@ -35,7 +36,7 @@
   flex-direction: column;
   gap: 5px;
 
-  > span:first-child {
+  >span:first-child {
     font-size: 13px;
     font-weight: 600;
   }
@@ -64,20 +65,24 @@
   color: #dc2626;
   font-size: 12px;
 }
+
 .formError {
   color: #dc2626;
   font-size: 13px;
   margin-top: 10px;
 }
+
 .success {
   color: #1e8449;
   font-size: 13px;
   margin-top: 10px;
 }
+
 .muted {
   color: #6b7280;
   font-size: 13px;
 }
+
 .warning {
   color: #b45309;
   font-size: 12px;
@@ -128,14 +133,17 @@
   background: #eff6ff;
   color: #1e40af;
 }
+
 .statusAccepted {
   background: #eafaf0;
   color: #1e8449;
 }
+
 .statusExpired {
   background: #f3f4f6;
   color: #6b7280;
 }
+
 .statusRevoked {
   background: #fef2f2;
   color: #b91c1c;
@@ -145,7 +153,7 @@
   text-align: right;
   white-space: nowrap;
 
-  button + button {
+  button+button {
     margin-left: 6px;
   }
 }
@@ -163,6 +171,7 @@
   &:hover:not(:disabled) {
     background: #1d4ed8;
   }
+
   &:disabled {
     opacity: 0.6;
   }

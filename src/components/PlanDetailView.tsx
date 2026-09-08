@@ -3,6 +3,7 @@ import { PlanStatus, TrainingPlan } from '../types/workout';
 import { changeStatus, deletePlan } from '../services/trainingPlansApi';
 import { ApiRequestError } from '../services/apiClient';
 import { hexToRgba, darkenHex } from '../utils/color';
+import { formatDuration } from '../utils/format';
 import Modal from './Modal';
 import styles from '../styles/PlanDetailView.module.scss';
 
@@ -83,7 +84,7 @@ function PlanDetailView({ plan: initial, onClose, onEdit, onChanged, onAddJourna
             Data: {formatDate(plan.plannedDate)}
             {time ? `, ${time}` : ''}
           </p>
-          {plan.durationMin && <p>Czas trwania: {plan.durationMin} min</p>}
+          {plan.durationMin && <p>Czas trwania: {formatDuration(plan.durationMin)}</p>}
           {plan.notes && <p className={styles.notes}>{plan.notes}</p>}
         </div>
 

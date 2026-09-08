@@ -1,4 +1,6 @@
 .calendar {
+  max-width: var(--page-max);
+  margin: 0 auto;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
@@ -21,8 +23,14 @@
     border-radius: 7px;
     padding: 6px 10px;
 
-    &:hover:not(:disabled) { background: #f3f4f6; }
-    &:disabled { opacity: 0.5; cursor: default; }
+    &:hover:not(:disabled) {
+      background: #f3f4f6;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
   }
 }
 
@@ -39,7 +47,9 @@
   text-align: center;
 }
 
-.todayButton { margin-left: 4px; }
+.todayButton {
+  margin-left: 4px;
+}
 
 .actions {
   display: flex;
@@ -70,7 +80,9 @@
   border-color: #2563eb !important;
   font-weight: 600;
 
-  &:hover:not(:disabled) { background: #1d4ed8 !important; }
+  &:hover:not(:disabled) {
+    background: #1d4ed8 !important;
+  }
 }
 
 .error {
@@ -99,7 +111,7 @@
 }
 
 .cell {
-  min-width: 0;                          
+  min-width: 0;
   min-height: clamp(72px, 9vw, 110px);
   background: #fff;
   border: 1px solid #e5e7eb;
@@ -111,7 +123,10 @@
 
 .outside {
   background: #fafafa;
-  .dayNumber { color: #c0c4cc; }
+
+  .dayNumber {
+    color: #c0c4cc;
+  }
 }
 
 .today {
@@ -151,13 +166,13 @@
   border: 1px solid #e5e7eb;
   border-radius: 7px;
   padding: 4px 6px;
-  display: flex;          // nowe — pozwala dopchnąć pasek do dołu
+  display: flex; // nowe — pozwala dopchnąć pasek do dołu
   flex-direction: column;
 }
 
 .addRow {
-  margin-top: auto;       // zawsze na dole komórki
-  opacity: 0;             // niewidoczny, ale rezerwuje miejsce (brak skakania layoutu)
+  margin-top: auto; // zawsze na dole komórki
+  opacity: 0; // niewidoczny, ale rezerwuje miejsce (brak skakania layoutu)
   border: 1px dashed #bfdbfe;
   background: none;
   border-radius: 4px;
@@ -167,7 +182,9 @@
   cursor: pointer;
   transition: opacity 0.12s;
 
-  &:hover { background: #eff6ff; }
+  &:hover {
+    background: #eff6ff;
+  }
 }
 
 .cell:hover .addRow {
