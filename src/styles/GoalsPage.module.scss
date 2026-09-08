@@ -1,5 +1,6 @@
 .page {
-    max-width: 900px; // szerzej podpis odrywa się wizualnie od paska
+    max-width: var(--page-max);
+    margin: 0 auto;
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
@@ -89,8 +90,12 @@
 
 .grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 12px;
+
+    @media (max-width: 1100px) {
+        grid-template-columns: repeat(2, 1fr);
+    }
 
     @media (max-width: 700px) {
         grid-template-columns: 1fr;

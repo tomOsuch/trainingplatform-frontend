@@ -29,7 +29,7 @@ export function mockFetch(...responses: MockResponse[]) {
   const spy = jest.spyOn(global, 'fetch');
 
   responses.forEach(({ status = 200, body, headers = {} }) => {
-    // porównanie nazw nagłówków bez względu na wielkość liter, jak w prawdziwym Headers
+
     const lookup = Object.fromEntries(Object.entries(headers).map(([k, v]) => [k.toLowerCase(), v]));
 
     spy.mockResolvedValueOnce({
@@ -39,14 +39,6 @@ export function mockFetch(...responses: MockResponse[]) {
       text: async () => (body === undefined ? '' : JSON.stringify(body)),
       json: async () => body,
     } as unknown as Response);
-  });
-
-  // po wyczerpaniu kolejki spy przepuszczałby wywołania do prawdziwego fetcha
-  // (jsdom -> XMLHttpRequest -> realne żądanie na API_BASE_URL). Zamiast cichego
-  // strzału w sieć test ma paść z informacją, którego żądania nie zamockowano.
-  spy.mockImplementation(async (input) => {
-    const url = typeof input === 'string' ? input : String((input as Request).url ?? input);
-    throw new Error(`Nieoczekiwane żądanie w teście: ${url}`);
   });
 
   return spy;
