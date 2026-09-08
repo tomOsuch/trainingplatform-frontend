@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Goal, GoalStatusFilter } from '../types/goal';
-import { WorkoutCategory } from '../types/workout';
+import { Goal, GoalEntry, GoalStatusFilter } from '../types/goal';
+import { WorkoutCategory, WorkoutLog } from '../types/workout';
 import { changeGoalStatus, getGoals } from '../services/goalsApi';
 import { getCategories } from '../services/categoriesApi';
+import { getLog } from '../services/workoutLogsApi';
 import { sortGoals } from '../utils/goal';
 import { plural } from '../utils/format';
 import GoalCard from '../components/GoalCard';
 import GoalForm from '../components/GoalForm';
+import GoalDetailsModal from '../components/GoalDetailsModal';
+import WorkoutLogDetail from '../components/WorkoutLogDetail';
+import WorkoutLogForm from '../components/WorkoutLogForm';
 import styles from '../styles/GoalsPage.module.scss';
 
 const TABS: { key: GoalStatusFilter; label: string }[] = [
@@ -29,9 +32,12 @@ function GoalsPage() {
   const [busyId, setBusyId] = useState<number | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  // w danym momencie otwarte jest najwyżej jedno okno — nie układamy okna na oknie
   const [formOpen, setFormOpen] = useState(false);
   const [editGoal, setEditGoal] = useState<Goal | null>(null);
-  const navigate = useNavigate();
+  const [detailsGoal, setDetailsGoal] = useState<Goal | null>(null);
+  const [selectedLog, setSelectedLog] = useState<WorkoutLog | null>(null);
+  const [editLog, setEditLog] = useState<WorkoutLog | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -42,14 +48,12 @@ function GoalsPage() {
       .finally(() => setLoading(false));
   }, [status, refreshKey]);
 
-  // kategorie pobieramy raz — słownik nie zmienia się w trakcie pracy z listą
   useEffect(() => {
     getCategories()
       .then(setCategories)
       .catch(() => {});
   }, []);
 
-  // backend nie deklaruje kolejności — porządek ustalamy u siebie
   const items = useMemo(() => sortGoals(goals), [goals]);
 
   const refresh = () => setRefreshKey((k) => k + 1);
@@ -59,13 +63,24 @@ function GoalsPage() {
     setError(null);
     try {
       await changeGoalStatus(goal.id, 'ACHIEVED');
-      // cel znika z listy aktywnych i dostaje migawkę postępu — pełne odświeżenie
-      // zamiast sklejania stanu lokalnie
       refresh();
     } catch (e) {
       setError((e as Error).message ?? 'Nie udało się zamknąć celu');
     } finally {
       setBusyId(null);
+    }
+  };
+
+  // wpis z listy wliczonych treningów: zamykamy okno celu i otwieramy okno wpisu,
+  // tym samym komponentem co w dzienniku
+  const handleOpenEntry = async (entry: GoalEntry) => {
+    setError(null);
+    try {
+      const log = await getLog(entry.id);
+      setDetailsGoal(null);
+      setSelectedLog(log);
+    } catch (e) {
+      setError((e as Error).message ?? 'Nie udało się pobrać wpisu');
     }
   };
 
@@ -105,7 +120,7 @@ function GoalsPage() {
           <GoalCard
             key={goal.id}
             goal={goal}
-            onOpen={(g) => navigate(`/cele/${g.id}`)}
+            onOpen={setDetailsGoal}
             onAchieve={handleAchieve}
             onEdit={setEditGoal}
             busy={busyId === goal.id}
@@ -113,9 +128,40 @@ function GoalsPage() {
         ))}
       </div>
 
+      {detailsGoal && (
+        <GoalDetailsModal
+          goal={detailsGoal}
+          onClose={() => setDetailsGoal(null)}
+          onChanged={refresh}
+          onOpenEntry={handleOpenEntry}
+          onEdit={(g) => {
+            setDetailsGoal(null);
+            setEditGoal(g);
+          }}
+        />
+      )}
+
       {formOpen && <GoalForm categories={categories} onClose={() => setFormOpen(false)} onSaved={refresh} />}
 
-      {editGoal && <GoalForm categories={categories} goal={editGoal} onClose={() => setEditGoal(null)} onSaved={refresh} />}
+      {editGoal && (
+        <GoalForm categories={categories} goal={editGoal} onClose={() => setEditGoal(null)} onSaved={refresh} />
+      )}
+
+      {selectedLog && (
+        <WorkoutLogDetail
+          log={selectedLog}
+          onClose={() => setSelectedLog(null)}
+          onChanged={refresh} // zmiana wpisu przelicza postęp celu
+          onEdit={(log) => {
+            setSelectedLog(null);
+            setEditLog(log);
+          }}
+        />
+      )}
+
+      {editLog && (
+        <WorkoutLogForm categories={categories} log={editLog} onClose={() => setEditLog(null)} onSaved={refresh} />
+      )}
     </div>
   );
 }

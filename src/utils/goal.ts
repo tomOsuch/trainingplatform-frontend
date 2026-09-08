@@ -19,7 +19,7 @@ const MONTHS_GENITIVE = [
 const DAY_MS = 86_400_000;
 
 export function isAchieved(goal: Goal): boolean {
-  return goal.achievedAt !== null;
+  return Boolean(goal.achievedAt);
 }
 
 export function progressValue(goal: Goal): number {
