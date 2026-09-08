@@ -41,6 +41,14 @@ export function mockFetch(...responses: MockResponse[]) {
     } as unknown as Response);
   });
 
+  // po wyczerpaniu kolejki spy przepuszczałby wywołania do prawdziwego fetcha
+  // (jsdom -> XMLHttpRequest -> realne żądanie na API_BASE_URL). Zamiast cichego
+  // strzału w sieć test ma paść z informacją, którego żądania nie zamockowano.
+  spy.mockImplementation(async (input) => {
+    const url = typeof input === 'string' ? input : String((input as Request).url ?? input);
+    throw new Error(`Nieoczekiwane żądanie w teście: ${url}`);
+  });
+
   return spy;
 }
 
