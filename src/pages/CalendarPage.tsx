@@ -12,8 +12,8 @@ import { getLogs } from '../services/workoutLogsApi';
 import { getCategories } from '../services/categoriesApi';
 import { buildItemsByDay } from '../utils/calendarItems';
 import { buildMonthGrid, buildWeekGrid, startOfWeek, toISODate, MONTH_NAMES, WEEKDAY_NAMES } from '../utils/calendar';
-import { formatDatePl, weekdayPl } from "../utils/calendar";
-import Modal from "../components/Modal";
+import { formatDatePl, weekdayPl } from '../utils/calendar';
+import Modal from '../components/Modal';
 import styles from '../styles/CalendarPage.module.scss';
 
 function CalendarPage() {
@@ -21,7 +21,6 @@ function CalendarPage() {
 
   const location = useLocation();
   const requestedMonth = (location.state as { month?: string } | null)?.month;
-
 
   const [anchor, setAnchor] = useState(() => {
     if (requestedMonth) {
@@ -108,11 +107,9 @@ function CalendarPage() {
     }
   };
 
-  const visibleItems = (iso: string) =>
-    (itemsByDay.get(iso) ?? []).slice(0, MAX_TILES_PER_DAY);
+  const visibleItems = (iso: string) => (itemsByDay.get(iso) ?? []).slice(0, MAX_TILES_PER_DAY);
 
-  const hiddenCount = (iso: string) =>
-    Math.max((itemsByDay.get(iso) ?? []).length - MAX_TILES_PER_DAY, 0);
+  const hiddenCount = (iso: string) => Math.max((itemsByDay.get(iso) ?? []).length - MAX_TILES_PER_DAY, 0);
 
   const dm = (d: Date) => `${d.getDate()}.${String(d.getMonth() + 1).padStart(2, '0')}`;
   const rangeLabel =
@@ -180,10 +177,7 @@ function CalendarPage() {
                 ))}
 
                 {hiddenCount(day.iso) > 0 && (
-                  <button
-                    className={styles.moreButton}
-                    onClick={() => setDayModal(day.iso)}
-                  >
+                  <button className={styles.moreButton} onClick={() => setDayModal(day.iso)}>
                     +{hiddenCount(day.iso)} więcej
                   </button>
                 )}
@@ -197,6 +191,49 @@ function CalendarPage() {
         </>
       ) : (
         <WeekView days={grid} itemsByDay={itemsByDay} onSelectItem={handleSelectItem} onAddForDay={handleAddForDay} />
+      )}
+
+      {dayModal && (
+        <Modal title={`${formatDatePl(dayModal)} · ${weekdayPl(dayModal)}`} onClose={() => setDayModal(null)}>
+          <div className={styles.dayModal}>
+            {(itemsByDay.get(dayModal) ?? []).map((item) => (
+              <CalendarTile
+                key={item.key}
+                item={item}
+                onClick={(i) => {
+                  setDayModal(null);
+                  handleSelectItem(i);
+                }}
+              />
+            ))}
+
+            <div className={styles.dayModalActions}>
+              <button
+                type="button"
+                className={styles.dayModalAdd}
+                onClick={() => {
+                  const iso = dayModal;
+                  setDayModal(null);
+                  handleAddForDay(iso);
+                }}
+              >
+                + Dodaj trening
+              </button>
+              <button
+                type="button"
+                className={styles.dayModalWeek}
+                onClick={() => {
+                  const [year, month, day] = dayModal.split('-').map(Number);
+                  setAnchor(startOfWeek(new Date(year, month - 1, day)));
+                  setView('week');
+                  setDayModal(null);
+                }}
+              >
+                Pokaż w widoku tygodnia →
+              </button>
+            </div>
+          </div>
+        </Modal>
       )}
 
       {formDate && (
