@@ -25,6 +25,11 @@ const profile = {
   role: "USER" as const,
 };
 
+jest.mock('../components/NotificationsSettings', () => ({
+  __esModule: true,
+  default: () => null,
+}));
+
 describe("ProfilePage", () => {
   afterEach(() => jest.restoreAllMocks());
 
