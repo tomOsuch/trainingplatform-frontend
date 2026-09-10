@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { CalendarItem, TrainingPlan, WorkoutCategory, WorkoutLog, WorkoutLogRequest } from '../types/workout';
 import CalendarTile from '../components/CalendarTile';
 import WeekView from '../components/WeekView';
@@ -18,8 +19,15 @@ import styles from '../styles/CalendarPage.module.scss';
 function CalendarPage() {
   const [view, setView] = useState<'month' | 'week'>('month');
 
-  // "kotwica": 1. dzień miesiąca (widok miesięczny) lub poniedziałek (tygodniowy)
+  const location = useLocation();
+  const requestedMonth = (location.state as { month?: string } | null)?.month;
+
+
   const [anchor, setAnchor] = useState(() => {
+    if (requestedMonth) {
+      const [year, month] = requestedMonth.split('-').map(Number);
+      return new Date(year, month - 1, 1);
+    }
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });

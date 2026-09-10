@@ -1,0 +1,316 @@
+<title>Makieta — ustawienia powiadomień (F3)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: #f5f6f8;
+    color: #1a1a1a;
+    padding-bottom: 48px;
+  }
+
+  .navbar {
+    height: 60px; background: #2563eb;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 clamp(12px, 2vw, 24px);
+  }
+  .brand { font-weight: 700; font-size: 17px; color: #fff; }
+  .left { display: flex; align-items: center; gap: 22px; }
+  .tabs { display: flex; gap: 6px; }
+  .tab { color: #c7dcfb; font-size: 14px; padding: 6px 14px; border-radius: 999px; }
+  .tabActive { background: rgba(255,255,255,.22); color: #fff; font-weight: 600; }
+  .userName { font-size: 14px; color: #dbeafe; }
+
+  .wrap { padding: 20px clamp(12px, 2vw, 24px); }
+  .block { max-width: 1200px; margin: 0 auto 26px; }
+
+  .blockHead { margin-bottom: 10px; }
+  .blockHead h2 { font-size: 15px; display: flex; align-items: center; gap: 8px; }
+  .blockHead p { font-size: 12px; color: #6b7280; margin-top: 4px; line-height: 1.5; max-width: 860px; }
+  .tag {
+    font-size: 11px; font-weight: 600; border-radius: 999px; padding: 2px 9px;
+    background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8;
+  }
+  .tagPlain { background: #f3f4f6; border-color: #e5e7eb; color: #6b7280; }
+
+  /* karta profilu — wewnętrzna treść wąska i wyśrodkowana, jak w ProfilePage */
+  .card {
+    background: #fff; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.08);
+    padding: 20px; margin-bottom: 16px;
+  }
+  .card > * { width: 100%; max-width: 720px; margin-left: auto; margin-right: auto; }
+  .card h3 {
+    font-size: 16px; margin-bottom: 14px; padding-bottom: 10px;
+    border-bottom: 1px solid #eef0f3;
+  }
+  .cardGhost { opacity: .55; }
+
+  .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+  .field > span:first-child { font-size: 13px; font-weight: 600; }
+  .field input, .field select {
+    padding: 9px 11px; border: 1px solid #d1d5db; border-radius: 8px;
+    font-size: 14px; font-family: inherit; background: #fff;
+  }
+  .field input:disabled, .field select:disabled { background: #f5f6f8; color: #6b7280; }
+  .hint { font-size: 11px; color: #9ca3af; }
+  .fieldError { font-size: 12px; color: #dc2626; }
+  .inputError { border-color: #dc2626 !important; }
+
+  .primary {
+    align-self: flex-start; background: #2563eb; color: #fff; border: none;
+    border-radius: 8px; padding: 10px 18px; font-size: 14px; font-weight: 600; cursor: pointer;
+    display: inline-block; width: auto;
+  }
+  .primary:disabled { opacity: .6; }
+
+  /* przełącznik */
+  .toggleRow {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 14px;
+  }
+  .toggleRow.on { border-color: #bfdbfe; background: #f8fbff; }
+  .switch {
+    width: 40px; height: 22px; border-radius: 999px; background: #d1d5db;
+    position: relative; flex-shrink: 0; margin-top: 2px;
+  }
+  .switch.on { background: #2563eb; }
+  .knob {
+    position: absolute; top: 3px; left: 3px; width: 16px; height: 16px;
+    border-radius: 50%; background: #fff;
+  }
+  .switch.on .knob { left: 21px; }
+  .toggleText { font-size: 13px; }
+  .toggleText b { display: block; font-size: 13px; margin-bottom: 2px; }
+  .toggleText span { color: #6b7280; }
+
+  .note {
+    font-size: 12px; color: #6b7280; background: #fafbfc; border: 1px solid #eef0f3;
+    border-radius: 8px; padding: 9px 11px; margin-bottom: 14px; line-height: 1.5;
+  }
+  .noteWarn { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+
+  .preview { font-size: 12px; color: #1d4ed8; font-weight: 600; }
+
+  .presets { display: flex; flex-wrap: wrap; gap: 6px; }
+  .preset {
+    border: 1px solid #d1d5db; background: #fff; border-radius: 999px;
+    padding: 6px 12px; font-size: 12px; cursor: pointer;
+  }
+  .presetActive { background: #2563eb; border-color: #2563eb; color: #fff; font-weight: 600; }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 900px) { .row2 { grid-template-columns: 1fr; } }
+
+  .dangerCard { border: 1px solid #fca5a5; }
+  .dangerCard h3 { color: #b91c1c; }
+  .dangerText { font-size: 13px; color: #6b7280; margin-bottom: 14px; line-height: 1.6; }
+  .dangerButton {
+    display: block; width: fit-content; background: #fff; border: 1px solid #dc2626;
+    color: #dc2626; border-radius: 8px; padding: 9px 16px; font-size: 14px; font-weight: 600;
+  }
+
+  .notes {
+    max-width: 1200px; margin: 0 auto; background: #fff; border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.08); padding: 20px; font-size: 13px; color: #374151;
+  }
+  .notes h2 { font-size: 15px; margin-bottom: 10px; }
+  .notes ul { margin: 0 0 4px 18px; }
+  .notes li { margin-bottom: 7px; line-height: 1.55; }
+  .notes strong { color: #111; }
+</style>
+
+<header class="navbar">
+  <div class="left">
+    <span class="brand">Platforma Treningowa</span>
+    <nav class="tabs">
+      <span class="tab">Kalendarz</span>
+      <span class="tab">Dziennik</span>
+      <span class="tab">Cele</span>
+      <span class="tab">Statystyki</span>
+      <span class="tab tabActive">Profil</span>
+    </nav>
+  </div>
+  <span class="userName">Tomek Osuch</span>
+</header>
+
+<div class="wrap">
+
+  <!-- ============ UMIEJSCOWIENIE ============ -->
+  <section class="block">
+    <div class="blockHead">
+      <h2>Gdzie siedzi sekcja</h2>
+      <p>
+        Trzecia karta na stronie profilu — po zmianie hasła, przed strefą niebezpieczną. Własny przycisk
+        „Zapisz", bo preferencje to osobny zasób: <code>PUT /profile</code> zastępuje cały profil, więc zapis
+        imienia nie może dotykać zgody na maile.
+      </p>
+    </div>
+
+    <div class="card cardGhost">
+      <h3>Dane osobowe</h3>
+      <div class="field"><span>Email</span><input value="test@test.pl" disabled></div>
+      <div class="row2">
+        <div class="field"><span>Imię</span><input value="Jan"></div>
+        <div class="field"><span>Nazwisko</span><input value="Kowalski"></div>
+      </div>
+      <button class="primary">Zapisz zmiany</button>
+    </div>
+
+    <div class="card cardGhost">
+      <h3>Zmiana hasła</h3>
+      <div class="field"><span>Obecne hasło</span><input type="password"></div>
+      <button class="primary">Zmień hasło</button>
+    </div>
+
+    <div class="card">
+      <h3>Powiadomienia</h3>
+
+      <div class="toggleRow on">
+        <span class="switch on"><span class="knob"></span></span>
+        <span class="toggleText">
+          <b>Przypomnienia o zaplanowanych treningach</b>
+          <span>Maile trafią na <b style="display:inline">test@test.pl</b> — adresu nie można zmienić.</span>
+        </span>
+      </div>
+
+      <div class="field">
+        <span>Wyprzedzenie</span>
+        <input value="24" style="max-width: 160px">
+        <span class="preview">dzień przed treningiem</span>
+        <span class="hint">Od 1 godziny do 168 godzin (tydzień).</span>
+      </div>
+
+      <div class="note">
+        Trening zaplanowany bez godziny liczony jest tak, jakby zaczynał się o 12:00.
+      </div>
+
+      <button class="primary">Zapisz powiadomienia</button>
+    </div>
+
+    <div class="card dangerCard cardGhost">
+      <h3>Strefa niebezpieczna</h3>
+      <p class="dangerText">Usunięcie konta jest nieodwracalne — znikną wszystkie treningi i wpisy w dzienniku.</p>
+      <span class="dangerButton">Usuń konto</span>
+    </div>
+  </section>
+
+  <!-- ============ WARIANTY POLA ============ -->
+  <section class="block">
+    <div class="blockHead">
+      <h2>Trzy warianty wyboru wyprzedzenia</h2>
+      <p>Ta sama sekcja, różni się wyłącznie sposób ustawiania liczby godzin.</p>
+    </div>
+
+    <div class="row2">
+      <div class="card">
+        <h3>A — liczba godzin z podglądem <span class="tag">rekomendacja</span></h3>
+        <div class="field">
+          <span>Wyprzedzenie</span>
+          <input value="48" style="max-width: 160px">
+          <span class="preview">2 dni przed treningiem</span>
+          <span class="hint">Od 1 godziny do 168 godzin (tydzień).</span>
+        </div>
+        <p class="dangerText" style="color:#6b7280; margin:0">
+          Pełna swoboda (36 godzin też się da), a podgląd pod polem tłumaczy godziny na coś, co się czyta.
+          Jedno pole, jedna walidacja, jeden test.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>B — lista gotowych wartości <span class="tag tagPlain">alternatywa</span></h3>
+        <div class="field">
+          <span>Wyprzedzenie</span>
+          <select style="max-width: 220px">
+            <option>2 godziny przed</option>
+            <option>12 godzin przed</option>
+            <option selected>dzień przed (24 h)</option>
+            <option>2 dni przed (48 h)</option>
+            <option>3 dni przed (72 h)</option>
+            <option>tydzień przed (168 h)</option>
+          </select>
+        </div>
+        <p class="dangerText" style="color:#6b7280; margin:0">
+          Nie da się wpisać wartości spoza zakresu, więc walidacja po stronie interfejsu praktycznie znika.
+          Kosztem jest brak wartości pośrednich — 36 godzin nie ustawisz.
+        </p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>C — lista z opcją własnej wartości <span class="tag tagPlain">alternatywa</span></h3>
+      <div class="field">
+        <span>Wyprzedzenie</span>
+        <div class="presets">
+          <span class="preset">2 h</span>
+          <span class="preset">12 h</span>
+          <span class="preset presetActive">dzień</span>
+          <span class="preset">2 dni</span>
+          <span class="preset">3 dni</span>
+          <span class="preset">tydzień</span>
+          <span class="preset">własne…</span>
+        </div>
+        <span class="hint" style="margin-top:6px">Po wybraniu „własne…" odsłania się pole liczbowe 1–168.</span>
+      </div>
+      <p class="dangerText" style="color:#6b7280; margin:0">
+        Najwygodniejsze w klikaniu, ale to dwa stany kontrolki w sekcji, która ma dwa pola — sporo mechaniki
+        jak na ustawienie zmieniane raz na pół roku.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ STANY ============ -->
+  <section class="block">
+    <div class="blockHead">
+      <h2>Stany sekcji <span class="tag tagPlain">wariant A</span></h2>
+    </div>
+
+    <div class="row2">
+      <div class="card">
+        <h3>Wyłączone — stan domyślny</h3>
+        <div class="toggleRow">
+          <span class="switch"><span class="knob"></span></span>
+          <span class="toggleText">
+            <b>Przypomnienia o zaplanowanych treningach</b>
+            <span>Wyłączone — nie wysyłamy żadnych maili.</span>
+          </span>
+        </div>
+        <div class="field">
+          <span>Wyprzedzenie</span>
+          <input value="72" disabled style="max-width: 160px">
+          <span class="hint">Wartość zostaje zapamiętana — po ponownym włączeniu wróci 72 godziny.</span>
+        </div>
+        <button class="primary">Zapisz powiadomienia</button>
+      </div>
+
+      <div class="card">
+        <h3>Błąd walidacji z backendu</h3>
+        <div class="toggleRow on">
+          <span class="switch on"><span class="knob"></span></span>
+          <span class="toggleText">
+            <b>Przypomnienia o zaplanowanych treningach</b>
+            <span>Maile trafią na <b style="display:inline">test@test.pl</b>.</span>
+          </span>
+        </div>
+        <div class="field">
+          <span>Wyprzedzenie</span>
+          <input value="200" class="inputError" style="max-width: 160px">
+          <span class="fieldError">Wyprzedzenie może wynosić maksymalnie 168 godzin</span>
+        </div>
+        <button class="primary">Zapisz powiadomienia</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ NOTATKI ============ -->
+  <div class="notes">
+    <h2>Decyzje widoczne w makiecie</h2>
+    <ul>
+      <li><strong>Własny przycisk „Zapisz powiadomienia".</strong> Preferencje to osobny zasób, a <code>PUT /profile</code> zastępuje cały profil — wspólny zapis groziłby cichym wyłączeniem zgody na maile przy edycji imienia.</li>
+      <li><strong>Pole wyprzedzenia jest nieaktywne, nie wyzerowane</strong>, gdy przełącznik jest wyłączony. Backend zapisuje obie wartości, więc po ponownym włączeniu wraca wcześniejszy wybór.</li>
+      <li><strong>Adres e-mail jako tekst przy przełączniku</strong>, nie jako pole. Zgoda na kontakt powinna mówić, dokąd trafi wiadomość; adresu i tak nie da się zmienić (USER-04).</li>
+      <li><strong>Zdanie o godzinie 12:00</strong> przy treningach bez ustawionej godziny. Bez tego przypomnienia wyglądałyby na losowe dla kogoś, kto planuje bez godzin.</li>
+      <li><strong>Żadnej obietnicy „mail przyjdzie".</strong> Zadanie cykliczne chodzi na maszynie z uruchomioną aplikacją, więc przed wdrożeniem B3 interfejs opisuje ustawienie, nie gwarancję.</li>
+      <li><strong>Błędy walidacji pod polem</strong>, z komunikatem z backendu — ten sam format <code>errors</code> co w pozostałych formularzach.</li>
+    </ul>
+  </div>
+
+</div>
