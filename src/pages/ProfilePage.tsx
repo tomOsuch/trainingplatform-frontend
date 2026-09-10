@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { toISODate } from '../utils/calendar';
 import styles from '../styles/ProfilePage.module.scss';
 import DeleteAccountDialog from '../components/DeleteAccountDialog';
+import NotificationsSettings from '../components/NotificationsSettings';
 import { useNavigate } from 'react-router-dom';
 
 function ProfilePage() {
@@ -189,6 +190,10 @@ function ProfilePage() {
             {savingPass ? 'Zapisywanie...' : 'Zmień hasło'}
           </button>
         </form>
+      </section>
+      <section className={styles.card}>
+        <h2>Powiadomienia</h2>
+        <NotificationsSettings email={profile.email} />
       </section>
       <section className={[styles.card, styles.dangerCard].join(' ')}>
         <h2>Strefa niebezpieczna</h2>

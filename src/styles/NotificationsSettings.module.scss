@@ -1,0 +1,176 @@
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.toggleRow {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    cursor: pointer;
+
+    &:hover {
+        background: #fafbfc;
+    }
+}
+
+.toggleRowOn {
+    composes: toggleRow;
+    border-color: #bfdbfe;
+    background: #f8fbff;
+
+    &:hover {
+        background: #f8fbff;
+    }
+}
+
+// checkbox schowany wizualnie, ale nadal fokusowalny i widoczny dla czytników ekranu
+.checkbox {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+}
+
+.switch {
+    width: 40px;
+    height: 22px;
+    border-radius: 999px;
+    background: #d1d5db;
+    position: relative;
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: background 0.15s;
+}
+
+.switchOn {
+    composes: switch;
+    background: #2563eb;
+}
+
+.knob {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    transition: left 0.15s;
+}
+
+.switchOn .knob {
+    left: 21px;
+}
+
+// obwódka fokusu na pigułce, skoro sam checkbox jest niewidoczny
+.checkbox:focus-visible+.switch,
+.checkbox:focus-visible+.switchOn {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+}
+
+.toggleText {
+    font-size: 13px;
+    color: #6b7280;
+
+    b {
+        display: block;
+        color: #111;
+        margin-bottom: 2px;
+    }
+}
+
+.inline {
+    display: inline !important;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    >span:first-child {
+        font-size: 13px;
+        font-weight: 600;
+    }
+}
+
+.hoursInput {
+    max-width: 160px;
+    padding: 9px 11px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+
+    &:focus {
+        outline: 2px solid #2563eb;
+        border-color: transparent;
+    }
+
+    &:disabled {
+        background: #f5f6f8;
+        color: #6b7280;
+    }
+}
+
+.preview {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1d4ed8;
+}
+
+.hint {
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+.fieldError {
+    font-size: 12px;
+    color: #dc2626;
+}
+
+.formError {
+    font-size: 13px;
+    color: #dc2626;
+}
+
+.success {
+    font-size: 13px;
+    color: #1e8449;
+}
+
+.note {
+    font-size: 12px;
+    color: #6b7280;
+    background: #fafbfc;
+    border: 1px solid #eef0f3;
+    border-radius: 8px;
+    padding: 9px 11px;
+    line-height: 1.5;
+}
+
+.primary {
+    align-self: flex-start;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+        background: #1d4ed8;
+    }
+
+    &:disabled {
+        opacity: 0.6;
+    }
+}
