@@ -31,10 +31,10 @@ function renderAdminApp() {
   return renderWithProviders(
     <>
       <LoginButton />
-      <Link to="/administracja">otwórz panel</Link>
+      <Link to="/admin">otwórz panel</Link>
       <Routes>
         <Route element={<AdminRoute />}>
-          <Route path="/administracja" element={<h1>Panel administratora</h1>} />
+          <Route path="/admin" element={<h1>Panel administratora</h1>} />
         </Route>
         <Route path="/kalendarz" element={<h1>Kalendarz</h1>} />
         <Route path="/" element={<h1>Start</h1>} />

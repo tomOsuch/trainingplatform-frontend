@@ -53,12 +53,6 @@
   }
 }
 
-// Layout daje pełną szerokość — o ograniczeniu decyduje każdy widok z osobna
-// (kalendarz korzysta z całości, profil ma 720px, dziennik 1200px)
-.main {
-  padding: 20px clamp(12px, 2vw, 24px);
-}
-
 .left {
   position: relative; // nad grafiką SVG
   display: flex;
