@@ -13,6 +13,9 @@ import AdminRoute from './components/AdminRoute';
 import AdminPage from './pages/AdminPage';
 import GoalsPage from './pages/GoalsPage';
 import StatisticsPage from './pages/StatisticsPage';
+import AdminLayout from './components/AdminLayout';
+import AdminCategoriesPage from './pages/AdminCategoriesPage';
+import AdminUsersPage from './pages/AdminUsersPage';
 
 function App() {
   return (
@@ -32,7 +35,13 @@ function App() {
               <Route path="/statystyki" element={<StatisticsPage />} />
               <Route path="/profil" element={<ProfilePage />} />
               <Route element={<AdminRoute />}>
-                <Route path="/administracja" element={<AdminPage />} />
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<Navigate to="/admin/kategorie" replace />} />
+                  <Route path="kategorie" element={<AdminCategoriesPage />} />
+                  <Route path="uzytkownicy" element={<AdminUsersPage />} />
+                  <Route path="zaproszenia" element={<AdminPage />} />
+                </Route>
+                <Route path="/administracja" element={<Navigate to="/admin/zaproszenia" replace />} />
               </Route>
             </Route>
           </Route>

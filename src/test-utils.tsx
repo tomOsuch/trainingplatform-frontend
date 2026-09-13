@@ -45,8 +45,8 @@ export function mockFetch(...responses: MockResponse[]) {
 }
 
 export const sampleCategories = [
-  { id: 1, name: 'Taniec', color: '#9B59B6', iconName: 'dance' },
-  { id: 2, name: 'Gimnastyka', color: '#E74C3C', iconName: 'gymnastics' },
+  { id: 1, name: 'Taniec', color: '#9B59B6', iconName: 'music' },
+  { id: 2, name: 'Gimnastyka', color: '#E74C3C', iconName: 'person-standing' },
 ];
 
 export const sampleLoginResponse = {
