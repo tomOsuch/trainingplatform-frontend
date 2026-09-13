@@ -6,7 +6,7 @@ function normalizeHex(hex: string): string {
   if (/^[0-9a-fA-F]{6}$/.test(h)) return h.toLowerCase();
   if (/^[0-9a-fA-F]{3}$/.test(h)) return h.toLowerCase().split("").map((c) => c + c).join("");
 
-  if (process.env.NODE_ENV === "development") {
+  if (process.env.NODE_ENV !== "production") {
     console.warn(`[color] Nierozpoznany kolor kategorii: "${hex}" — użyto wartości awaryjnej`);
   }
   return FALLBACK_HEX;
