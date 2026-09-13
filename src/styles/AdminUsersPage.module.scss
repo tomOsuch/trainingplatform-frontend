@@ -1,0 +1,286 @@
+.card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+}
+
+.toolbar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+
+    label {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+
+        >span {
+            font-size: 13px;
+            font-weight: 600;
+        }
+    }
+
+    input,
+    select {
+        padding: 9px 11px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 14px;
+        font-family: inherit;
+        min-width: 160px;
+
+        &:focus {
+            outline: 2px solid #2563eb;
+            border-color: transparent;
+        }
+    }
+}
+
+.grow {
+    flex: 1 1 240px;
+
+    input {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+.list {
+    list-style: none;
+    margin-top: 16px;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 4px;
+    border-bottom: 1px solid #f3f4f6;
+    flex-wrap: wrap;
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.rowInactive {
+    composes: row;
+
+    .name,
+    .email {
+        color: #9ca3af;
+    }
+}
+
+.identity {
+    flex: 1 1 220px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.name {
+    font-size: 14px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.email {
+    font-size: 12px;
+    color: #6b7280;
+    overflow-wrap: anywhere;
+}
+
+.meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.badge {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.badgeAdmin {
+    composes: badge;
+    background: #f5f3ff;
+    color: #6d28d9;
+}
+
+.badgeActive {
+    composes: badge;
+    background: #eafaf0;
+    color: #1e8449;
+}
+
+.badgeInactive {
+    composes: badge;
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.date {
+    font-size: 12px;
+    color: #9ca3af;
+    white-space: nowrap;
+}
+
+.action {
+    margin-left: auto;
+    position: relative;
+}
+
+.tip {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    z-index: 5;
+    width: 240px;
+    background: #1f2937;
+    color: #fff;
+    font-size: 11px;
+    line-height: 1.45;
+    border-radius: 6px;
+    padding: 7px 9px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.12s;
+}
+
+.action:hover .tip,
+.action:focus-within .tip {
+    opacity: 1;
+}
+
+.pager {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 14px;
+    margin-top: 4px;
+    border-top: 1px solid #eef0f3;
+    flex-wrap: wrap;
+}
+
+.pagerButtons {
+    display: flex;
+    gap: 6px;
+}
+
+.empty {
+    text-align: center;
+    padding: 34px 16px;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+
+.consequences {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-top: 14px;
+
+    li::before {
+        content: '→ ';
+        color: #9ca3af;
+    }
+}
+
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 18px;
+}
+
+.muted {
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.formError {
+    color: #dc2626;
+    font-size: 13px;
+    margin-top: 10px;
+}
+
+.errorBox {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 13px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+
+.secondary {
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 6px 11px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+
+    &:hover:not(:disabled) {
+        background: #f3f4f6;
+    }
+
+    &:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+}
+
+.danger {
+    background: #fff;
+    border: 1px solid #fca5a5;
+    color: #dc2626;
+    border-radius: 6px;
+    padding: 6px 11px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+
+    &:hover:not(:disabled) {
+        background: #fef2f2;
+    }
+
+    &:disabled {
+        opacity: 0.6;
+    }
+}
+
+@media (max-width: 560px) {
+    .action {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .tip {
+        left: 0;
+        right: auto;
+        width: 100%;
+    }
+}
