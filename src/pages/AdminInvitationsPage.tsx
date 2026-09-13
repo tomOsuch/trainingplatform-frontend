@@ -4,7 +4,7 @@ import { Invitation, InvitationStatus } from '../types/invitation';
 import { createInvitation, getInvitations, revokeInvitation } from '../services/invitationsApi';
 import { ApiRequestError } from '../services/apiClient';
 import { formatDateTimePl } from '../utils/calendar';
-import styles from '../styles/AdminPage.module.scss';
+import styles from '../styles/AdminInvitationsPage.module.scss';
 import { useRetryAfter } from '../hooks/useRetryAfter';
 import { formatWaitTime } from '../utils/format';
 
@@ -24,7 +24,7 @@ const STATUS_CLASS: Record<InvitationStatus, string> = {
   REVOKED: styles.statusRevoked,
 };
 
-function AdminPage() {
+function AdminInvitationsPage() {
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
@@ -94,9 +94,7 @@ function AdminPage() {
   };
 
   return (
-    <div className={styles.page}>
-      <h1>Administracja</h1>
-
+    <>
       <section className={styles.card}>
         <h2>Wystaw zaproszenie</h2>
 
@@ -120,7 +118,7 @@ function AdminPage() {
           </button>
         </form>
 
-                {formError && (
+        {formError && (
           <p className={styles.formError}>
             {formError}
             {blocked && ` Spróbuj ponownie za ${formatWaitTime(secondsLeft)}.`}
@@ -197,8 +195,8 @@ function AdminPage() {
           </table>
         )}
       </section>
-    </div>
+    </>
   );
 }
 
-export default AdminPage;
+export default AdminInvitationsPage;
