@@ -1,7 +1,7 @@
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders, mockFetch } from '../test-utils';
-import AdminPage from './AdminPage';
+import AdminInvitationsPage from './AdminInvitationsPage';
 import { Invitation } from '../types/invitation';
 
 const pending: Invitation = {
@@ -39,13 +39,13 @@ const rowFor = (email: string): HTMLElement => {
   return row;
 };
 
-describe('AdminPage', () => {
+describe('AdminInvitationsPage', () => {
   afterEach(() => jest.restoreAllMocks());
 
   describe('lista zaproszeń', () => {
     test('pokazuje zaproszenia pobrane z API', async () => {
       mockFetch({ status: 200, body: [pending, accepted] });
-      renderWithProviders(<AdminPage />);
+      renderWithProviders(<AdminInvitationsPage />);
 
       expect(await screen.findByText('oczekuje@example.com')).toBeInTheDocument();
       expect(screen.getByText('wykorzystane@example.com')).toBeInTheDocument();
@@ -55,7 +55,7 @@ describe('AdminPage', () => {
 
     test('informuje, gdy nie ma żadnych zaproszeń', async () => {
       mockFetch({ status: 200, body: [] });
-      renderWithProviders(<AdminPage />);
+      renderWithProviders(<AdminInvitationsPage />);
 
       expect(await screen.findByText('Nie wystawiono jeszcze żadnych zaproszeń.')).toBeInTheDocument();
     });
@@ -63,7 +63,7 @@ describe('AdminPage', () => {
     // sentAt: null przy PENDING = zaproszenie istnieje, ale mail nie dotarł
     test('oznacza zaproszenia, których mail nie dotarł', async () => {
       mockFetch({ status: 200, body: [notSent] });
-      renderWithProviders(<AdminPage />);
+      renderWithProviders(<AdminInvitationsPage />);
 
       await screen.findByText(/bez-maila@example\.com/);
 
@@ -73,7 +73,7 @@ describe('AdminPage', () => {
 
     test('przycisk unieważnienia jest tylko przy oczekujących', async () => {
       mockFetch({ status: 200, body: [pending, accepted] });
-      renderWithProviders(<AdminPage />);
+      renderWithProviders(<AdminInvitationsPage />);
 
       await screen.findByText('oczekuje@example.com');
 
@@ -85,7 +85,7 @@ describe('AdminPage', () => {
   describe('wystawianie zaproszenia', () => {
     test('odrzuca niepoprawny adres bez wysyłania żądania', async () => {
       const fetchSpy = mockFetch({ status: 200, body: [] });
-      renderWithProviders(<AdminPage />);
+      renderWithProviders(<AdminInvitationsPage />);
 
       await screen.findByText('Nie wystawiono jeszcze żadnych zaproszeń.');
       await userEvent.type(screen.getByLabelText(/^Adres email/), 'to-nie-jest-email');
@@ -101,7 +101,7 @@ describe('AdminPage', () => {
         { status: 201, body: { ...pending, email: 'nowy@example.com' } }, // POST
         { status: 200, body: [{ ...pending, email: 'nowy@example.com' }] }, // GET po zapisie
       );
-      renderWithProviders(<AdminPage />);
+      renderWithProviders(<AdminInvitationsPage />);
 
       await screen.findByText('Nie wystawiono jeszcze żadnych zaproszeń.');
       await userEvent.type(screen.getByLabelText(/^Adres email/), 'nowy@example.com');
@@ -121,7 +121,7 @@ describe('AdminPage', () => {
 
     test('pokazuje błąd zwrócony przez backend', async () => {
       mockFetch({ status: 200, body: [] }, { status: 409, body: { message: 'Użytkownik o tym adresie już istnieje' } });
-      renderWithProviders(<AdminPage />);
+      renderWithProviders(<AdminInvitationsPage />);
 
       await screen.findByText('Nie wystawiono jeszcze żadnych zaproszeń.');
       await userEvent.type(screen.getByLabelText(/^Adres email/), 'istnieje@example.com');
@@ -134,7 +134,7 @@ describe('AdminPage', () => {
   describe('unieważnianie', () => {
     test('wymaga potwierdzenia przed wysłaniem żądania', async () => {
       const fetchSpy = mockFetch({ status: 200, body: [pending] });
-      renderWithProviders(<AdminPage />);
+      renderWithProviders(<AdminInvitationsPage />);
 
       await screen.findByText('oczekuje@example.com');
       await userEvent.click(screen.getByRole('button', { name: 'Unieważnij' }));
@@ -149,7 +149,7 @@ describe('AdminPage', () => {
         { status: 204 },
         { status: 200, body: [{ ...pending, status: 'REVOKED' }] },
       );
-      renderWithProviders(<AdminPage />);
+      renderWithProviders(<AdminInvitationsPage />);
 
       await screen.findByText('oczekuje@example.com');
       await userEvent.click(screen.getByRole('button', { name: 'Unieważnij' }));
@@ -164,7 +164,7 @@ describe('AdminPage', () => {
 
     test('pokazuje komunikat, gdy zaproszenie zostało już wykorzystane', async () => {
       mockFetch({ status: 200, body: [pending] }, { status: 409, body: { message: 'Zaproszenie zostało już wykorzystane' } });
-      renderWithProviders(<AdminPage />);
+      renderWithProviders(<AdminInvitationsPage />);
 
       await screen.findByText('oczekuje@example.com');
       await userEvent.click(screen.getByRole('button', { name: 'Unieważnij' }));

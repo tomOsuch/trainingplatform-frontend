@@ -10,7 +10,7 @@ import ProfilePage from './pages/ProfilePage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import AdminRoute from './components/AdminRoute';
-import AdminPage from './pages/AdminPage';
+import AdminInvitationsPage from './pages/AdminInvitationsPage';
 import GoalsPage from './pages/GoalsPage';
 import StatisticsPage from './pages/StatisticsPage';
 import AdminLayout from './components/AdminLayout';
@@ -39,7 +39,7 @@ function App() {
                   <Route index element={<Navigate to="/admin/kategorie" replace />} />
                   <Route path="kategorie" element={<AdminCategoriesPage />} />
                   <Route path="uzytkownicy" element={<AdminUsersPage />} />
-                  <Route path="zaproszenia" element={<AdminPage />} />
+                  <Route path="zaproszenia" element={<AdminInvitationsPage/>} />
                 </Route>
                 <Route path="/administracja" element={<Navigate to="/admin/zaproszenia" replace />} />
               </Route>
