@@ -13,7 +13,6 @@ import {
   Timer,
   Trophy,
   Volleyball,
-  Waves,
   WavesHorizontal,
   Zap,
 } from 'lucide-react';
@@ -35,7 +34,7 @@ const ICONS: Record<string, IconComponent> = {
   timer: Timer,
   trophy: Trophy,
   volleyball: Volleyball,
-  waves: Waves,
+  waves: WavesHorizontal,
   'waves-horizontal': WavesHorizontal,
   zap: Zap,
 };
@@ -57,20 +56,11 @@ function CategoryIcon({ name, size = 16, strokeWidth = 2, className }: CategoryI
   const Icon = ICONS[name] ?? FALLBACK;
 
   if (process.env.NODE_ENV !== 'production' && !ICONS[name]) {
-    // rozjazd między zestawem w bazie a zainstalowaną wersją biblioteki
     console.warn(`[CategoryIcon] Nieznana nazwa ikony: "${name}" — użyto ikony awaryjnej`);
   }
 
-  // ikona stoi w kontenerach flex obok tekstu, ktory bywa dlugi — bez tego zostalaby scisnieta
   return (
-    <Icon
-      size={size}
-      strokeWidth={strokeWidth}
-      className={className}
-      style={{ flexShrink: 0 }}
-      aria-hidden="true"
-      focusable="false"
-    />
+    <Icon size={size} strokeWidth={strokeWidth} className={className} style={{ flexShrink: 0 }} aria-hidden="true" focusable="false" />
   );
 }
 
