@@ -7,6 +7,7 @@ describe('CategoryIcon', () => {
   const NAMES = [
     'dumbbell', 'footprints', 'volleyball', 'trophy', 'bike', 'waves', 'heart-pulse', 'activity',
     'flame', 'mountain', 'music', 'target', 'timer', 'medal', 'zap', 'person-standing',
+    'waves-horizontal',
   ];
 
   test.each(NAMES)('zna nazwę "%s"', (name) => {

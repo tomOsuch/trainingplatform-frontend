@@ -12,6 +12,7 @@ const previewItem = (category: WorkoutCategory, state: CalendarItemState): Calen
   key: `preview-${category.id}-${state}`,
   kind: 'plan',
   id: category.id,
+  iconName: category.iconName,
   date: '',
   time: null,
   durationMin: null,

@@ -11,6 +11,7 @@ export interface Goal {
   categoryId: number | null;
   categoryName: string | null;
   categoryColor: string | null;
+  categoryIconName: string | null;
   metric: GoalMetric;
   targetValue: number;
   currentValue: number;
@@ -38,6 +39,7 @@ export interface GoalEntry {
   durationMin: number | null;
   categoryName: string;
   categoryColor: string;
+  categoryIconName: string;
 }
 
 export interface GoalDetails extends Goal {

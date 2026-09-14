@@ -1,5 +1,6 @@
 import { Goal } from '../types/goal';
 import { hexToRgba, darkenHex } from '../utils/color';
+import CategoryIcon from './CategoryIcon';
 import { achievedLabel, deadlineLabel, formatProgress, isAchieved, periodLabel, progressPercent, progressWidth } from '../utils/goal';
 import styles from '../styles/GoalsPage.module.scss';
 
@@ -33,7 +34,11 @@ function GoalCard({ goal, onOpen, onAchieve, onEdit, busy }: GoalCardProps) {
       <button type="button" className={styles.cardMain} onClick={() => onOpen(goal)}>
         <div className={styles.cardTop}>
           <span className={styles.pill} style={pillStyle}>
-            <span className={styles.dot} style={{ background: goal.categoryColor ?? NEUTRAL }} />
+            {goal.categoryIconName ? (
+              <CategoryIcon name={goal.categoryIconName} size={12} />
+            ) : (
+              <span className={styles.dot} style={{ background: NEUTRAL }} />
+            )}
             {goal.categoryName ?? 'Wszystkie kategorie'}
           </span>
           {awaitingClose && <span className={styles.badge}>Cel osiągnięty</span>}

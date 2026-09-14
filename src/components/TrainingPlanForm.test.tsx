@@ -16,6 +16,7 @@ const pastPlan: TrainingPlan = {
   categoryId: 1,
   categoryName: 'Taniec',
   categoryColor: '#9B59B6',
+  categoryIconName: 'music',
   plannedDate: iso(-30),
   plannedTime: '19:30',
   durationMin: 60,

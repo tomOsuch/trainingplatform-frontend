@@ -6,6 +6,7 @@ import { formatDatePl, weekdayPl } from '../utils/calendar';
 import { plural } from '../utils/format';
 import { achievedLabel, deadlineLabel, formatProgress, isAchieved, periodLabel, progressPercent, progressWidth } from '../utils/goal';
 import { formatDuration } from '../utils/format';
+import CategoryIcon from './CategoryIcon';
 import Modal from './Modal';
 import styles from '../styles/GoalDetailsModal.module.scss';
 
@@ -71,7 +72,11 @@ function GoalDetailsModal({ goal, onClose, onEdit, onOpenEntry, onChanged }: Goa
       <div className={styles.body}>
         <div className={styles.head}>
           <span className={styles.pill} style={pillStyle}>
-            <span className={styles.dot} style={{ background: goal.categoryColor ?? NEUTRAL }} />
+            {goal.categoryIconName ? (
+              <CategoryIcon name={goal.categoryIconName} size={12} />
+            ) : (
+              <span className={styles.dot} style={{ background: NEUTRAL }} />
+            )}
             {goal.categoryName ?? 'Wszystkie kategorie'}
           </span>
           {achieved && <span className={styles.badgeDone}>Osiągnięty</span>}
@@ -162,6 +167,7 @@ function GoalDetailsModal({ goal, onClose, onEdit, onOpenEntry, onChanged }: Goa
                   className={styles.entryPill}
                   style={{ background: hexToRgba(entry.categoryColor, 0.14), color: darkenHex(entry.categoryColor) }}
                 >
+                  <CategoryIcon name={entry.categoryIconName} size={11} />
                   {entry.categoryName}
                 </span>
                 <span className={styles.entryTitle}>{entry.title ?? entry.categoryName}</span>

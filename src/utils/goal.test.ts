@@ -8,6 +8,7 @@ const base: Goal = {
   categoryId: null,
   categoryName: null,
   categoryColor: null,
+  categoryIconName: null,
   metric: 'SESSIONS',
   targetValue: 20,
   currentValue: 5,

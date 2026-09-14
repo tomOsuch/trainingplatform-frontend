@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { CalendarItem } from '../types/workout';
 import { CalendarDay, timeToMinutes } from '../utils/calendar';
 import { hexToRgba, darkenHex, lightenHex } from '../utils/color';
+import CategoryIcon from './CategoryIcon';
 import styles from '../styles/WeekView.module.scss';
 import { layoutDay, PositionedItem } from '../utils/weekLayout';
 
@@ -65,6 +66,7 @@ function WeekView({ days, itemsByDay, onSelectItem, onAddForDay }: WeekViewProps
         onClick={() => onSelectItem(item)}
         title={item.label}
       >
+        <CategoryIcon name={item.iconName} size={11} strokeWidth={2.4} />
         <span className={cancelled ? styles.cancelled : undefined}>
           {item.time ? `${item.time.slice(0, 5)} ` : ''}
           {item.label}

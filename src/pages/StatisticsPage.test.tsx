@@ -12,9 +12,9 @@ const stats: Statistics = {
   workoutCount: 7,
   totalMinutes: 390,
   byCategory: [
-    { categoryId: 5, categoryName: 'Taniec', categoryColor: '#9B59B6', workoutCount: 4, totalMinutes: 240 },
-    { categoryId: 6, categoryName: 'Gimnastyka', categoryColor: '#E74C3C', workoutCount: 2, totalMinutes: 105 },
-    { categoryId: 7, categoryName: 'Ogólnorozwojowy', categoryColor: '#10B981', workoutCount: 1, totalMinutes: 45 },
+    { categoryId: 5, categoryName: 'Taniec', categoryColor: '#9B59B6', categoryIconName: 'music', workoutCount: 4, totalMinutes: 240 },
+    { categoryId: 6, categoryName: 'Gimnastyka', categoryColor: '#E74C3C', categoryIconName: 'person-standing', workoutCount: 2, totalMinutes: 105 },
+    { categoryId: 7, categoryName: 'Ogólnorozwojowy', categoryColor: '#10B981', categoryIconName: 'dumbbell', workoutCount: 1, totalMinutes: 45 },
   ],
   planCompletion: {
     completed: 6,

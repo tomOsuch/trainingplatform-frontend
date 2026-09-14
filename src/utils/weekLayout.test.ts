@@ -6,6 +6,7 @@ const item = (time: string | null, durationMin: number | null, label = `t${++seq
   key: `plan-${seq}`,
   kind: 'plan',
   id: seq,
+  iconName: 'dumbbell',
   date: '2026-09-07',
   time,
   durationMin,

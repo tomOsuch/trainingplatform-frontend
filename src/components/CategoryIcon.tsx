@@ -14,6 +14,7 @@ import {
   Trophy,
   Volleyball,
   Waves,
+  WavesHorizontal,
   Zap,
 } from 'lucide-react';
 
@@ -35,6 +36,7 @@ const ICONS: Record<string, IconComponent> = {
   trophy: Trophy,
   volleyball: Volleyball,
   waves: Waves,
+  'waves-horizontal': WavesHorizontal,
   zap: Zap,
 };
 
@@ -59,7 +61,17 @@ function CategoryIcon({ name, size = 16, strokeWidth = 2, className }: CategoryI
     console.warn(`[CategoryIcon] Nieznana nazwa ikony: "${name}" — użyto ikony awaryjnej`);
   }
 
-  return <Icon size={size} strokeWidth={strokeWidth} className={className} aria-hidden="true" focusable="false" />;
+  // ikona stoi w kontenerach flex obok tekstu, ktory bywa dlugi — bez tego zostalaby scisnieta
+  return (
+    <Icon
+      size={size}
+      strokeWidth={strokeWidth}
+      className={className}
+      style={{ flexShrink: 0 }}
+      aria-hidden="true"
+      focusable="false"
+    />
+  );
 }
 
 export default CategoryIcon;
