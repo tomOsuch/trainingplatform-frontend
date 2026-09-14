@@ -3,6 +3,7 @@ import { PlanStatus, TrainingPlan } from '../types/workout';
 import { changeStatus, deletePlan } from '../services/trainingPlansApi';
 import { ApiRequestError } from '../services/apiClient';
 import { hexToRgba, darkenHex } from '../utils/color';
+import CategoryIcon from './CategoryIcon';
 import { formatDuration } from '../utils/format';
 import Modal from './Modal';
 import styles from '../styles/PlanDetailView.module.scss';
@@ -44,8 +45,8 @@ function PlanDetailView({ plan: initial, onClose, onEdit, onChanged, onAddJourna
     setError(null);
     try {
       await changeStatus(plan.id, status);
-      setPlan((p) => ({ ...p, status })); // aktualizacja lokalna — modal od razu spójny
-      onChanged(); // kalendarz w tle też się odświeży
+      setPlan((p) => ({ ...p, status }));
+      onChanged();
       setJournalDialog(status === 'COMPLETED');
     } catch (err) {
       setError(err instanceof ApiRequestError ? err.message : 'Nie udało się zmienić statusu');
@@ -75,7 +76,7 @@ function PlanDetailView({ plan: initial, onClose, onEdit, onChanged, onAddJourna
           className={styles.categoryPill}
           style={{ background: hexToRgba(plan.categoryColor, 0.14), color: darkenHex(plan.categoryColor) }}
         >
-          <span className={styles.dot} style={{ background: plan.categoryColor }} />
+          <CategoryIcon name={plan.categoryIconName} size={12} />
           {plan.categoryName}
         </span>
 
