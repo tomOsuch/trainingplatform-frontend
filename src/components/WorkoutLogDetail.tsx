@@ -3,6 +3,7 @@ import { WorkoutLog } from '../types/workout';
 import { deleteLog } from '../services/workoutLogsApi';
 import { ApiRequestError } from '../services/apiClient';
 import { hexToRgba, darkenHex } from '../utils/color';
+import CategoryIcon from './CategoryIcon';
 import { formatDatePl, weekdayPl } from '../utils/calendar';
 import { formatDuration } from '../utils/format';
 import Modal from './Modal';
@@ -42,7 +43,7 @@ function WorkoutLogDetail({ log, onClose, onEdit, onChanged }: WorkoutLogDetailP
             color: darkenHex(log.categoryColor),
           }}
         >
-          <span className={styles.dot} style={{ background: log.categoryColor }} />
+          <CategoryIcon name={log.categoryIconName} size={12} />
           {log.categoryName}
         </span>
 
@@ -51,7 +52,7 @@ function WorkoutLogDetail({ log, onClose, onEdit, onChanged }: WorkoutLogDetailP
             Data: {weekdayPl(log.performedDate)}, {formatDatePl(log.performedDate)}
             {log.performedTime ? `, ${log.performedTime.slice(0, 5)}` : ''}
           </p>
-           {log.durationMin && <p>Czas trwania: {formatDuration(log.durationMin)}</p>}
+          {log.durationMin && <p>Czas trwania: {formatDuration(log.durationMin)}</p>}
         </div>
 
         {log.intensity && (
