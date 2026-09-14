@@ -46,7 +46,9 @@ $gutter: 56px;
 }
 
 .allDayChip {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   width: 100%;
   border: 1px solid;
   border-radius: 4px;
@@ -56,8 +58,6 @@ $gutter: 56px;
   text-align: left;
   cursor: pointer;
   overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
 }
 
 .scroll {
@@ -100,6 +100,9 @@ $gutter: 56px;
 
 .block {
   position: absolute;
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
   border: 1px solid;
   border-radius: 5px;
   padding: 2px 5px;
@@ -120,4 +123,14 @@ $gutter: 56px;
 
 .muted {
   opacity: 0.8;
+}
+
+.label {
+  min-width: 0;
+}
+
+.allDayChip .label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

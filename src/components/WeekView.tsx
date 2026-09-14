@@ -67,7 +67,7 @@ function WeekView({ days, itemsByDay, onSelectItem, onAddForDay }: WeekViewProps
         title={item.label}
       >
         <CategoryIcon name={item.iconName} size={11} strokeWidth={2.4} />
-        <span className={cancelled ? styles.cancelled : undefined}>
+        <span className={[styles.label, cancelled ? styles.cancelled : ''].join(' ')}>
           {item.time ? `${item.time.slice(0, 5)} ` : ''}
           {item.label}
           {icon}

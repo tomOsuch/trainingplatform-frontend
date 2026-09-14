@@ -75,7 +75,7 @@ function GoalDetailsModal({ goal, onClose, onEdit, onOpenEntry, onChanged }: Goa
             {goal.categoryIconName ? (
               <CategoryIcon name={goal.categoryIconName} size={12} />
             ) : (
-              <span className={styles.dot} style={{ background: NEUTRAL }} />
+              <span className={styles.dot} style={{ background: goal.categoryColor ?? NEUTRAL }} />
             )}
             {goal.categoryName ?? 'Wszystkie kategorie'}
           </span>
