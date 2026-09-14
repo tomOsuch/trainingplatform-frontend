@@ -2,6 +2,7 @@ export interface CategoryStat {
   categoryId: number;
   categoryName: string;
   categoryColor: string;
+  categoryIconName: string;
   workoutCount: number;
   totalMinutes: number;
 }

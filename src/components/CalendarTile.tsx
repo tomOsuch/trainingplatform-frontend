@@ -1,5 +1,6 @@
 import { CalendarItem } from "../types/workout";
 import { hexToRgba, darkenHex, lightenHex } from "../utils/color";
+import CategoryIcon from "./CategoryIcon";
 import styles from "../styles/CalendarTile.module.scss";
 
 interface CalendarTileProps {
@@ -37,14 +38,7 @@ function CalendarTile({ item, onClick }: CalendarTileProps) {
       onClick={() => onClick(item)}
       title={item.label}
     >
-      <span
-        className={styles.dot}
-        style={
-          filled
-            ? { background: color }
-            : { background: "transparent", boxShadow: `inset 0 0 0 2px ${color}` }
-        }
-      />
+      <CategoryIcon name={item.iconName} size={11} strokeWidth={2.4} />
       <span className={cancelled ? styles.cancelledText : styles.text}>
         {item.label}
         {time ? ` ${time}` : ""}

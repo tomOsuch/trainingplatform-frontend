@@ -16,6 +16,7 @@ const oldLog: WorkoutLog = {
   categoryId: 2,
   categoryName: 'Gimnastyka',
   categoryColor: '#E74C3C',
+  categoryIconName: 'person-standing',
   planId: null,
   performedDate: iso(-45),
   performedTime: '07:00',

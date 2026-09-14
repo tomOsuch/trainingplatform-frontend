@@ -11,6 +11,7 @@ const existing: Goal = {
   categoryId: 1,
   categoryName: 'Taniec',
   categoryColor: '#9B59B6',
+  categoryIconName: 'music',
   metric: 'MINUTES',
   targetValue: 1200,
   currentValue: 720,

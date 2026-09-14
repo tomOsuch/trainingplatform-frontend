@@ -19,6 +19,7 @@ export interface TrainingPlan {
   categoryId: number;
   categoryName: string;
   categoryColor: string;
+  categoryIconName: string;
   plannedDate: string;
   plannedTime: string | null;
   durationMin: number | null;
@@ -41,6 +42,7 @@ export interface WorkoutLog {
   categoryId: number;
   categoryName: string;
   categoryColor: string;
+  categoryIconName: string;
   planId: number | null;
   performedDate: string;
   performedTime: string | null;
@@ -76,6 +78,7 @@ export interface CalendarItem {
   durationMin: number | null;
   label: string;
   color: string;
+  iconName: string;
   state: CalendarItemState;
 }
 
@@ -89,6 +92,7 @@ export interface JournalItem {
   label: string;
   categoryName: string;
   categoryColor: string;
+  iconName: string;
   durationMin: number | null;
   intensity: number | null;
   notes: string | null;

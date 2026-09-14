@@ -203,6 +203,9 @@
 }
 
 .entryPill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
     font-size: 11px;
     padding: 3px 9px;
     border-radius: 999px;

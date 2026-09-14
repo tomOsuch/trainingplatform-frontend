@@ -10,6 +10,7 @@ const goal: Goal = {
   description: 'Regularność ważniejsza niż długość',
   categoryId: 2,
   categoryName: 'Gimnastyka',
+  categoryIconName: 'music',
   categoryColor: '#E74C3C',
   metric: 'SESSIONS',
   targetValue: 20,
@@ -22,8 +23,8 @@ const goal: Goal = {
 };
 
 const entries: GoalEntry[] = [
-  { id: 91, title: 'Poranna sesja', performedDate: '2026-09-05', durationMin: 45, categoryName: 'Gimnastyka', categoryColor: '#E74C3C' },
-  { id: 90, title: null, performedDate: '2026-09-03', durationMin: null, categoryName: 'Gimnastyka', categoryColor: '#E74C3C' },
+  { id: 91, title: 'Poranna sesja', performedDate: '2026-09-05', durationMin: 45, categoryName: 'Gimnastyka', categoryColor: '#E74C3C', categoryIconName: 'person-standing' },
+  { id: 90, title: null, performedDate: '2026-09-03', durationMin: null, categoryName: 'Gimnastyka', categoryColor: '#E74C3C', categoryIconName: 'person-standing' },
 ];
 
 const noop = () => {};

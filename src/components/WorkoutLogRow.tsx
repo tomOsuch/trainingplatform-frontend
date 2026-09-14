@@ -1,5 +1,6 @@
 import { JournalItem } from '../types/workout';
 import { hexToRgba, darkenHex, lightenHex } from '../utils/color';
+import CategoryIcon from './CategoryIcon';
 import { formatDatePl, weekdayPl } from '../utils/calendar';
 import { formatDuration } from '../utils/format';
 import styles from '../styles/WorkoutLogPage.module.scss';
@@ -42,10 +43,7 @@ function WorkoutLogRow({ item, onClick, onFillDetails }: WorkoutLogRowProps) {
                 }
           }
         >
-          <span
-            className={styles.dot}
-            style={done ? { background: color } : { background: 'transparent', boxShadow: `inset 0 0 0 2px ${color}` }}
-          />
+          <CategoryIcon name={item.iconName} size={11} strokeWidth={2.4} />
           {item.categoryName}
           {item.state === 'skipped' && ' ✗'}
         </span>

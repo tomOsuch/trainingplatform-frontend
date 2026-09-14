@@ -12,6 +12,8 @@ import {
   startOfCurrentMonth,
 } from '../utils/period';
 import { formatDuration, plural } from '../utils/format';
+import { darkenHex } from '../utils/color';
+import CategoryIcon from '../components/CategoryIcon';
 import styles from '../styles/StatisticsPage.module.scss';
 
 function StatisticsPage() {
@@ -189,8 +191,8 @@ function StatisticsPage() {
                 ) : (
                   stats.byCategory.map((cat) => (
                     <div key={cat.categoryId} className={styles.catRow}>
-                      <span className={styles.catName}>
-                        <span className={styles.dot} style={{ background: cat.categoryColor }} />
+                      <span className={styles.catName} style={{ color: darkenHex(cat.categoryColor) }}>
+                        <CategoryIcon name={cat.categoryIconName} size={13} />
                         {cat.categoryName}
                       </span>
                       <span className={styles.catBar}>

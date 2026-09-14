@@ -11,6 +11,7 @@ const base: Goal = {
   categoryId: 1,
   categoryName: 'Taniec',
   categoryColor: '#9B59B6',
+  categoryIconName: 'music',
   metric: 'MINUTES',
   targetValue: 1200, // 20 godzin — tytuł celu mówi o godzinach, więc dane muszą się zgadzać
   currentValue: 720,
@@ -38,6 +39,7 @@ const openGoal: Goal = {
   categoryId: null,
   categoryName: null,
   categoryColor: null,
+  categoryIconName: null,
   metric: 'SESSIONS',
   targetValue: 50,
   currentValue: 7,

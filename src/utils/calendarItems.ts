@@ -18,6 +18,7 @@ export function planToItem(p: TrainingPlan): CalendarItem {
     durationMin: p.durationMin,
     label: p.title,
     color: p.categoryColor,
+    iconName: p.categoryIconName,
     state: PLAN_STATE[p.status],
   };
 }
@@ -33,6 +34,7 @@ export function logToItem(l: WorkoutLog): CalendarItem {
     time: l.performedTime,
     durationMin: l.durationMin,
     label: l.performedTime || !l.durationMin ? base : `${base} ${formatDuration(l.durationMin)}`,
+    iconName: l.categoryIconName,
     color: l.categoryColor,
     state: "done",
   };
