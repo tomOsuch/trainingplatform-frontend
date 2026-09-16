@@ -38,7 +38,7 @@ describe('TemplatesPage', () => {
     renderWithProviders(<TemplatesPage />);
 
     expect(await screen.findByText(/Nie masz jeszcze żadnego szablonu/)).toBeInTheDocument();
-    expect(screen.getByText(/formularz wypełnia się sam/)).toBeInTheDocument();
+    expect(screen.getByText(/wzorzec, do którego wracasz/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Utwórz pierwszy szablon' })).toBeInTheDocument();
   });
 
@@ -79,5 +79,40 @@ describe('TemplatesPage', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Usuń szablon' }));
 
     expect(await screen.findByText(/Nie masz jeszcze żadnego szablonu/)).toBeInTheDocument();
+  });
+
+  test('edycja podmienia wiersz bez ponownego pobrania listy', async () => {
+    const spy = mockFetch(...listy([tpl()]), { status: 200, body: tpl({ name: 'Trening nóg B' }) });
+    renderWithProviders(<TemplatesPage />);
+
+    await screen.findByText('Trening nóg');
+    await userEvent.click(screen.getByRole('button', { name: 'Edytuj' }));
+
+    const nazwa = screen.getByLabelText(/^Nazwa/);
+    await userEvent.clear(nazwa);
+    await userEvent.type(nazwa, 'Trening nóg B');
+    await userEvent.click(screen.getByRole('button', { name: 'Zapisz szablon' }));
+
+    expect(await screen.findByText('Trening nóg B')).toBeInTheDocument();
+    expect(spy).toHaveBeenCalledTimes(3);
+  });
+
+  test('błąd pola z serwera ląduje przy tym polu', async () => {
+    mockFetch(...listy([tpl()]), {
+      status: 400,
+      body: {
+        timestamp: '',
+        status: 400,
+        message: 'Błąd walidacji',
+        errors: { name: 'Nazwa może mieć maksymalnie 200 znaków' },
+      },
+    });
+    renderWithProviders(<TemplatesPage />);
+
+    await screen.findByText('Trening nóg');
+    await userEvent.click(screen.getByRole('button', { name: 'Edytuj' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Zapisz szablon' }));
+
+    expect(await screen.findByText('Nazwa może mieć maksymalnie 200 znaków')).toBeInTheDocument();
   });
 });

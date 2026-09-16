@@ -24,8 +24,6 @@ function TemplatesPage() {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [removing, setRemoving] = useState(false);
   const [categoriesError, setCategoriesError] = useState(false);
-  // wlasny stan ladowania kategorii — bez niego pasek ostrzezenia mignie, zanim odpowiedz dotrze,
-  // bo `loading` dotyczy wylacznie szablonow i te dwa zadania koncza sie niezaleznie
   const [categoriesLoading, setCategoriesLoading] = useState(true);
 
   const load = useCallback(() => {
@@ -69,7 +67,7 @@ function TemplatesPage() {
     try {
       await deleteTemplate(deleting.id);
       setTemplates((prev) => prev.filter((t) => t.id !== deleting.id));
-      setDeleting(null);
+      setDeleting((current) => (current?.id === deleting.id ? null : current));
     } catch (e) {
       setDeleteError((e as ApiRequestError).message ?? 'Nie udało się usunąć szablonu');
     } finally {
@@ -130,8 +128,8 @@ function TemplatesPage() {
               </span>
               <p className={styles.emptyTitle}>Nie masz jeszcze żadnego szablonu</p>
               <p className={styles.muted}>
-                Szablon zapamiętuje kategorię, czas trwania i opis powtarzalnego treningu. Przy planowaniu wybierasz go z listy i formularz
-                wypełnia się sam — zostaje do podania data.
+                Szablon zapamiętuje kategorię, czas trwania i opis powtarzalnego treningu — wzorzec, do którego wracasz
+                zamiast wypisywać te same wartości za każdym razem.
               </p>
               <button type="button" className={styles.primary} onClick={() => setCreating(true)} disabled={!canEdit}>
                 Utwórz pierwszy szablon
@@ -175,7 +173,7 @@ function TemplatesPage() {
         </section>
       )}
 
-      {!loading && templates.length > 0 && (
+      {!loading && !listError && templates.length > 0 && (
         <p className={styles.count}>
           {templates.length} {plural(templates.length, 'szablon', 'szablony', 'szablonów')}
         </p>
@@ -194,13 +192,13 @@ function TemplatesPage() {
       )}
 
       {deleting && (
-        <Modal title={`Usunąć szablon „${deleting.name}"?`} onClose={() => setDeleting(null)}>
+         <Modal title={`Usunąć szablon „${deleting.name}”?`} onClose={() => setDeleting(null)}>
           <p className={styles.muted}>
             Plany utworzone na jego podstawie zostaną nietknięte — szablon jest kopiowany przy wstawianiu, a nie powiązany z planem.
           </p>
           {deleteError && <p className={styles.formError}>{deleteError}</p>}
           <div className={styles.modalActions}>
-            <button type="button" className={styles.secondary} onClick={() => setDeleting(null)}>
+            <button type="button" className={styles.secondary} onClick={() => setDeleting(null)} disabled={removing}>
               Anuluj
             </button>
             <button type="button" className={styles.danger} onClick={handleDelete} disabled={removing}>

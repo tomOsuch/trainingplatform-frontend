@@ -37,7 +37,7 @@ function TemplateForm({ categories, template, onClose, onSaved }: TemplateFormPr
 
     if (!categoryId) e.categoryId = 'Wybierz kategorię';
 
-    if (duration.trim() && parsed === null) e.durationMin = 'Podaj czas jak „45min" albo „1h 30min"';
+     if (duration.trim() && parsed === null) e.durationMin = 'Podaj czas jak „45min” albo „1h 30min”';
     else if (parsed !== null && parsed <= 0) e.durationMin = 'Czas musi być większy od 0';
 
     return e;
