@@ -144,10 +144,12 @@ describe('TrainingPlanForm', () => {
     await userEvent.selectOptions(screen.getByLabelText(/^Zacznij od szablonu/), '3');
 
     expect(screen.getByLabelText(/^Tytuł/)).toHaveValue('Trening nóg');
+    expect(screen.getByLabelText(/^Kategoria/)).toHaveValue('1');
     expect(screen.getByLabelText(/^Czas trwania/)).toHaveValue('1h');
     expect(screen.getByLabelText(/^Notatki/)).toHaveValue('Przysiady, wykroki, martwy ciąg');
     expect(screen.getByLabelText(/^Data/)).toHaveValue('');
     expect(screen.getByText(/Wypełniono z szablonu/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Wyczyść i zacznij od zera' })).toHaveFocus();
   });
 
   test('wyczyszczenie szablonu opróżnia wypełnione pola', async () => {
@@ -161,6 +163,7 @@ describe('TrainingPlanForm', () => {
     expect(screen.getByLabelText(/^Tytuł/)).toHaveValue('');
     expect(screen.getByLabelText(/^Notatki/)).toHaveValue('');
     expect(screen.getByLabelText(/^Zacznij od szablonu/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Zacznij od szablonu/)).toHaveFocus();
   });
 
   test('w trybie edycji nie ma wyboru szablonu', () => {
