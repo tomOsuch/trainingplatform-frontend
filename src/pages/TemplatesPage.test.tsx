@@ -55,7 +55,8 @@ describe('TemplatesPage', () => {
     const spy = mockFetch(
       ...listy([tpl()]),
       { status: 200, body: tpl({ id: 9, name: 'Bieganie' }) },
-      ...listy([tpl({ id: 9, name: 'Bieganie' }), tpl()]),
+      // po zapisie odswiezamy wylacznie liste szablonow — kategorie pobieraja sie raz, przy wejsciu
+      { status: 200, body: [tpl({ id: 9, name: 'Bieganie' }), tpl()] },
     );
     renderWithProviders(<TemplatesPage />);
 
@@ -66,7 +67,7 @@ describe('TemplatesPage', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Zapisz szablon' }));
 
     expect(await screen.findByText('Bieganie')).toBeInTheDocument();
-    expect(spy).toHaveBeenCalledTimes(5);
+    expect(spy).toHaveBeenCalledTimes(4);
   });
 
   test('usunięcie zdejmuje wiersz z listy', async () => {

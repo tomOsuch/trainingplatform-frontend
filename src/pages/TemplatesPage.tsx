@@ -23,21 +23,34 @@ function TemplatesPage() {
   const [deleting, setDeleting] = useState<WorkoutTemplate | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [removing, setRemoving] = useState(false);
+  const [categoriesError, setCategoriesError] = useState(false);
+  // wlasny stan ladowania kategorii — bez niego pasek ostrzezenia mignie, zanim odpowiedz dotrze,
+  // bo `loading` dotyczy wylacznie szablonow i te dwa zadania koncza sie niezaleznie
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
 
   const load = useCallback(() => {
     setLoading(true);
     setListError(null);
 
-    Promise.all([getTemplates(), getCategories()])
-      .then(([tpl, cats]) => {
-        setTemplates(tpl);
-        setCategories(cats);
-      })
+    getTemplates()
+      .then(setTemplates)
       .catch((e) => setListError((e as ApiRequestError).message ?? 'Nie udało się pobrać szablonów'))
       .finally(() => setLoading(false));
   }, []);
 
-  useEffect(load, [load]);
+  const loadCategories = useCallback(() => {
+    setCategoriesError(false);
+    setCategoriesLoading(true);
+    getCategories()
+      .then(setCategories)
+      .catch(() => setCategoriesError(true))
+      .finally(() => setCategoriesLoading(false));
+  }, []);
+
+  useEffect(() => {
+    load();
+    loadCategories();
+  }, [load, loadCategories]);
 
   const handleSaved = (saved: WorkoutTemplate) => {
     const known = templates.some((t) => t.id === saved.id);
@@ -64,6 +77,8 @@ function TemplatesPage() {
     }
   };
 
+  const canEdit = categories.length > 0;
+
   return (
     <div className={styles.page}>
       <div className={styles.head}>
@@ -74,11 +89,26 @@ function TemplatesPage() {
           <h1>Szablony treningów</h1>
         </div>
         {templates.length > 0 && (
-          <button type="button" className={styles.primary} onClick={() => setCreating(true)}>
+          <button type="button" className={styles.primary} onClick={() => setCreating(true)} disabled={!canEdit}>
             + Nowy szablon
           </button>
         )}
       </div>
+
+      {!canEdit && !categoriesLoading && (
+        <div className={styles.warnBox}>
+          <span>
+            {categoriesError
+              ? 'Nie udało się pobrać kategorii — dodawanie i edycja szablonów są chwilowo niedostępne.'
+              : 'Nie ma jeszcze żadnej kategorii, a szablon musi ją mieć. Poproś administratora o dodanie kategorii.'}
+          </span>
+          {categoriesError && (
+            <button type="button" className={styles.secondary} onClick={loadCategories}>
+              Spróbuj ponownie
+            </button>
+          )}
+        </div>
+      )}
 
       {listError && (
         <div className={styles.errorBox}>
@@ -103,7 +133,7 @@ function TemplatesPage() {
                 Szablon zapamiętuje kategorię, czas trwania i opis powtarzalnego treningu. Przy planowaniu wybierasz go z listy i formularz
                 wypełnia się sam — zostaje do podania data.
               </p>
-              <button type="button" className={styles.primary} onClick={() => setCreating(true)}>
+              <button type="button" className={styles.primary} onClick={() => setCreating(true)} disabled={!canEdit}>
                 Utwórz pierwszy szablon
               </button>
             </div>
@@ -124,7 +154,7 @@ function TemplatesPage() {
                   <span className={styles.duration}>{t.durationMin ? formatDuration(t.durationMin) : '—'}</span>
 
                   <span className={styles.actions}>
-                    <button type="button" className={styles.secondary} onClick={() => setEditing(t)}>
+                    <button type="button" className={styles.secondary} onClick={() => setEditing(t)} disabled={!canEdit}>
                       Edytuj
                     </button>
                     <button
