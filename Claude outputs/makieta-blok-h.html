@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Makiety — Faza 3, blok H</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: #f5f6f8; color: #1a1a1a; }
+  a { color: inherit; text-decoration: none; }
+  :root { --page-max: 1200px; --form-max: 720px; }
+
+  .mockNote { background: #1f2937; color: #d1d5db; font-size: 13px; line-height: 1.6; padding: 14px clamp(12px, 2vw, 24px); }
+  .mockNote strong { color: #fff; }
+  .mockSwitch { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .mockSwitch button { background: #374151; border: 1px solid #4b5563; color: #d1d5db; border-radius: 999px; padding: 5px 13px; font-size: 12px; cursor: pointer; font-family: inherit; }
+  .mockSwitch button[aria-pressed="true"] { background: #2563eb; border-color: #2563eb; color: #fff; }
+
+  .navbar { position: sticky; top: 0; z-index: 10; height: 60px; background: #2563eb; overflow: hidden;
+    display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(12px, 2vw, 24px); }
+  .navLeft { display: flex; align-items: center; gap: 22px; min-width: 0; }
+  .brand { font-weight: 700; font-size: 17px; color: #fff; white-space: nowrap; }
+  .navTabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+  .navTabs::-webkit-scrollbar { display: none; }
+  .navTab { color: #c7dcfb; font-size: 14px; padding: 6px 14px; border-radius: 999px; white-space: nowrap; }
+  .navTabActive { background: rgba(255,255,255,.22); color: #fff; font-weight: 600; }
+  .navRight { display: flex; align-items: center; gap: 16px; }
+  .userName { font-size: 14px; font-weight: 500; color: #dbeafe; white-space: nowrap; }
+  .logoutButton { background: transparent; border: 1px solid rgba(255,255,255,.6); border-radius: 8px; padding: 8px 14px; font-size: 14px; color: #fff; cursor: pointer; font-family: inherit; }
+
+  main { padding: 20px clamp(12px, 2vw, 24px); }
+  .page { max-width: var(--page-max); margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+  .pageHead { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .page h1 { font-size: 22px; }
+  .backLink { font-size: 13px; color: #2563eb; display: inline-flex; align-items: center; gap: 5px; }
+
+  .card { background: #fff; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.08); padding: 20px; }
+  .muted { color: #6b7280; font-size: 13px; }
+  .hint { margin-top: 12px; font-size: 12px; color: #9ca3af; line-height: 1.5; }
+
+  .primary { background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 10px 18px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .primary:hover { background: #1d4ed8; }
+  .secondary { background: #fff; border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 11px; font-size: 12px; cursor: pointer; font-family: inherit; }
+  .secondary:hover { background: #f3f4f6; }
+  .danger { background: #fff; border: 1px solid #fca5a5; color: #dc2626; border-radius: 6px; padding: 6px 11px; font-size: 12px; cursor: pointer; font-family: inherit; }
+  .danger:hover { background: #fef2f2; }
+
+  /* ---------- lista szablonów ---------- */
+  .tplList { display: flex; flex-direction: column; }
+  .tplRow { display: flex; align-items: center; gap: 14px; padding: 14px 4px; border-bottom: 1px solid #f3f4f6; flex-wrap: wrap; }
+  .tplRow:last-child { border-bottom: none; }
+  .tplPill { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 4px 12px; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+  .tplMain { flex: 1 1 260px; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .tplName { font-size: 15px; font-weight: 600; overflow-wrap: anywhere; }
+  .tplDesc { font-size: 12px; color: #6b7280; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tplDuration { font-size: 13px; color: #374151; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .tplActions { margin-left: auto; display: flex; gap: 6px; }
+
+  .empty { text-align: center; padding: 40px 16px; display: flex; flex-direction: column; gap: 10px; align-items: center; font-size: 14px; }
+  .emptyArt { width: 46px; height: 46px; border-radius: 12px; background: #eff6ff; color: #2563eb; display: grid; place-items: center; }
+
+  /* ---------- okna ---------- */
+  .modalBackdrop { background: rgba(15,23,42,.45); border-radius: 12px; padding: 28px 16px; display: grid; place-items: center; }
+  .modal { background: #fff; border-radius: 12px; box-shadow: 0 18px 48px rgba(0,0,0,.24); width: 100%; max-width: 560px; padding: 22px; }
+  .modalHead { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #eef0f3; padding-bottom: 12px; }
+  .modalHead h2 { font-size: 17px; }
+  .close { background: none; border: none; font-size: 15px; color: #9ca3af; cursor: pointer; }
+  .form { display: flex; flex-direction: column; gap: 16px; margin-top: 16px; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field > span:first-child { font-size: 13px; font-weight: 600; }
+  .field input, .field select, .field textarea {
+    padding: 9px 11px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; font-family: inherit; width: 100%;
+  }
+  .field textarea { resize: vertical; }
+  .row2 { display: flex; gap: 12px; flex-wrap: wrap; }
+  .row2 > * { flex: 1 1 160px; }
+  .selectWrap { position: relative; display: flex; align-items: center; gap: 8px; }
+  .selectWrap select { flex: 1; }
+  .actions { display: flex; justify-content: flex-end; gap: 8px; }
+  .actions .secondary, .actions .danger { padding: 10px 16px; font-size: 14px; border-radius: 8px; }
+  .fieldHint { font-size: 12px; color: #9ca3af; }
+
+  /* ---------- pasek szablonu w formularzu planu ---------- */
+  .tplPicker { background: #f8faff; border: 1px solid #dbeafe; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .tplPickerTop { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .tplPickerLabel { font-size: 13px; font-weight: 600; color: #1e40af; display: flex; align-items: center; gap: 6px; }
+  .tplPickerLink { font-size: 12px; color: #2563eb; white-space: nowrap; }
+  .tplApplied { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 10px 12px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 13px; color: #1e40af; }
+  .tplAppliedName { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+  .clearBtn { background: none; border: none; color: #2563eb; font-size: 12px; text-decoration: underline; cursor: pointer; font-family: inherit; }
+
+  .screen { display: none; }
+  .screen.on { display: block; }
+
+  @media (max-width: 560px) {
+    .tplActions { margin-left: 0; width: 100%; }
+    .tplActions button { flex: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="mockNote">
+  <strong>Makieta robocza — Faza 3, blok H (H5 i H6).</strong> Materiał do rozmowy, nie trafia do dokumentacji.
+  Style skopiowane z istniejących arkuszy, ikony to prawdziwe SVG z <code>lucide-react@1.45.0</code>.
+  <div class="mockSwitch" id="switcher"></div>
+</div>
+
+<header class="navbar">
+  <div class="navLeft">
+    <span class="brand">Platforma Treningowa</span>
+    <nav class="navTabs">
+      <span class="navTab" id="navKal">Kalendarz</span>
+      <span class="navTab">Dziennik</span>
+      <span class="navTab">Cele</span>
+      <span class="navTab">Statystyki</span>
+      <span class="navTab">Profil</span>
+      <span class="navTab">Administracja</span>
+    </nav>
+  </div>
+  <div class="navRight">
+    <span class="userName">Tomasz Osuch</span>
+    <button class="logoutButton" type="button">Wyloguj</button>
+  </div>
+</header>
+
+<main>
+  <div class="page">
+
+    <!-- ========== BIBLIOTEKA ========== -->
+    <section class="screen" data-screen="biblioteka">
+      <div class="pageHead">
+        <span>
+          <a class="backLink" href="#">← Kalendarz</a>
+          <h1 style="margin-top:4px">Szablony treningów</h1>
+        </span>
+        <button class="primary" type="button">+ Nowy szablon</button>
+      </div>
+
+      <div class="card">
+        <div class="tplList" id="tplList"></div>
+      </div>
+
+      <p class="hint">
+        Szablonów nie ma w pasku nawigacji — wchodzi się tu z kalendarza i z formularza planu.
+        Odsyłacz „← Kalendarz” prowadzi z powrotem tam, skąd się przyszło.
+      </p>
+    </section>
+
+    <!-- ========== BIBLIOTEKA — PUSTO ========== -->
+    <section class="screen" data-screen="pusto">
+      <div class="pageHead">
+        <span>
+          <a class="backLink" href="#">← Kalendarz</a>
+          <h1 style="margin-top:4px">Szablony treningów</h1>
+        </span>
+      </div>
+
+      <div class="card">
+        <div class="empty">
+          <span class="emptyArt" id="emptyIcon"></span>
+          <p style="font-weight:600">Nie masz jeszcze żadnego szablonu</p>
+          <p class="muted" style="max-width:420px; line-height:1.6">
+            Szablon zapamiętuje kategorię, czas trwania i opis powtarzalnego treningu.
+            Przy planowaniu wybierasz go z listy i formularz wypełnia się sam — zostaje do podania data.
+          </p>
+          <button class="primary" type="button" style="margin-top:6px">Utwórz pierwszy szablon</button>
+        </div>
+      </div>
+
+      <p class="hint">
+        Pusty stan tłumaczy, po co są szablony. Sama lista bez treści niczego nie sprzedaje — użytkownik nie wie,
+        czy warto poświęcić minutę na założenie pierwszego.
+      </p>
+    </section>
+
+    <!-- ========== FORMULARZ SZABLONU ========== -->
+    <section class="screen" data-screen="formularz">
+      <div class="modalBackdrop">
+        <div class="modal">
+          <div class="modalHead">
+            <h2>Nowy szablon</h2>
+            <button class="close" type="button" aria-label="Zamknij">✕</button>
+          </div>
+
+          <div class="form">
+            <label class="field">
+              <span>Nazwa</span>
+              <input type="text" value="Trening nóg">
+              <span class="fieldHint">Stanie się tytułem treningu po wstawieniu do planu.</span>
+            </label>
+
+            <div class="row2">
+              <label class="field">
+                <span>Kategoria</span>
+                <span class="selectWrap" id="catWrap"></span>
+              </label>
+              <label class="field">
+                <span>Czas trwania</span>
+                <input type="text" value="1h">
+                <span class="fieldHint">Nieobowiązkowy. „45min”, „1h 30min”, „90”.</span>
+              </label>
+            </div>
+
+            <label class="field">
+              <span>Opis</span>
+              <textarea rows="3">Przysiady, wykroki, martwy ciąg</textarea>
+              <span class="fieldHint">Trafi do notatek planu.</span>
+            </label>
+
+            <div class="actions">
+              <button class="secondary" type="button">Anuluj</button>
+              <button class="primary" type="button">Zapisz szablon</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="hint">
+        Szablon nie ma daty ani godziny — to wzorzec, nie zaplanowany trening. Podpowiedzi pod polami mówią wprost,
+        gdzie każda wartość wyląduje po wstawieniu, żeby mapowanie nie było zagadką.
+      </p>
+    </section>
+
+    <!-- ========== PLAN — WYBÓR SZABLONU ========== -->
+    <section class="screen" data-screen="plan-wybor">
+      <div class="modalBackdrop">
+        <div class="modal">
+          <div class="modalHead">
+            <h2>Nowy trening</h2>
+            <button class="close" type="button" aria-label="Zamknij">✕</button>
+          </div>
+
+          <div class="form">
+            <div class="tplPicker">
+              <div class="tplPickerTop">
+                <span class="tplPickerLabel" id="pickerIcon">Zacznij od szablonu</span>
+                <a class="tplPickerLink" href="#">Zarządzaj szablonami →</a>
+              </div>
+              <select id="tplSelect"></select>
+            </div>
+
+            <label class="field">
+              <span>Tytuł</span>
+              <input type="text" placeholder="np. Trening nóg">
+            </label>
+
+            <div class="row2">
+              <label class="field"><span>Data</span><input type="date"></label>
+              <label class="field"><span>Godzina</span><input type="time"></label>
+            </div>
+
+            <div class="actions">
+              <button class="secondary" type="button">Anuluj</button>
+              <button class="primary" type="button">Zapisz</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="hint">
+        Wybór szablonu stoi <strong>nad</strong> polami, bo działa na nie wszystkie — pod nimi wyglądałby na kolejne pole.
+        Pojawia się wyłącznie przy tworzeniu; w trybie edycji istniejącego planu go nie ma.
+      </p>
+    </section>
+
+    <!-- ========== PLAN — PO WSTAWIENIU ========== -->
+    <section class="screen" data-screen="plan-wstawiony">
+      <div class="modalBackdrop">
+        <div class="modal">
+          <div class="modalHead">
+            <h2>Nowy trening</h2>
+            <button class="close" type="button" aria-label="Zamknij">✕</button>
+          </div>
+
+          <div class="form">
+            <div class="tplApplied">
+              <span class="tplAppliedName" id="appliedName"></span>
+              <button class="clearBtn" type="button">Wyczyść i zacznij od zera</button>
+            </div>
+
+            <label class="field">
+              <span>Tytuł</span>
+              <input type="text" value="Trening nóg">
+            </label>
+
+            <label class="field">
+              <span>Kategoria</span>
+              <span class="selectWrap" id="catWrap2"></span>
+            </label>
+
+            <div class="row2">
+              <label class="field"><span>Data</span><input type="date" value=""></label>
+              <label class="field"><span>Godzina</span><input type="time"></label>
+            </div>
+
+            <label class="field">
+              <span>Czas trwania</span>
+              <input type="text" value="1h">
+            </label>
+
+            <label class="field">
+              <span>Notatki</span>
+              <textarea rows="3">Przysiady, wykroki, martwy ciąg</textarea>
+            </label>
+
+            <div class="actions">
+              <button class="secondary" type="button">Anuluj</button>
+              <button class="primary" type="button">Zapisz</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="hint">
+        Pasek informuje, skąd wzięły się wartości, i daje wyjście. <strong>Wszystkie pola zostają edytowalne</strong> —
+        szablon jest punktem wyjścia, nie kontraktem. Data zostaje pusta, bo szablon jej nie zna.
+      </p>
+    </section>
+
+    <!-- ========== WEJŚCIE Z KALENDARZA ========== -->
+    <section class="screen" data-screen="wejscie">
+      <div class="card">
+        <div class="pageHead" style="margin-bottom:14px">
+          <h1 style="font-size:20px">Wrzesień 2026</h1>
+          <span style="display:flex; gap:8px">
+            <button class="secondary" type="button" id="tplEntryBtn">Szablony</button>
+            <button class="primary" type="button">+ Dodaj trening</button>
+          </span>
+        </div>
+        <div style="border:1px dashed #d1d5db; border-radius:10px; padding:38px; text-align:center; color:#9ca3af; font-size:13px">
+          siatka miesięczna kalendarza
+        </div>
+      </div>
+      <p class="hint">
+        Pierwsze z dwóch wejść do biblioteki. Przycisk stoi obok „+ Dodaj trening”, bo obie czynności należą do planowania —
+        ale jest drugorzędny wizualnie, żeby nie konkurował z główną akcją ekranu.
+      </p>
+    </section>
+
+  </div>
+</main>
+
+<script>
+const ICONS = {"dumbbell":"<path d=\"M17.596 12.768a2 2 0 1 0 2.829-2.829l-1.768-1.767a2 2 0 0 0 2.828-2.829l-2.828-2.828a2 2 0 0 0-2.829 2.828l-1.767-1.768a2 2 0 1 0-2.829 2.829z\"></path><path d=\"m2.5 21.5 1.4-1.4\"></path><path d=\"m20.1 3.9 1.4-1.4\"></path><path d=\"M5.343 21.485a2 2 0 1 0 2.829-2.828l1.767 1.768a2 2 0 1 0 2.829-2.829l-6.364-6.364a2 2 0 1 0-2.829 2.829l1.768 1.767a2 2 0 0 0-2.828 2.829z\"></path><path d=\"m9.6 14.4 4.8-4.8\"></path>","footprints":"<path d=\"M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z\"></path><path d=\"M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z\"></path><path d=\"M16 17h4\"></path><path d=\"M4 13h4\"></path>","volleyball":"<path d=\"M11 7a16 16 20 0 1 10.98 4.362\"></path><path d=\"M12 12a13 13 0 0 1-8.66 5\"></path><path d=\"M16.83 13.634a16 16 0 0 1-9.267 7.328\"></path><path d=\"M20.66 17A13 13 0 0 0 12 12a13 13 0 0 1 0-10\"></path><path d=\"M8.17 15.366a16 16 0 0 1-1.713-11.69\"></path><circle cx=\"12\" cy=\"12\" r=\"10\"></circle>","trophy":"<path d=\"M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2\"></path><path d=\"M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2\"></path><path d=\"M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3\"></path><path d=\"M4 22h16\"></path><path d=\"M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z\"></path><path d=\"M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3\"></path>","bike":"<circle cx=\"18.5\" cy=\"17.5\" r=\"3.5\"></circle><circle cx=\"5.5\" cy=\"17.5\" r=\"3.5\"></circle><circle cx=\"15\" cy=\"5\" r=\"1\"></circle><path d=\"M12 17.5V14l-3-3 4-3 2 3h2\"></path>","waves":"<path d=\"M2 12q2.5 2 5 0t5 0 5 0 5 0\"></path><path d=\"M2 19q2.5 2 5 0t5 0 5 0 5 0\"></path><path d=\"M2 5q2.5 2 5 0t5 0 5 0 5 0\"></path>","heart-pulse":"<path d=\"M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5\"></path><path d=\"M3.22 13H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27\"></path>","activity":"<path d=\"M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2\"></path>","flame":"<path d=\"M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4\"></path>","mountain":"<path d=\"m8 3 4 8 5-5 5 15H2L8 3z\"></path>","music":"<path d=\"M9 18V5l12-2v13\"></path><circle cx=\"6\" cy=\"18\" r=\"3\"></circle><circle cx=\"18\" cy=\"16\" r=\"3\"></circle>","target":"<circle cx=\"12\" cy=\"12\" r=\"10\"></circle><circle cx=\"12\" cy=\"12\" r=\"6\"></circle><circle cx=\"12\" cy=\"12\" r=\"2\"></circle>","timer":"<line x1=\"10\" x2=\"14\" y1=\"2\" y2=\"2\"></line><line x1=\"12\" x2=\"15\" y1=\"14\" y2=\"11\"></line><circle cx=\"12\" cy=\"14\" r=\"8\"></circle>","medal":"<path d=\"M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15\"></path><path d=\"M11 12 5.12 2.2\"></path><path d=\"m13 12 5.88-9.8\"></path><path d=\"M8 7h8\"></path><circle cx=\"12\" cy=\"17\" r=\"5\"></circle><path d=\"M12 18v-2h-.5\"></path>","zap":"<path d=\"M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z\"></path>","person-standing":"<circle cx=\"12\" cy=\"5\" r=\"1\"></circle><path d=\"m9 20 3-6 3 6\"></path><path d=\"m6 8 6 2 6-2\"></path><path d=\"M12 10v4\"></path>"};
+function svg(name, size = 16, stroke = 2) {
+  const inner = ICONS[name] || ICONS['dumbbell'] || '';
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    stroke-width="${stroke}" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0" aria-hidden="true">${inner}</svg>`;
+}
+const hexToRgba = (hex, a) => { const h = hex.replace('#',''); return `rgba(${parseInt(h.slice(0,2),16)}, ${parseInt(h.slice(2,4),16)}, ${parseInt(h.slice(4,6),16)}, ${a})`; };
+const darken = (hex, f = .55) => { const h = hex.replace('#',''); const g = s => Math.round(parseInt(s,16)*f).toString(16).padStart(2,'0'); return `#${g(h.slice(0,2))}${g(h.slice(2,4))}${g(h.slice(4,6))}`; };
+
+const CATS = [
+  { id: 1, name: 'Siłownia',       color: '#EA580C', iconName: 'dumbbell' },
+  { id: 2, name: 'Bieganie',       color: '#16A34A', iconName: 'footprints' },
+  { id: 3, name: 'Taniec',         color: '#DB2777', iconName: 'music' },
+  { id: 4, name: 'Rower',          color: '#2563EB', iconName: 'bike' },
+];
+const TEMPLATES = [
+  { id: 1, name: 'Interwały 8×400', description: 'Rozgrzewka 15min, 8×400m na tempie, schłodzenie', cat: 2, durationMin: 50 },
+  { id: 2, name: 'Rundka po lesie', description: 'Spokojne wybieganie, tętno w drugiej strefie', cat: 2, durationMin: 60 },
+  { id: 3, name: 'Trening nóg', description: 'Przysiady, wykroki, martwy ciąg', cat: 1, durationMin: 60 },
+  { id: 4, name: 'Trening techniki', description: '', cat: 3, durationMin: 90 },
+];
+const fmt = (m) => { const h = Math.floor(m/60), r = m%60; return h ? (r ? `${h}h ${r}min` : `${h}h`) : `${m} min`; };
+const catOf = (id) => CATS.find((c) => c.id === id);
+
+function pill(cat) {
+  return `<span class="tplPill" style="background:${hexToRgba(cat.color,.14)}; color:${darken(cat.color)}">
+    ${svg(cat.iconName, 13, 2.2)}${cat.name}</span>`;
+}
+
+// lista posortowana po nazwie — tak przychodzi z serwera, front nie sortuje ponownie
+document.getElementById('tplList').innerHTML = [...TEMPLATES]
+  .sort((a, b) => a.name.localeCompare(b.name, 'pl'))
+  .map((t) => {
+    const c = catOf(t.cat);
+    return `<div class="tplRow">
+      ${pill(c)}
+      <span class="tplMain">
+        <span class="tplName">${t.name}</span>
+        ${t.description ? `<span class="tplDesc">${t.description}</span>` : '<span class="tplDesc" style="color:#c3c8d0">bez opisu</span>'}
+      </span>
+      <span class="tplDuration">${t.durationMin ? fmt(t.durationMin) : '—'}</span>
+      <span class="tplActions">
+        <button class="secondary" type="button">Edytuj</button>
+        <button class="danger" type="button">Usuń</button>
+      </span>
+    </div>`;
+  }).join('');
+
+document.getElementById('emptyIcon').innerHTML = svg('dumbbell', 24, 2);
+document.getElementById('tplEntryBtn').innerHTML = svg('trophy', 13, 2.2) + ' Szablony';
+document.getElementById('tplEntryBtn').style.display = 'inline-flex';
+document.getElementById('tplEntryBtn').style.alignItems = 'center';
+document.getElementById('tplEntryBtn').style.gap = '6px';
+document.getElementById('pickerIcon').innerHTML = svg('flame', 14, 2.2) + ' Zacznij od szablonu';
+
+const catSelect = (id) => {
+  const c = catOf(id);
+  return `<span style="display:inline-flex; color:${darken(c.color)}">${svg(c.iconName, 15, 2.2)}</span>
+    <select>${CATS.map((x) => `<option ${x.id === id ? 'selected' : ''}>${x.name}</option>`).join('')}</select>`;
+};
+document.getElementById('catWrap').innerHTML = catSelect(1);
+document.getElementById('catWrap2').innerHTML = catSelect(1);
+
+document.getElementById('tplSelect').innerHTML =
+  `<option value="">— bez szablonu —</option>` +
+  [...TEMPLATES].sort((a, b) => a.name.localeCompare(b.name, 'pl'))
+    .map((t) => `<option>${t.name} · ${catOf(t.cat).name}${t.durationMin ? ' · ' + fmt(t.durationMin) : ''}</option>`).join('');
+
+document.getElementById('appliedName').innerHTML =
+  svg('dumbbell', 14, 2.2) + ' Wypełniono z szablonu „Trening nóg”';
+
+const SCREENS = [
+  ['wejscie',         'Wejście z kalendarza', 'H5'],
+  ['biblioteka',      'Biblioteka',           'H5 · lista'],
+  ['pusto',           'Stan pusty',           'H5'],
+  ['formularz',       'Formularz szablonu',   'H5'],
+  ['plan-wybor',      'Plan — wybór',         'H6'],
+  ['plan-wstawiony',  'Plan — po wstawieniu', 'H6'],
+];
+document.getElementById('switcher').innerHTML = SCREENS.map(([id, label, note], i) =>
+  `<button type="button" data-goto="${id}" aria-pressed="${i === 0}">${label} <span style="opacity:.6">· ${note}</span></button>`).join('');
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach((s) => s.classList.toggle('on', s.dataset.screen === id));
+  document.querySelectorAll('[data-goto]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.goto === id)));
+  document.getElementById('navKal').className = 'navTab navTabActive';
+}
+document.querySelectorAll('[data-goto]').forEach((b) => b.onclick = () => show(b.dataset.goto));
+show('wejscie');
+</script>
+</body>
+</html>

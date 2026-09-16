@@ -16,6 +16,7 @@ import StatisticsPage from './pages/StatisticsPage';
 import AdminLayout from './components/AdminLayout';
 import AdminCategoriesPage from './pages/AdminCategoriesPage';
 import AdminUsersPage from './pages/AdminUsersPage';
+import TemplatesPage from './pages/TemplatesPage';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
           <Route element={<PrivateRoute />}>
             <Route element={<AppLayout />}>
               <Route path="/kalendarz" element={<CalendarPage />} />
+              <Route path="/szablony" element={<TemplatesPage />} />
               <Route path="/dziennik" element={<WorkoutLogPage />} />
               <Route path="/cele" element={<GoalsPage />} />
               <Route path="/statystyki" element={<StatisticsPage />} />
