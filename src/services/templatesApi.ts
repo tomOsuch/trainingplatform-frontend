@@ -21,7 +21,7 @@ export function updateTemplate(id: number, data: WorkoutTemplateRequest): Promis
 }
 
 export function deleteTemplate(id: number): Promise<void> {
-  return apiFetch(`/workout-templates/${id}`, {
+  return apiFetch<void>(`/workout-templates/${id}`, {
     method: 'DELETE',
   });
 }
