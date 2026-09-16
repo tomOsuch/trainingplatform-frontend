@@ -24,6 +24,17 @@ const pastPlan: TrainingPlan = {
   status: 'COMPLETED',
 };
 
+const sampleTemplate = {
+  id: 3,
+  name: 'Trening nóg',
+  description: 'Przysiady, wykroki, martwy ciąg',
+  categoryId: 1,
+  categoryName: 'Taniec',
+  categoryColor: '#9B59B6',
+  categoryIconName: 'music',
+  durationMin: 60,
+};
+
 const noop = () => {};
 
 describe('TrainingPlanForm', () => {
@@ -124,4 +135,62 @@ describe('TrainingPlanForm', () => {
     expect(url).toContain("/training-plans/7");
     expect(options!.method).toBe("PUT");
   });
+
+  test('wybór szablonu wypełnia pola i nie rusza wybranej daty', async () => {
+    renderWithProviders(
+      <TrainingPlanForm
+        categories={sampleCategories}
+        templates={[sampleTemplate]}
+        initialDate="2030-06-15"
+        onClose={noop}
+        onSaved={noop}
+      />,
+    );
+
+    await userEvent.selectOptions(screen.getByLabelText(/^Zacznij od szablonu/), '3');
+
+    expect(screen.getByLabelText(/^Tytuł/)).toHaveValue('Trening nóg');
+    expect(screen.getByLabelText(/^Kategoria/)).toHaveValue('1');
+    expect(screen.getByLabelText(/^Czas trwania/)).toHaveValue('1h');
+    expect(screen.getByLabelText(/^Notatki/)).toHaveValue('Przysiady, wykroki, martwy ciąg');
+    expect(screen.getByLabelText(/^Data/)).toHaveValue('2030-06-15');
+    expect(screen.getByText(/Wypełniono z szablonu/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Wyczyść i zacznij od zera' })).toHaveFocus();
+  });
+
+  test('wyczyszczenie szablonu opróżnia wypełnione pola', async () => {
+    renderWithProviders(
+      <TrainingPlanForm
+        categories={sampleCategories}
+        templates={[sampleTemplate]}
+        initialDate="2030-06-15"
+        onClose={noop}
+        onSaved={noop}
+      />,
+    );
+
+    await userEvent.selectOptions(screen.getByLabelText(/^Zacznij od szablonu/), '3');
+    await userEvent.click(screen.getByRole('button', { name: 'Wyczyść i zacznij od zera' }));
+
+    expect(screen.getByLabelText(/^Tytuł/)).toHaveValue('');
+    expect(screen.getByLabelText(/^Notatki/)).toHaveValue('');
+    expect(screen.getByLabelText(/^Data/)).toHaveValue('2030-06-15');
+    expect(screen.getByLabelText(/^Zacznij od szablonu/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Zacznij od szablonu/)).toHaveFocus();
+  });
+
+  test('w trybie edycji nie ma wyboru szablonu', () => {
+    renderWithProviders(
+      <TrainingPlanForm
+        categories={sampleCategories}
+        templates={[sampleTemplate]}
+        plan={pastPlan}
+        onClose={noop}
+        onSaved={noop}
+      />,
+    );
+
+    expect(screen.queryByLabelText(/^Zacznij od szablonu/)).not.toBeInTheDocument();
+  });
+
 });

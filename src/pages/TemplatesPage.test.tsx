@@ -38,7 +38,7 @@ describe('TemplatesPage', () => {
     renderWithProviders(<TemplatesPage />);
 
     expect(await screen.findByText(/Nie masz jeszcze żadnego szablonu/)).toBeInTheDocument();
-    expect(screen.getByText(/wzorzec, do którego wracasz/)).toBeInTheDocument();
+    expect(screen.getByText(/formularz wypełnia się sam/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Utwórz pierwszy szablon' })).toBeInTheDocument();
   });
 

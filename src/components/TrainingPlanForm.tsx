@@ -1,5 +1,6 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { TrainingPlan, TrainingPlanRequest, WorkoutCategory } from '../types/workout';
+import { WorkoutTemplate } from '../types/template';
 import { createPlan, updatePlan, deletePlan } from '../services/trainingPlansApi';
 import { ApiRequestError } from '../services/apiClient';
 import { toISODate } from '../utils/calendar';
@@ -8,14 +9,15 @@ import Modal from './Modal';
 import styles from '../styles/TrainingPlanForm.module.scss';
 
 interface TrainingPlanFormProps {
+  templates?: WorkoutTemplate[];
   categories: WorkoutCategory[];
-  initialDate?: string; // z paska "+ Dodaj" na dniu
-  plan?: TrainingPlan; // obecność = tryb edycji
+  initialDate?: string;
+  plan?: TrainingPlan;
   onClose: () => void;
-  onSaved: () => void; // CalendarPage odświeży plany
+  onSaved: () => void;
 }
 
-function TrainingPlanForm({ categories, initialDate, plan, onClose, onSaved }: TrainingPlanFormProps) {
+function TrainingPlanForm({ categories, templates, initialDate, plan, onClose, onSaved }: TrainingPlanFormProps) {
   const editMode = Boolean(plan);
 
   const [title, setTitle] = useState(plan?.title ?? '');
@@ -24,11 +26,22 @@ function TrainingPlanForm({ categories, initialDate, plan, onClose, onSaved }: T
   const [plannedTime, setPlannedTime] = useState(plan?.plannedTime?.slice(0, 5) ?? '');
   const [durationMin, setDurationMin] = useState(plan?.durationMin ? formatDuration(plan.durationMin) : '');
   const [notes, setNotes] = useState(plan?.notes ?? '');
+  const [appliedTemplate, setAppliedTemplate] = useState<WorkoutTemplate | null>(null);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const templateSelectRef = useRef<HTMLSelectElement>(null);
+  const templateClearRef = useRef<HTMLButtonElement>(null);
+  const templateSwitched = useRef(false);
+
+  useEffect(() => {
+    if (!templateSwitched.current) return;
+    if (appliedTemplate) templateClearRef.current?.focus();
+    else templateSelectRef.current?.focus();
+  }, [appliedTemplate]);
 
   const selectedColor = categories.find((c) => String(c.id) === categoryId)?.color;
   const parsedDuration = durationMin.trim() ? parseDuration(durationMin) : null;
@@ -95,9 +108,66 @@ function TrainingPlanForm({ categories, initialDate, plan, onClose, onSaved }: T
     }
   };
 
+  const applyTemplate = (id: string) => {
+    const tpl = templates?.find((t) => String(t.id) === id);
+    if (!tpl) return;
+
+    templateSwitched.current = true;
+    setTitle(tpl.name);
+    setCategoryId(String(tpl.categoryId));
+    setDurationMin(tpl.durationMin ? formatDuration(tpl.durationMin) : '');
+    setNotes(tpl.description ?? '');
+    setAppliedTemplate(tpl);
+    setErrors({});
+    setFormError(null);
+  };
+
+  const clearTemplate = () => {
+    templateSwitched.current = true;
+    setTitle('');
+    setCategoryId('');
+    setDurationMin('');
+    setNotes('');
+    setAppliedTemplate(null);
+    setErrors({});
+    setFormError(null);
+  };
+
   return (
     <Modal title={editMode ? 'Edytuj trening' : 'Nowy trening'} onClose={onClose}>
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
+        {!editMode &&
+          templates &&
+          templates.length > 0 &&
+          (appliedTemplate ? (
+            <div className={styles.templateApplied}>
+              <span id="template-applied-label">
+                Wypełniono z szablonu <strong>{appliedTemplate.name}</strong>
+              </span>
+              <button
+                type="button"
+                ref={templateClearRef}
+                aria-describedby="template-applied-label"
+                className={styles.templateClear}
+                onClick={clearTemplate}
+              >
+                Wyczyść i zacznij od zera
+              </button>
+            </div>
+          ) : (
+            <label className={styles.templatePicker}>
+              <span>Zacznij od szablonu</span>
+              <select ref={templateSelectRef} value="" onChange={(e) => applyTemplate(e.target.value)}>
+                <option value="">— bez szablonu —</option>
+                {templates.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                    {t.durationMin ? ` · ${formatDuration(t.durationMin)}` : ''}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ))}
         <label className={styles.field}>
           <span>Tytuł *</span>
           <input value={title} onChange={(e) => setTitle(e.target.value)} />
