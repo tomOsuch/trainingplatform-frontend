@@ -257,3 +257,19 @@
     text-decoration: underline;
   }
 }
+
+.templatesButton {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 9px 14px;
+  font-size: 14px;
+  background: #fff;
+  color: #374151;
+  white-space: nowrap;
+
+  &:hover {
+    background: #f3f4f6;
+  }
+}

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { CalendarItem, TrainingPlan, WorkoutCategory, WorkoutLog, WorkoutLogRequest } from '../types/workout';
 import CalendarTile from '../components/CalendarTile';
 import WeekView from '../components/WeekView';
@@ -142,6 +142,9 @@ function CalendarPage() {
               Tydzień
             </button>
           </div>
+          <Link to="/szablony" className={styles.templatesButton}>
+            Szablony
+          </Link>
           <button className={styles.addButton} onClick={() => setFormDate(toISODate(new Date()))}>
             + Dodaj trening
           </button>
