@@ -10,6 +10,8 @@ import WorkoutLogDetail from '../components/WorkoutLogDetail';
 import { getPlans } from '../services/trainingPlansApi';
 import { getLogs } from '../services/workoutLogsApi';
 import { getCategories } from '../services/categoriesApi';
+import { getTemplates } from '../services/templatesApi';
+import { WorkoutTemplate } from '../types/template';
 import { buildItemsByDay } from '../utils/calendarItems';
 import { buildMonthGrid, buildWeekGrid, startOfWeek, toISODate, MONTH_NAMES, WEEKDAY_NAMES } from '../utils/calendar';
 import { formatDatePl, weekdayPl } from '../utils/calendar';
@@ -40,6 +42,7 @@ function CalendarPage() {
   const [plans, setPlans] = useState<TrainingPlan[]>([]);
   const [logs, setLogs] = useState<WorkoutLog[]>([]);
   const [categories, setCategories] = useState<WorkoutCategory[]>([]);
+  const [templates, setTemplates] = useState<WorkoutTemplate[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const [formDate, setFormDate] = useState<string | null>(null);
@@ -75,6 +78,10 @@ function CalendarPage() {
   useEffect(() => {
     getCategories()
       .then(setCategories)
+      .catch(() => {});
+
+    getTemplates()
+      .then(setTemplates)
       .catch(() => {});
   }, []);
 
@@ -250,6 +257,7 @@ function CalendarPage() {
       {formDate && (
         <TrainingPlanForm
           categories={categories}
+          templates={templates}
           initialDate={formDate}
           onClose={() => setFormDate(null)}
           onSaved={() => setRefreshKey((k) => k + 1)}

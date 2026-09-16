@@ -129,8 +129,8 @@ function TemplatesPage() {
               </span>
               <p className={styles.emptyTitle}>Nie masz jeszcze żadnego szablonu</p>
               <p className={styles.muted}>
-                Szablon zapamiętuje kategorię, czas trwania i opis powtarzalnego treningu — wzorzec, do którego wracasz zamiast wypisywać te
-                same wartości za każdym razem.
+                Szablon zapamiętuje kategorię, czas trwania i opis powtarzalnego treningu. Przy planowaniu wybierasz go z listy
+                i formularz wypełnia się sam — zostaje do podania data.
               </p>
               <button type="button" className={styles.primary} onClick={() => setCreating(true)} disabled={!canEdit}>
                 Utwórz pierwszy szablon

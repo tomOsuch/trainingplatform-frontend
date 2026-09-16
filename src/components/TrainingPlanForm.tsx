@@ -1,5 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { TrainingPlan, TrainingPlanRequest, WorkoutCategory } from '../types/workout';
+import { WorkoutTemplate } from '../types/template';
 import { createPlan, updatePlan, deletePlan } from '../services/trainingPlansApi';
 import { ApiRequestError } from '../services/apiClient';
 import { toISODate } from '../utils/calendar';
@@ -8,14 +9,15 @@ import Modal from './Modal';
 import styles from '../styles/TrainingPlanForm.module.scss';
 
 interface TrainingPlanFormProps {
+  templates?: WorkoutTemplate[];
   categories: WorkoutCategory[];
-  initialDate?: string; // z paska "+ Dodaj" na dniu
-  plan?: TrainingPlan; // obecność = tryb edycji
+  initialDate?: string;
+  plan?: TrainingPlan;
   onClose: () => void;
-  onSaved: () => void; // CalendarPage odświeży plany
+  onSaved: () => void;
 }
 
-function TrainingPlanForm({ categories, initialDate, plan, onClose, onSaved }: TrainingPlanFormProps) {
+function TrainingPlanForm({ categories, templates, initialDate, plan, onClose, onSaved }: TrainingPlanFormProps) {
   const editMode = Boolean(plan);
 
   const [title, setTitle] = useState(plan?.title ?? '');
@@ -24,6 +26,7 @@ function TrainingPlanForm({ categories, initialDate, plan, onClose, onSaved }: T
   const [plannedTime, setPlannedTime] = useState(plan?.plannedTime?.slice(0, 5) ?? '');
   const [durationMin, setDurationMin] = useState(plan?.durationMin ? formatDuration(plan.durationMin) : '');
   const [notes, setNotes] = useState(plan?.notes ?? '');
+  const [appliedTemplate, setAppliedTemplate] = useState<WorkoutTemplate | null>(null);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -95,9 +98,56 @@ function TrainingPlanForm({ categories, initialDate, plan, onClose, onSaved }: T
     }
   };
 
+  const applyTemplate = (id: string) => {
+    const tpl = templates?.find((t) => String(t.id) === id);
+    if (!tpl) return;
+
+    setTitle(tpl.name);
+    setCategoryId(String(tpl.categoryId));
+    setDurationMin(tpl.durationMin ? formatDuration(tpl.durationMin) : '');
+    setNotes(tpl.description ?? '');
+    setAppliedTemplate(tpl);
+    setErrors({});
+  };
+
+  const clearTemplate = () => {
+    setTitle('');
+    setCategoryId('');
+    setDurationMin('');
+    setNotes('');
+    setAppliedTemplate(null);
+    setErrors({});
+  };
+
   return (
     <Modal title={editMode ? 'Edytuj trening' : 'Nowy trening'} onClose={onClose}>
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
+        {!editMode &&
+          templates &&
+          templates.length > 0 &&
+          (appliedTemplate ? (
+            <div className={styles.templateApplied}>
+              <span>
+                Wypełniono z szablonu <strong>{appliedTemplate.name}</strong>
+              </span>
+              <button type="button" className={styles.templateClear} onClick={clearTemplate}>
+                Wyczyść i zacznij od zera
+              </button>
+            </div>
+          ) : (
+            <label className={styles.templatePicker}>
+              <span>Zacznij od szablonu</span>
+              <select value="" onChange={(e) => applyTemplate(e.target.value)}>
+                <option value="">— bez szablonu —</option>
+                {templates.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                    {t.durationMin ? ` · ${formatDuration(t.durationMin)}` : ''}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ))}
         <label className={styles.field}>
           <span>Tytuł *</span>
           <input value={title} onChange={(e) => setTitle(e.target.value)} />

@@ -15,7 +15,9 @@
     font-weight: 600;
   }
 
-  input, select, textarea {
+  input,
+  select,
+  textarea {
     padding: 9px 11px;
     border: 1px solid #d1d5db;
     border-radius: 8px;
@@ -39,7 +41,9 @@
   align-items: center;
   gap: 8px;
 
-  select { flex: 1; }
+  select {
+    flex: 1;
+  }
 }
 
 .dot {
@@ -77,8 +81,13 @@
   font-weight: 600;
   cursor: pointer;
 
-  &:hover:not(:disabled) { background: #1d4ed8; }
-  &:disabled { opacity: 0.6; }
+  &:hover:not(:disabled) {
+    background: #1d4ed8;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+  }
 }
 
 .cancel {
@@ -90,7 +99,9 @@
   font-size: 14px;
   cursor: pointer;
 
-  &:hover { background: #f3f4f6; }
+  &:hover {
+    background: #f3f4f6;
+  }
 }
 
 .delete {
@@ -102,7 +113,9 @@
   font-size: 13px;
   cursor: pointer;
 
-  &:hover { background: #fef2f2; }
+  &:hover {
+    background: #fef2f2;
+  }
 }
 
 .confirmBox {
@@ -111,5 +124,57 @@
   gap: 8px;
   font-size: 13px;
 
-  button { flex: 1; }
+  button {
+    flex: 1;
+  }
+}
+
+.templatePicker {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: #f8faff;
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  padding: 12px;
+
+  >span:first-child {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e40af;
+  }
+
+  select {
+    padding: 9px 11px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #fff;
+  }
+}
+
+.templateApplied {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: #1e40af;
+}
+
+.templateClear {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
 }
