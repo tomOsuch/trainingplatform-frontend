@@ -136,9 +136,15 @@ describe('TrainingPlanForm', () => {
     expect(options!.method).toBe("PUT");
   });
 
-  test('wybór szablonu wypełnia pola i zostawia datę pustą', async () => {
+  test('wybór szablonu wypełnia pola i nie rusza wybranej daty', async () => {
     renderWithProviders(
-      <TrainingPlanForm categories={sampleCategories} templates={[sampleTemplate]} onClose={noop} onSaved={noop} />,
+      <TrainingPlanForm
+        categories={sampleCategories}
+        templates={[sampleTemplate]}
+        initialDate="2030-06-15"
+        onClose={noop}
+        onSaved={noop}
+      />,
     );
 
     await userEvent.selectOptions(screen.getByLabelText(/^Zacznij od szablonu/), '3');
@@ -147,14 +153,20 @@ describe('TrainingPlanForm', () => {
     expect(screen.getByLabelText(/^Kategoria/)).toHaveValue('1');
     expect(screen.getByLabelText(/^Czas trwania/)).toHaveValue('1h');
     expect(screen.getByLabelText(/^Notatki/)).toHaveValue('Przysiady, wykroki, martwy ciąg');
-    expect(screen.getByLabelText(/^Data/)).toHaveValue('');
+    expect(screen.getByLabelText(/^Data/)).toHaveValue('2030-06-15');
     expect(screen.getByText(/Wypełniono z szablonu/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Wyczyść i zacznij od zera' })).toHaveFocus();
   });
 
   test('wyczyszczenie szablonu opróżnia wypełnione pola', async () => {
     renderWithProviders(
-      <TrainingPlanForm categories={sampleCategories} templates={[sampleTemplate]} onClose={noop} onSaved={noop} />,
+      <TrainingPlanForm
+        categories={sampleCategories}
+        templates={[sampleTemplate]}
+        initialDate="2030-06-15"
+        onClose={noop}
+        onSaved={noop}
+      />,
     );
 
     await userEvent.selectOptions(screen.getByLabelText(/^Zacznij od szablonu/), '3');
@@ -162,6 +174,7 @@ describe('TrainingPlanForm', () => {
 
     expect(screen.getByLabelText(/^Tytuł/)).toHaveValue('');
     expect(screen.getByLabelText(/^Notatki/)).toHaveValue('');
+    expect(screen.getByLabelText(/^Data/)).toHaveValue('2030-06-15');
     expect(screen.getByLabelText(/^Zacznij od szablonu/)).toBeInTheDocument();
     expect(screen.getByLabelText(/^Zacznij od szablonu/)).toHaveFocus();
   });
