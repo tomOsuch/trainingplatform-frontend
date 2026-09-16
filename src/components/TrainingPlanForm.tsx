@@ -119,6 +119,7 @@ function TrainingPlanForm({ categories, templates, initialDate, plan, onClose, o
     setNotes(tpl.description ?? '');
     setAppliedTemplate(tpl);
     setErrors({});
+    setFormError(null);
   };
 
   const clearTemplate = () => {
@@ -129,6 +130,7 @@ function TrainingPlanForm({ categories, templates, initialDate, plan, onClose, o
     setNotes('');
     setAppliedTemplate(null);
     setErrors({});
+    setFormError(null);
   };
 
   return (
