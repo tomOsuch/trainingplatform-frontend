@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { WorkoutCategory } from '../types/workout';
 import { WorkoutTemplate } from '../types/template';
 import { deleteTemplate, getTemplates } from '../services/templatesApi';
@@ -13,6 +13,7 @@ import Modal from '../components/Modal';
 import styles from '../styles/TemplatesPage.module.scss';
 
 function TemplatesPage() {
+  const location = useLocation();
   const [templates, setTemplates] = useState<WorkoutTemplate[]>([]);
   const [categories, setCategories] = useState<WorkoutCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,7 +82,7 @@ function TemplatesPage() {
     <div className={styles.page}>
       <div className={styles.head}>
         <div>
-          <Link to="/kalendarz" className={styles.back}>
+          <Link to="/kalendarz" state={location.state} className={styles.back}>
             ← Kalendarz
           </Link>
           <h1>Szablony treningów</h1>
@@ -128,8 +129,8 @@ function TemplatesPage() {
               </span>
               <p className={styles.emptyTitle}>Nie masz jeszcze żadnego szablonu</p>
               <p className={styles.muted}>
-                Szablon zapamiętuje kategorię, czas trwania i opis powtarzalnego treningu — wzorzec, do którego wracasz
-                zamiast wypisywać te same wartości za każdym razem.
+                Szablon zapamiętuje kategorię, czas trwania i opis powtarzalnego treningu — wzorzec, do którego wracasz zamiast wypisywać te
+                same wartości za każdym razem.
               </p>
               <button type="button" className={styles.primary} onClick={() => setCreating(true)} disabled={!canEdit}>
                 Utwórz pierwszy szablon
@@ -192,7 +193,12 @@ function TemplatesPage() {
       )}
 
       {deleting && (
-         <Modal title={`Usunąć szablon „${deleting.name}”?`} onClose={() => setDeleting(null)}>
+        <Modal
+          title={`Usunąć szablon „${deleting.name}”?`}
+          onClose={() => {
+            if (!removing) setDeleting(null);
+          }}
+        >
           <p className={styles.muted}>
             Plany utworzone na jego podstawie zostaną nietknięte — szablon jest kopiowany przy wstawianiu, a nie powiązany z planem.
           </p>

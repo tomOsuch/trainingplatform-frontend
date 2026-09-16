@@ -37,7 +37,7 @@ function TemplateForm({ categories, template, onClose, onSaved }: TemplateFormPr
 
     if (!categoryId) e.categoryId = 'Wybierz kategorię';
 
-     if (duration.trim() && parsed === null) e.durationMin = 'Podaj czas jak „45min” albo „1h 30min”';
+    if (duration.trim() && parsed === null) e.durationMin = 'Podaj czas jak „45min” albo „1h 30min”';
     else if (parsed !== null && parsed <= 0) e.durationMin = 'Czas musi być większy od 0';
 
     return e;
@@ -72,7 +72,13 @@ function TemplateForm({ categories, template, onClose, onSaved }: TemplateFormPr
   };
 
   return (
-    <Modal title={template ? `Edycja: ${template.name}` : 'Nowy szablon'} onClose={onClose} wide>
+    <Modal
+      title={template ? `Edycja: ${template.name}` : 'Nowy szablon'}
+      onClose={() => {
+        if (!saving) onClose();
+      }}
+      wide
+    >
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
         <label className={styles.field}>
           <span>Nazwa</span>
@@ -121,7 +127,7 @@ function TemplateForm({ categories, template, onClose, onSaved }: TemplateFormPr
         {formError && <p className={styles.formError}>{formError}</p>}
 
         <div className={styles.actions}>
-          <button type="button" className={styles.secondary} onClick={onClose}>
+          <button type="button" className={styles.secondary} onClick={onClose} disabled={saving}>
             Anuluj
           </button>
           <button type="submit" className={styles.primary} disabled={saving}>

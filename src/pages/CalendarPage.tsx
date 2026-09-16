@@ -17,10 +17,11 @@ import Modal from '../components/Modal';
 import styles from '../styles/CalendarPage.module.scss';
 
 function CalendarPage() {
-  const [view, setView] = useState<'month' | 'week'>('month');
-
   const location = useLocation();
-  const requestedMonth = (location.state as { month?: string } | null)?.month;
+  const navState = location.state as { month?: string; view?: 'month' | 'week' } | null;
+  const requestedMonth = navState?.month;
+
+  const [view, setView] = useState<'month' | 'week'>(navState?.view ?? 'month');
 
   const [anchor, setAnchor] = useState(() => {
     if (requestedMonth) {
@@ -142,7 +143,7 @@ function CalendarPage() {
               Tydzień
             </button>
           </div>
-          <Link to="/szablony" className={styles.templatesButton}>
+          <Link to="/szablony" state={{ month: toISODate(anchor).slice(0, 7), view }} className={styles.templatesButton}>
             Szablony
           </Link>
           <button className={styles.addButton} onClick={() => setFormDate(toISODate(new Date()))}>
