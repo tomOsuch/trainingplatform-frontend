@@ -18,14 +18,17 @@ import styles from '../styles/CalendarPage.module.scss';
 
 function CalendarPage() {
   const location = useLocation();
-  const navState = location.state as { month?: string; view?: 'month' | 'week' } | null;
-  const requestedMonth = navState?.month;
+  const navState = location.state as { month?: string; anchor?: string; view?: 'month' | 'week' } | null;
 
   const [view, setView] = useState<'month' | 'week'>(navState?.view ?? 'month');
 
   const [anchor, setAnchor] = useState(() => {
-    if (requestedMonth) {
-      const [year, month] = requestedMonth.split('-').map(Number);
+    if (navState?.anchor) {
+      const [year, month, day] = navState.anchor.split('-').map(Number);
+      return new Date(year, month - 1, day);
+    }
+    if (navState?.month) {
+      const [year, month] = navState.month.split('-').map(Number);
       return new Date(year, month - 1, 1);
     }
     const now = new Date();
@@ -89,15 +92,19 @@ function CalendarPage() {
     setAnchor(view === 'month' ? new Date(now.getFullYear(), now.getMonth(), 1) : startOfWeek(now));
   };
 
-  // przy zmianie widoku normalizujemy kotwicę do właściwego "początku"
   const switchView = (next: 'month' | 'week') => {
     setView(next);
-    setAnchor((a) => (next === 'week' ? startOfWeek(a) : new Date(a.getFullYear(), a.getMonth(), 1)));
+    setAnchor((a) => {
+      if (next === 'month') return new Date(a.getFullYear(), a.getMonth(), 1);
+
+      const now = new Date();
+      const sameMonth = a.getFullYear() === now.getFullYear() && a.getMonth() === now.getMonth();
+      return startOfWeek(sameMonth ? now : a);
+    });
   };
 
   const handleAddForDay = (iso: string) => setFormDate(iso);
 
-  // kliknięcie kafelka: odnajdujemy oryginalny obiekt po rodzaju i id
   const handleSelectItem = (item: CalendarItem) => {
     if (item.kind === 'plan') {
       const plan = plans.find((p) => p.id === item.id);
@@ -143,7 +150,7 @@ function CalendarPage() {
               Tydzień
             </button>
           </div>
-          <Link to="/szablony" state={{ month: toISODate(anchor).slice(0, 7), view }} className={styles.templatesButton}>
+          <Link to="/szablony" state={{ anchor: toISODate(anchor), view }} className={styles.templatesButton}>
             Szablony
           </Link>
           <button className={styles.addButton} onClick={() => setFormDate(toISODate(new Date()))}>
