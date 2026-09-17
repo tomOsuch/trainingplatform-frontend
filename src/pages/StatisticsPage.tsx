@@ -54,6 +54,30 @@ function StatisticsPage() {
 
   const averageMinutes = stats && stats.workoutCount > 0 ? Math.round(stats.totalMinutes / stats.workoutCount) : null;
 
+  const workoutsHint = (() => {
+    if (!stats) return '';
+    if (stats.workoutCount === 0) return 'wpisy w dzienniku';
+    if (stats.adHocCount === 0) return 'wszystkie z planu';
+    if (stats.plannedCount === 0) return 'wszystkie poza planem';
+    return `${stats.plannedCount} z planu · ${stats.adHocCount} poza planem`;
+  })();
+
+  const intensity = stats?.intensity;
+
+  const intensityValue = intensity && intensity.average !== null ? intensity.average.toFixed(1).replace('.', ',') : null;
+
+  const intensityHint = (() => {
+    if (!intensity) return '';
+    if (intensity.totalCount === 0) return 'brak treningów w tym okresie';
+    if (intensity.ratedCount === 0) return 'żaden trening nie ma jeszcze oceny';
+    return `oceniono ${intensity.ratedCount} z ${intensity.totalCount} ${plural(
+      intensity.totalCount,
+      'treningu',
+      'treningów',
+      'treningów',
+    )}`;
+  })();
+
   return (
     <div className={styles.page}>
       <div className={styles.header}>
@@ -169,12 +193,24 @@ function StatisticsPage() {
                 <div className={styles.tile}>
                   <span className={styles.tileLabel}>Treningi</span>
                   <span className={styles.tileValue}>{stats.workoutCount}</span>
-                  <span className={styles.tileHint}>wpisy w dzienniku</span>
+                  <span className={styles.tileHint}>{workoutsHint}</span>
                 </div>
                 <div className={styles.tile}>
                   <span className={styles.tileLabel}>Łączny czas</span>
                   <span className={styles.tileValue}>{formatDuration(stats.totalMinutes)}</span>
                   <span className={styles.tileHint}>{averageMinutes ? `średnio ${formatDuration(averageMinutes)} na trening` : '—'}</span>
+                </div>
+                <div className={styles.tile}>
+                  <span className={styles.tileLabel}>Średnia intensywność</span>
+                  {intensityValue !== null ? (
+                    <span className={styles.tileValue}>
+                      {intensityValue}
+                      <span className={styles.tileScale}>/ 10</span>
+                    </span>
+                  ) : (
+                    <span className={`${styles.tileValue} ${styles.tileValueEmpty}`}>—</span>
+                  )}
+                  <span className={styles.tileHint}>{intensityHint}</span>
                 </div>
               </div>
 

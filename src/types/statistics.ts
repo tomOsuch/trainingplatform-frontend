@@ -16,6 +16,12 @@ export interface PlanCompletion {
   completionRate: number | null;
 }
 
+export interface IntensityStat {
+  average: number | null;
+  ratedCount: number;
+  totalCount: number;
+}
+
 export interface Statistics {
   from: string;
   to: string;
@@ -23,4 +29,7 @@ export interface Statistics {
   totalMinutes: number;
   byCategory: CategoryStat[];
   planCompletion: PlanCompletion;
+  intensity: IntensityStat;
+  plannedCount: number;
+  adHocCount: number;
 }
