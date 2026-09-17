@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Statistics } from '../types/statistics';
-import { getStatistics } from '../services/statisticsApi';
+import { Statistics, WeeklyStatistics } from '../types/statistics';
+import { getStatistics, getWeeklyStatistics } from '../services/statisticsApi';
 import {
   isCurrentMonth,
   monthKey,
@@ -14,6 +14,7 @@ import {
 import { formatDuration, plural } from '../utils/format';
 import { darkenHex } from '../utils/color';
 import CategoryIcon from '../components/CategoryIcon';
+import WeeklyChart from '../components/WeeklyChart';
 import styles from '../styles/StatisticsPage.module.scss';
 
 function StatisticsPage() {
@@ -22,20 +23,53 @@ function StatisticsPage() {
   const [stats, setStats] = useState<Statistics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [weekly, setWeekly] = useState<WeeklyStatistics | null>(null);
+  const [weeklyError, setWeeklyError] = useState(false);
 
   const period = useMemo(() => monthPeriod(anchor), [anchor]);
 
   useEffect(() => {
+    let active = true;
+
     setLoading(true);
     setError(null);
     getStatistics(period.from, period.to)
-      .then(setStats)
-      .catch((e) => setError(e.message ?? 'Nie udało się pobrać statystyk'))
-      .finally(() => setLoading(false));
+      .then((data) => {
+        if (active) setStats(data);
+      })
+      .catch((e) => {
+        if (active) setError(e.message ?? 'Nie udało się pobrać statystyk');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [period]);
+
+  useEffect(() => {
+    let active = true;
+
+    setWeeklyError(false);
+    getWeeklyStatistics(period.from, period.to)
+      .then((data) => {
+        if (active) setWeekly(data);
+      })
+      .catch(() => {
+        if (active) setWeeklyError(true);
+      });
+
+    return () => {
+      active = false;
+    };
   }, [period]);
 
   const label = stats ? periodLabelFromResponse(stats.from) : monthLabel(anchor);
   const atCurrentMonth = isCurrentMonth(anchor);
+
+  const weeklyMatches = Boolean(stats && weekly && weekly.from === stats.from && weekly.to === stats.to);
 
   const completion = stats?.planCompletion;
   const hasBase = Boolean(completion && completion.completionBase > 0);
@@ -44,7 +78,6 @@ function StatisticsPage() {
   const share = (value: number, countValue: number): number => {
     if (!stats) return 0;
     if (minutesInBreakdown > 0) return (value / minutesInBreakdown) * 100;
-    // brak minut w rozbiciu (nikt nie podał czasu trwania albo dane są niespójne)
     if (stats.workoutCount > 0) return (countValue / stats.workoutCount) * 100;
     return 0;
   };
@@ -213,6 +246,25 @@ function StatisticsPage() {
                   <span className={styles.tileHint}>{intensityHint}</span>
                 </div>
               </div>
+
+              <section className={styles.section}>
+                <h2 className={styles.sectionTitle}>
+                  Aktywność tygodniowa
+                  {weeklyMatches && weekly && (
+                    <span className={styles.count}>
+                      {weekly.weeks.length} {plural(weekly.weeks.length, 'tydzień', 'tygodnie', 'tygodni')}
+                    </span>
+                  )}
+                </h2>
+
+                {weeklyError ? (
+                  <p className={styles.empty}>Nie udało się pobrać wykresu aktywności.</p>
+                ) : weeklyMatches && weekly ? (
+                  <WeeklyChart weeks={weekly.weeks} />
+                ) : (
+                  <p className={styles.loading}>Ładowanie…</p>
+                )}
+              </section>
 
               <section className={styles.section}>
                 <h2 className={styles.sectionTitle}>

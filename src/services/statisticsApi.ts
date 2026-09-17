@@ -1,5 +1,5 @@
 import { apiFetch } from './apiClient';
-import { Statistics } from '../types/statistics';
+import { Statistics, WeeklyStatistics } from '../types/statistics';
 
 export function getStatistics(from?: string, to?: string): Promise<Statistics> {
   const params = new URLSearchParams();
@@ -8,4 +8,9 @@ export function getStatistics(from?: string, to?: string): Promise<Statistics> {
   const qs = params.toString();
 
   return apiFetch<Statistics>(`/statistics${qs ? `?${qs}` : ''}`);
+}
+
+export function getWeeklyStatistics(from: string, to: string): Promise<WeeklyStatistics> {
+  const params = new URLSearchParams({ from, to });
+  return apiFetch<WeeklyStatistics>(`/statistics/weekly?${params.toString()}`);
 }
