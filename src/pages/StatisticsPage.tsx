@@ -33,34 +33,20 @@ function StatisticsPage() {
 
     setLoading(true);
     setError(null);
-    getStatistics(period.from, period.to)
-      .then((data) => {
-        if (active) setStats(data);
-      })
-      .catch((e) => {
-        if (active) setError(e.message ?? 'Nie udało się pobrać statystyk');
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
 
-    return () => {
-      active = false;
-    };
-  }, [period]);
+    Promise.allSettled([getStatistics(period.from, period.to), getWeeklyStatistics(period.from, period.to)]).then(
+      ([statsResult, weeklyResult]) => {
+        if (!active) return;
 
-  useEffect(() => {
-    let active = true;
+        if (statsResult.status === 'fulfilled') setStats(statsResult.value);
+        else setError(statsResult.reason?.message ?? 'Nie udało się pobrać statystyk');
 
-    setWeeklyError(false);
-    setWeekly(null);
-    getWeeklyStatistics(period.from, period.to)
-      .then((data) => {
-        if (active) setWeekly(data);
-      })
-      .catch(() => {
-        if (active) setWeeklyError(true);
-      });
+        setWeekly(weeklyResult.status === 'fulfilled' ? weeklyResult.value : null);
+        setWeeklyError(weeklyResult.status === 'rejected');
+
+        setLoading(false);
+      },
+    );
 
     return () => {
       active = false;
