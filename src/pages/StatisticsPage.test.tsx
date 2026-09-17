@@ -232,4 +232,14 @@ describe('StatisticsPage', () => {
 
     expect(await screen.findByText('wszystkie z planu')).toBeInTheDocument();
   });
+
+  test('wykres z innego okresu nie trafia na ekran', async () => {
+    mockFetch(...okres(stats, { ...weekly, from: '2026-02-01', to: '2026-02-28' }));
+    renderPage();
+
+    await screen.findByText('50%');
+
+    expect(screen.queryByRole('list', { name: 'Aktywność tygodniowa' })).not.toBeInTheDocument();
+    expect(screen.getByText('Ładowanie…')).toBeInTheDocument();
+  });
 });

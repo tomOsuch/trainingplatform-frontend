@@ -33,20 +33,33 @@ function StatisticsPage() {
 
     setLoading(true);
     setError(null);
+    getStatistics(period.from, period.to)
+      .then((data) => {
+        if (active) setStats(data);
+      })
+      .catch((e) => {
+        if (active) setError(e.message ?? 'Nie udało się pobrać statystyk');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
 
-    Promise.allSettled([getStatistics(period.from, period.to), getWeeklyStatistics(period.from, period.to)]).then(
-      ([statsResult, weeklyResult]) => {
-        if (!active) return;
+    return () => {
+      active = false;
+    };
+  }, [period]);
 
-        if (statsResult.status === 'fulfilled') setStats(statsResult.value);
-        else setError(statsResult.reason?.message ?? 'Nie udało się pobrać statystyk');
+  useEffect(() => {
+    let active = true;
 
-        setWeekly(weeklyResult.status === 'fulfilled' ? weeklyResult.value : null);
-        setWeeklyError(weeklyResult.status === 'rejected');
-
-        setLoading(false);
-      },
-    );
+    setWeeklyError(false);
+    getWeeklyStatistics(period.from, period.to)
+      .then((data) => {
+        if (active) setWeekly(data);
+      })
+      .catch(() => {
+        if (active) setWeeklyError(true);
+      });
 
     return () => {
       active = false;
@@ -56,6 +69,8 @@ function StatisticsPage() {
   const label = stats ? periodLabelFromResponse(stats.from) : monthLabel(anchor);
   const atCurrentMonth = isCurrentMonth(anchor);
 
+  const weeklyMatches = Boolean(stats && weekly && weekly.from === stats.from && weekly.to === stats.to);
+
   const completion = stats?.planCompletion;
   const hasBase = Boolean(completion && completion.completionBase > 0);
   const minutesInBreakdown = stats?.byCategory.reduce((sum, c) => sum + c.totalMinutes, 0) ?? 0;
@@ -63,7 +78,6 @@ function StatisticsPage() {
   const share = (value: number, countValue: number): number => {
     if (!stats) return 0;
     if (minutesInBreakdown > 0) return (value / minutesInBreakdown) * 100;
-    // brak minut w rozbiciu (nikt nie podał czasu trwania albo dane są niespójne)
     if (stats.workoutCount > 0) return (countValue / stats.workoutCount) * 100;
     return 0;
   };
@@ -236,7 +250,7 @@ function StatisticsPage() {
               <section className={styles.section}>
                 <h2 className={styles.sectionTitle}>
                   Aktywność tygodniowa
-                  {weekly && (
+                  {weeklyMatches && weekly && (
                     <span className={styles.count}>
                       {weekly.weeks.length} {plural(weekly.weeks.length, 'tydzień', 'tygodnie', 'tygodni')}
                     </span>
@@ -245,7 +259,7 @@ function StatisticsPage() {
 
                 {weeklyError ? (
                   <p className={styles.empty}>Nie udało się pobrać wykresu aktywności.</p>
-                ) : weekly ? (
+                ) : weeklyMatches && weekly ? (
                   <WeeklyChart weeks={weekly.weeks} />
                 ) : (
                   <p className={styles.loading}>Ładowanie…</p>
