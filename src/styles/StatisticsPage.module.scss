@@ -235,7 +235,7 @@
 
 .tiles {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 12px;
     margin-top: 16px;
 
@@ -261,6 +261,17 @@
 .tileValue {
     font-size: 24px;
     font-weight: 700;
+}
+
+.tileScale {
+    font-size: 13px;
+    font-weight: 600;
+    color: #9ca3af;
+    margin-left: 3px;
+}
+
+.tileValueEmpty {
+    color: #9ca3af;
 }
 
 .tileHint {

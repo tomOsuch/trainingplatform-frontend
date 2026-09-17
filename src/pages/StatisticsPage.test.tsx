@@ -13,8 +13,22 @@ const stats: Statistics = {
   totalMinutes: 390,
   byCategory: [
     { categoryId: 5, categoryName: 'Taniec', categoryColor: '#9B59B6', categoryIconName: 'music', workoutCount: 4, totalMinutes: 240 },
-    { categoryId: 6, categoryName: 'Gimnastyka', categoryColor: '#E74C3C', categoryIconName: 'person-standing', workoutCount: 2, totalMinutes: 105 },
-    { categoryId: 7, categoryName: 'Ogólnorozwojowy', categoryColor: '#10B981', categoryIconName: 'dumbbell', workoutCount: 1, totalMinutes: 45 },
+    {
+      categoryId: 6,
+      categoryName: 'Gimnastyka',
+      categoryColor: '#E74C3C',
+      categoryIconName: 'person-standing',
+      workoutCount: 2,
+      totalMinutes: 105,
+    },
+    {
+      categoryId: 7,
+      categoryName: 'Ogólnorozwojowy',
+      categoryColor: '#10B981',
+      categoryIconName: 'dumbbell',
+      workoutCount: 1,
+      totalMinutes: 45,
+    },
   ],
   planCompletion: {
     completed: 6,
@@ -24,6 +38,9 @@ const stats: Statistics = {
     completionBase: 12,
     completionRate: 50,
   },
+  intensity: { average: 8.5, ratedCount: 5, totalCount: 7 },
+  plannedCount: 5,
+  adHocCount: 2,
 };
 
 const emptyMonth: Statistics = {
@@ -40,6 +57,9 @@ const emptyMonth: Statistics = {
     completionBase: 0,
     completionRate: null,
   },
+  intensity: { average: null, ratedCount: 0, totalCount: 0 },
+  plannedCount: 0,
+  adHocCount: 0,
 };
 
 function CalendarStub() {
@@ -141,5 +161,34 @@ describe('StatisticsPage', () => {
     renderPage();
 
     expect(await screen.findByText('Nie udało się policzyć statystyk')).toBeInTheDocument();
+  });
+  test('średnia intensywność idzie z licznikiem pokrycia', async () => {
+    mockFetch({ status: 200, body: stats });
+    renderPage();
+
+    expect(await screen.findByText(/^8,5/)).toBeInTheDocument();
+    expect(screen.getByText('oceniono 5 z 7 treningów')).toBeInTheDocument();
+  });
+
+  test('brak ocen pokazuje kreskę, nie zero', async () => {
+    mockFetch({ status: 200, body: { ...stats, intensity: { average: null, ratedCount: 0, totalCount: 7 } } });
+    renderPage();
+
+    expect(await screen.findByText('żaden trening nie ma jeszcze oceny')).toBeInTheDocument();
+    expect(screen.getByText('—')).toBeInTheDocument();
+  });
+
+  test('treningi poza planem są rozbiciem liczby treningów', async () => {
+    mockFetch({ status: 200, body: stats });
+    renderPage();
+
+    expect(await screen.findByText('5 z planu · 2 poza planem')).toBeInTheDocument();
+  });
+
+  test('okres bez treningów poza planem nie wypisuje zera', async () => {
+    mockFetch({ status: 200, body: { ...stats, plannedCount: 7, adHocCount: 0 } });
+    renderPage();
+
+    expect(await screen.findByText('wszystkie z planu')).toBeInTheDocument();
   });
 });
