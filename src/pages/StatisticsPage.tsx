@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Statistics } from '../types/statistics';
-import { getStatistics } from '../services/statisticsApi';
+import { Statistics, WeeklyStatistics } from '../types/statistics';
+import { getStatistics, getWeeklyStatistics } from '../services/statisticsApi';
 import {
   isCurrentMonth,
   monthKey,
@@ -14,6 +14,7 @@ import {
 import { formatDuration, plural } from '../utils/format';
 import { darkenHex } from '../utils/color';
 import CategoryIcon from '../components/CategoryIcon';
+import WeeklyChart from '../components/WeeklyChart';
 import styles from '../styles/StatisticsPage.module.scss';
 
 function StatisticsPage() {
@@ -22,6 +23,8 @@ function StatisticsPage() {
   const [stats, setStats] = useState<Statistics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [weekly, setWeekly] = useState<WeeklyStatistics | null>(null);
+  const [weeklyError, setWeeklyError] = useState(false);
 
   const period = useMemo(() => monthPeriod(anchor), [anchor]);
 
@@ -32,6 +35,14 @@ function StatisticsPage() {
       .then(setStats)
       .catch((e) => setError(e.message ?? 'Nie udało się pobrać statystyk'))
       .finally(() => setLoading(false));
+  }, [period]);
+
+  useEffect(() => {
+    setWeeklyError(false);
+    setWeekly(null);
+    getWeeklyStatistics(period.from, period.to)
+      .then(setWeekly)
+      .catch(() => setWeeklyError(true));
   }, [period]);
 
   const label = stats ? periodLabelFromResponse(stats.from) : monthLabel(anchor);
@@ -213,6 +224,25 @@ function StatisticsPage() {
                   <span className={styles.tileHint}>{intensityHint}</span>
                 </div>
               </div>
+
+              <section className={styles.section}>
+                <h2 className={styles.sectionTitle}>
+                  Aktywność tygodniowa
+                  {weekly && (
+                    <span className={styles.count}>
+                      {weekly.weeks.length} {plural(weekly.weeks.length, 'tydzień', 'tygodnie', 'tygodni')}
+                    </span>
+                  )}
+                </h2>
+
+                {weeklyError ? (
+                  <p className={styles.empty}>Nie udało się pobrać wykresu aktywności.</p>
+                ) : weekly ? (
+                  <WeeklyChart weeks={weekly.weeks} />
+                ) : (
+                  <p className={styles.loading}>Ładowanie…</p>
+                )}
+              </section>
 
               <section className={styles.section}>
                 <h2 className={styles.sectionTitle}>

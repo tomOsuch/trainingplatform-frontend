@@ -33,3 +33,19 @@ export interface Statistics {
   plannedCount: number;
   adHocCount: number;
 }
+
+export interface WeeklyBucket {
+  weekStart: string;
+  weekEnd: string;
+  partial: boolean;
+  workoutCount: number;
+  totalMinutes: number;
+}
+
+export interface WeeklyStatistics {
+  from: string;
+  to: string;
+  workoutCount: number;
+  totalMinutes: number;
+  weeks: WeeklyBucket[];
+}
