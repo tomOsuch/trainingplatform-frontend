@@ -29,20 +29,42 @@ function StatisticsPage() {
   const period = useMemo(() => monthPeriod(anchor), [anchor]);
 
   useEffect(() => {
+    let active = true;
+
     setLoading(true);
     setError(null);
     getStatistics(period.from, period.to)
-      .then(setStats)
-      .catch((e) => setError(e.message ?? 'Nie udało się pobrać statystyk'))
-      .finally(() => setLoading(false));
+      .then((data) => {
+        if (active) setStats(data);
+      })
+      .catch((e) => {
+        if (active) setError(e.message ?? 'Nie udało się pobrać statystyk');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
   }, [period]);
 
   useEffect(() => {
+    let active = true;
+
     setWeeklyError(false);
     setWeekly(null);
     getWeeklyStatistics(period.from, period.to)
-      .then(setWeekly)
-      .catch(() => setWeeklyError(true));
+      .then((data) => {
+        if (active) setWeekly(data);
+      })
+      .catch(() => {
+        if (active) setWeeklyError(true);
+      });
+
+    return () => {
+      active = false;
+    };
   }, [period]);
 
   const label = stats ? periodLabelFromResponse(stats.from) : monthLabel(anchor);
