@@ -1,0 +1,99 @@
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.field>span {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.field input {
+    padding: 9px 11px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.fieldError {
+    font-size: 12px;
+    color: #b91c1c;
+}
+
+.hint {
+    margin: 0;
+    font-size: 12px;
+    color: #6b7280;
+    line-height: 1.5;
+}
+
+.formError {
+    margin: 0;
+    font-size: 13px;
+    color: #b91c1c;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 9px 11px;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.primary,
+.secondary {
+    font-family: inherit;
+    font-size: 13px;
+    border-radius: 8px;
+    padding: 8px 14px;
+    cursor: pointer;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    color: #374151;
+}
+
+.primary {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
+    font-weight: 600;
+}
+
+.primary:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.info {
+    font-size: 13px;
+    color: #374151;
+    line-height: 1.6;
+}
+
+.infoLead {
+    margin: 12px 0 4px;
+    font-weight: 600;
+}
+
+.info ul {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.infoFoot {
+    margin: 14px 0 16px;
+    font-size: 12px;
+    color: #6b7280;
+    line-height: 1.55;
+}

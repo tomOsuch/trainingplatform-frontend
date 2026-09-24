@@ -17,6 +17,7 @@ import AdminLayout from './components/AdminLayout';
 import AdminCategoriesPage from './pages/AdminCategoriesPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import TemplatesPage from './pages/TemplatesPage';
+import CooperationPage from './pages/CooperationPage';
 
 function App() {
   return (
@@ -35,6 +36,8 @@ function App() {
               <Route path="/dziennik" element={<WorkoutLogPage />} />
               <Route path="/cele" element={<GoalsPage />} />
               <Route path="/statystyki" element={<StatisticsPage />} />
+              <Route path="/wspolpraca" element={<CooperationPage />} />
+              <Route path="/wspolpraca/zaproszenia" element={<Navigate to="/wspolpraca" replace />} />
               <Route path="/profil" element={<ProfilePage />} />
               <Route element={<AdminRoute />}>
                 <Route path="/admin" element={<AdminLayout />}>

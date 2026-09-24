@@ -56,6 +56,9 @@ function Navbar() {
           <NavLink to="/statystyki" className={({ isActive }) => (isActive ? styles.tabActive : styles.tab)}>
             Statystyki
           </NavLink>
+           <NavLink to="/wspolpraca" className={({ isActive }) => (isActive ? styles.tabActive : styles.tab)}>
+            Współpraca
+          </NavLink>
           <NavLink to="/profil" className={({ isActive }) => (isActive ? styles.tabActive : styles.tab)}>
             Profil
           </NavLink>
