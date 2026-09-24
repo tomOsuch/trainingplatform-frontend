@@ -19,7 +19,15 @@ function Modal({ title, onClose, children, wide }: ModalProps) {
 
   return (
     <div className={styles.overlay} onClick={onClose}>
-      <div className={wide ? styles.cardWide : styles.card} onClick={(e) => e.stopPropagation()}>
+      {/* role + aria-modal robią z tego okno także dla czytnika ekranu; aria-label
+          daje mu nazwę, po której da się je jednoznacznie wskazać - również w testach */}
+      <div
+        className={wide ? styles.cardWide : styles.card}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className={styles.header}>
           <h2>{title}</h2>
           <button className={styles.close} onClick={onClose} aria-label="Zamknij">

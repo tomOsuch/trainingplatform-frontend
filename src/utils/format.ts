@@ -42,3 +42,15 @@ export function parseDuration(input: string): number | null {
 
   return hours * 60 + mins;
 }
+
+export function formatDeadline(iso: string, today: Date = new Date()): string {
+  const [y, m, d] = iso.split('T')[0].split('-').map(Number);
+  const deadline = new Date(y, m - 1, d);
+  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const days = Math.round((deadline.getTime() - start.getTime()) / 86_400_000);
+
+  if (days <= 0) return 'ważne jeszcze dziś';
+  if (days <= 3) return `ważne jeszcze ${days} ${plural(days, 'dzień', 'dni', 'dni')}`;
+
+  return `ważne do ${new Intl.DateTimeFormat('pl-PL', { day: 'numeric', month: 'long' }).format(deadline)}`;
+}

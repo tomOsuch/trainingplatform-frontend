@@ -1,4 +1,4 @@
-import { formatDuration, parseDuration } from './format';
+import { formatDuration, parseDuration, formatDeadline } from './format';
 
 describe('formatDuration', () => {
   test('poniżej godziny pokazuje minuty', () => {
@@ -42,6 +42,22 @@ describe('parseDuration', () => {
   test('to, co sformatowane, daje się odczytać z powrotem', () => {
     [1, 45, 60, 90, 165, 1200].forEach((minutes) => {
       expect(parseDuration(formatDuration(minutes))).toBe(minutes);
+    });
+  });
+  describe('formatDeadline', () => {
+    const dzis = new Date(2026, 8, 23);
+
+    test('daleki termin podaje datę w dopełniaczu', () => {
+      expect(formatDeadline('2026-10-06T10:00:00', dzis)).toBe('ważne do 6 października');
+    });
+
+    test('od trzech dni w dół przechodzi na odliczanie', () => {
+      expect(formatDeadline('2026-09-26T10:00:00', dzis)).toBe('ważne jeszcze 3 dni');
+      expect(formatDeadline('2026-09-24T10:00:00', dzis)).toBe('ważne jeszcze 1 dzień');
+    });
+
+    test('termin dzisiejszy nie pokazuje zera dni', () => {
+      expect(formatDeadline('2026-09-23T23:59:00', dzis)).toBe('ważne jeszcze dziś');
     });
   });
 });
