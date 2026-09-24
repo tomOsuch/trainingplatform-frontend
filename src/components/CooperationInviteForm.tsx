@@ -60,13 +60,13 @@ function CooperationInviteForm({ ownEmail, onClose, onSent }: CooperationInviteF
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
         <label className={styles.field}>
           <span>Adres e-mail *</span>
-          <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="anna.nowak@example.com" />
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="anna.nowak@example.com" />
           {emailError && <span className={styles.fieldError}>{emailError}</span>}
         </label>
 
         <p className={styles.hint}>
-          Osoba musi mieć konto w aplikacji. Dostęp do jej danych dostaniesz dopiero, gdy przyjmie zaproszenie — zaproszenie jest ważne
-          14 dni.
+          Osoba musi mieć konto w aplikacji. Dostęp do jej danych dostaniesz dopiero, gdy przyjmie zaproszenie — zaproszenie jest ważne 14
+          dni.
         </p>
 
         {formError && (

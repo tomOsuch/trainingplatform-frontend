@@ -55,8 +55,8 @@ function CooperationPage() {
 
   const myAthletes = cooperations.filter((c) => c.role === 'COACH');
   const myCoaches = cooperations.filter((c) => c.role === 'ATHLETE');
-  const sent = invitations.filter((i) => i.role === 'COACH');
-  const received = invitations.filter((i) => i.role === 'ATHLETE');
+  const sent = invitations.filter((i) => i.role === 'COACH' && i.status === 'PENDING');
+  const received = invitations.filter((i) => i.role === 'ATHLETE' && i.status === 'PENDING');
 
   const run = (action: Promise<unknown>, fallback: string) => {
     setBusy(true);
