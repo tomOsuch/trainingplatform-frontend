@@ -214,13 +214,15 @@ function StatisticsPage() {
                   {completion!.unresolved} {plural(completion!.unresolved, 'trening czeka', 'treningi czekają', 'treningów czeka')} na
                   rozstrzygnięcie — dopóki wiszą, obniżają wskaźnik.
                 </span>
-                <button
-                  type="button"
-                  className={styles.unresolvedLink}
-                  onClick={() => navigate('/kalendarz', { state: { month: monthKey(stats.from) } })}
-                >
-                  Otwórz {label} w kalendarzu →
-                </button>
+                {!athlete && (
+                  <button
+                    type="button"
+                    className={styles.unresolvedLink}
+                    onClick={() => navigate('/kalendarz', { state: { month: monthKey(stats.from) } })}
+                  >
+                    Otwórz {label} w kalendarzu →
+                  </button>
+                )}
               </div>
             )}
           </section>
