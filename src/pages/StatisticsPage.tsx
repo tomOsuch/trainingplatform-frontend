@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Statistics, WeeklyStatistics } from '../types/statistics';
 import { getStatistics, getWeeklyStatistics } from '../services/statisticsApi';
+import { ApiRequestError } from '../services/apiClient';
 import {
   isCurrentMonth,
   monthKey,
@@ -16,8 +17,10 @@ import { darkenHex } from '../utils/color';
 import CategoryIcon from '../components/CategoryIcon';
 import WeeklyChart from '../components/WeeklyChart';
 import styles from '../styles/StatisticsPage.module.scss';
+import { useAthleteContext } from '../hooks/useAthleteContext';
 
 function StatisticsPage() {
+  const athlete = useAthleteContext();
   const navigate = useNavigate();
   const [anchor, setAnchor] = useState(startOfCurrentMonth);
   const [stats, setStats] = useState<Statistics | null>(null);
@@ -33,12 +36,14 @@ function StatisticsPage() {
 
     setLoading(true);
     setError(null);
-    getStatistics(period.from, period.to)
+    getStatistics(period.from, period.to, athlete?.athleteId)
       .then((data) => {
         if (active) setStats(data);
       })
       .catch((e) => {
-        if (active) setError(e.message ?? 'Nie udało się pobrać statystyk');
+        if (!active) return;
+        if (athlete && e instanceof ApiRequestError && e.status === 403) return athlete.onForbidden();
+        setError(e.message ?? 'Nie udało się pobrać statystyk');
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -47,24 +52,26 @@ function StatisticsPage() {
     return () => {
       active = false;
     };
-  }, [period]);
+  }, [period, athlete]);
 
   useEffect(() => {
     let active = true;
 
     setWeeklyError(false);
-    getWeeklyStatistics(period.from, period.to)
+    getWeeklyStatistics(period.from, period.to, athlete?.athleteId)
       .then((data) => {
         if (active) setWeekly(data);
       })
-      .catch(() => {
-        if (active) setWeeklyError(true);
+      .catch((e) => {
+        if (!active) return;
+        if (athlete && e instanceof ApiRequestError && e.status === 403) return athlete.onForbidden();
+        setWeeklyError(true);
       });
 
     return () => {
       active = false;
     };
-  }, [period]);
+  }, [period, athlete]);
 
   const label = stats ? periodLabelFromResponse(stats.from) : monthLabel(anchor);
   const atCurrentMonth = isCurrentMonth(anchor);
