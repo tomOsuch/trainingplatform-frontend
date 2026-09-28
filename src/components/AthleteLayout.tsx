@@ -4,7 +4,11 @@ import { Athlete } from '../types/cooperation';
 import { getAthletes } from '../services/coachApi';
 import styles from '../styles/AthleteLayout.module.scss';
 
-const TABS = [{ to: 'statystyki', label: 'Statystyki' }];
+const TABS = [
+  { to: 'dziennik', label: 'Dziennik' },
+  { to: 'cele', label: 'Cele' },
+  { to: 'statystyki', label: 'Statystyki' },
+];
 
 function athleteName(a: Athlete): string {
   const full = `${a.firstName ?? ''} ${a.lastName ?? ''}`.trim();

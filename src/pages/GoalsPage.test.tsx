@@ -1,5 +1,6 @@
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { Outlet, Route, Routes } from 'react-router-dom';
 import { renderWithProviders, mockFetch } from '../test-utils';
 import GoalsPage from './GoalsPage';
 import { Goal } from '../types/goal';
@@ -150,5 +151,44 @@ describe('GoalsPage', () => {
     renderWithProviders(<GoalsPage />);
 
     expect(await screen.findByText('Coś poszło nie tak')).toBeInTheDocument();
+  });
+
+  describe('w trybie podglądu', () => {
+    const renderAsCoach = (onForbidden = jest.fn()) =>
+      renderWithProviders(
+        <Routes>
+          <Route element={<Outlet context={{ athleteId: 12, onForbidden }} />}>
+            <Route path="/cele" element={<GoalsPage />} />
+          </Route>
+        </Routes>,
+        { route: '/cele' },
+      );
+
+    test('pyta o cele podopiecznego', async () => {
+      const spy = mockFetch({ status: 200, body: [base] }, { status: 200, body: [] });
+      renderAsCoach();
+
+      await screen.findByText(base.title);
+      expect(String(spy.mock.calls[0][0])).toContain('/coach/athletes/12/goals');
+    });
+
+    test('karta nie ma akcji właściciela i nie otwiera szczegółów', async () => {
+      mockFetch({ status: 200, body: [base, reached] }, { status: 200, body: [] });
+      renderAsCoach();
+
+      await screen.findByText(reached.title);
+      expect(screen.queryByRole('button', { name: '+ Dodaj cel' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Edytuj' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Oznacz jako osiągnięty' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: new RegExp(base.title) })).not.toBeInTheDocument();
+    });
+
+    test('403 wyprowadza z trybu', async () => {
+      const onForbidden = jest.fn();
+      mockFetch({ status: 403, body: { message: 'Brak uprawnień' } }, { status: 200, body: [] });
+      renderAsCoach(onForbidden);
+
+      await waitFor(() => expect(onForbidden).toHaveBeenCalled());
+    });
   });
 });

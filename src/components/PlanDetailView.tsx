@@ -18,9 +18,10 @@ const STATUS_LABELS: Record<PlanStatus, string> = {
 interface PlanDetailViewProps {
   plan: TrainingPlan;
   onClose: () => void;
-  onEdit: (plan: TrainingPlan) => void;
-  onChanged: () => void;
-  onAddJournalEntry: (plan: TrainingPlan) => void; // NOWE
+  onEdit?: (plan: TrainingPlan) => void;
+  onChanged?: () => void;
+  onAddJournalEntry?: (plan: TrainingPlan) => void;
+  readOnly?: boolean;
 }
 
 function formatDate(iso: string): string {
@@ -33,7 +34,7 @@ function formatDate(iso: string): string {
   }).format(new Date(y, m - 1, d));
 }
 
-function PlanDetailView({ plan: initial, onClose, onEdit, onChanged, onAddJournalEntry }: PlanDetailViewProps) {
+function PlanDetailView({ plan: initial, onClose, onEdit, onChanged, onAddJournalEntry, readOnly = false }: PlanDetailViewProps) {
   const [plan, setPlan] = useState(initial);
   const [journalDialog, setJournalDialog] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -46,7 +47,7 @@ function PlanDetailView({ plan: initial, onClose, onEdit, onChanged, onAddJourna
     try {
       await changeStatus(plan.id, status);
       setPlan((p) => ({ ...p, status }));
-      onChanged();
+      onChanged?.();
       setJournalDialog(status === 'COMPLETED');
     } catch (err) {
       setError(err instanceof ApiRequestError ? err.message : 'Nie udało się zmienić statusu');
@@ -59,7 +60,7 @@ function PlanDetailView({ plan: initial, onClose, onEdit, onChanged, onAddJourna
     setBusy(true);
     try {
       await deletePlan(plan.id);
-      onChanged();
+      onChanged?.();
       onClose();
     } catch (err) {
       setError(err instanceof ApiRequestError ? err.message : 'Nie udało się usunąć');
@@ -89,16 +90,22 @@ function PlanDetailView({ plan: initial, onClose, onEdit, onChanged, onAddJourna
           {plan.notes && <p className={styles.notes}>{plan.notes}</p>}
         </div>
 
-        <label className={styles.statusField}>
-          <span>Status</span>
-          <select value={plan.status} disabled={busy} onChange={(e) => handleStatusChange(e.target.value as PlanStatus)}>
-            {(Object.keys(STATUS_LABELS) as PlanStatus[]).map((s) => (
-              <option key={s} value={s}>
-                {STATUS_LABELS[s]}
-              </option>
-            ))}
-          </select>
-        </label>
+        {readOnly ? (
+          <div className={styles.info}>
+            <p>Status: {STATUS_LABELS[plan.status]}</p>
+          </div>
+        ) : (
+          <label className={styles.statusField}>
+            <span>Status</span>
+            <select value={plan.status} disabled={busy} onChange={(e) => handleStatusChange(e.target.value as PlanStatus)}>
+              {(Object.keys(STATUS_LABELS) as PlanStatus[]).map((s) => (
+                <option key={s} value={s}>
+                  {STATUS_LABELS[s]}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
 
         {journalDialog && (
           <div className={styles.journalBox}>
@@ -110,7 +117,7 @@ function PlanDetailView({ plan: initial, onClose, onEdit, onChanged, onAddJourna
                 className={styles.journalYes}
                 onClick={() => {
                   setJournalDialog(false);
-                  onAddJournalEntry(plan);
+                  onAddJournalEntry?.(plan);
                 }}
               >
                 Tak, dodaj wpis
@@ -125,23 +132,28 @@ function PlanDetailView({ plan: initial, onClose, onEdit, onChanged, onAddJourna
         {error && <p className={styles.error}>{error}</p>}
 
         <div className={styles.buttons}>
-          <button className={styles.edit} onClick={() => onEdit(plan)}>
-            Edytuj
-          </button>
-          {!confirmDelete ? (
-            <button className={styles.delete} onClick={() => setConfirmDelete(true)}>
-              Usuń
+          {/* Edycja zależy od wywołującego, nie od trybu: w kroku 5 trener dostanie
+              ten przycisk przy planach, które sam ułożył - i tylko przy nich. */}
+          {onEdit && (
+            <button className={styles.edit} onClick={() => onEdit(plan)}>
+              Edytuj
             </button>
-          ) : (
-            <>
-              <button className={styles.delete} onClick={handleDelete} disabled={busy}>
-                Tak, usuń
-              </button>
-              <button className={styles.edit} onClick={() => setConfirmDelete(false)}>
-                Nie
-              </button>
-            </>
           )}
+          {!readOnly &&
+            (!confirmDelete ? (
+              <button className={styles.delete} onClick={() => setConfirmDelete(true)}>
+                Usuń
+              </button>
+            ) : (
+              <>
+                <button className={styles.delete} onClick={handleDelete} disabled={busy}>
+                  Tak, usuń
+                </button>
+                <button className={styles.edit} onClick={() => setConfirmDelete(false)}>
+                  Nie
+                </button>
+              </>
+            ))}
         </div>
       </div>
     </Modal>

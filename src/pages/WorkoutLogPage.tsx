@@ -10,6 +10,8 @@ import WorkoutLogDetail from '../components/WorkoutLogDetail';
 import PlanDetailView from '../components/PlanDetailView';
 import TrainingPlanForm from '../components/TrainingPlanForm';
 import styles from '../styles/WorkoutLogPage.module.scss';
+import { useAthleteContext } from '../hooks/useAthleteContext';
+import { ApiRequestError } from '../services/apiClient';
 
 type StatusFilter = 'all' | 'done' | 'skipped' | 'cancelled';
 
@@ -21,6 +23,7 @@ const STATUS_LABELS: Record<StatusFilter, string> = {
 };
 
 function WorkoutLogPage() {
+  const athlete = useAthleteContext();
   const [categoryId, setCategoryId] = useState('');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
@@ -61,14 +64,17 @@ function WorkoutLogPage() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    Promise.all([getLogs(filters), getPlans(from || undefined, to || undefined)])
+    Promise.all([getLogs(filters, athlete?.athleteId), getPlans(from || undefined, to || undefined, athlete?.athleteId)])
       .then(([l, p]) => {
         setLogs(l);
         setPlans(categoryId ? p.filter((x) => x.categoryId === Number(categoryId)) : p);
       })
-      .catch((e) => setError(e.message ?? 'Nie udało się pobrać danych'))
+      .catch((e) => {
+        if (athlete && e instanceof ApiRequestError && e.status === 403) return athlete.onForbidden();
+        setError(e.message ?? 'Nie udało się pobrać danych');
+      })
       .finally(() => setLoading(false));
-  }, [filters, from, to, categoryId, refreshKey]);
+  }, [filters, from, to, categoryId, refreshKey, athlete]);
 
   useEffect(() => {
     getCategories()
@@ -124,9 +130,11 @@ function WorkoutLogPage() {
     <div className={styles.page}>
       <div className={styles.header}>
         <h1>Dziennik treningów</h1>
-        <button className={styles.addButton} onClick={() => setFormOpen(true)}>
-          + Dodaj wpis
-        </button>
+        {!athlete && (
+          <button className={styles.addButton} onClick={() => setFormOpen(true)}>
+            + Dodaj wpis
+          </button>
+        )}
       </div>
 
       <div className={styles.filters}>
@@ -177,13 +185,17 @@ function WorkoutLogPage() {
 
       {!loading && items.length === 0 && !error && (
         <p className={styles.empty}>
-          {filtersActive ? 'Brak wyników dla wybranych filtrów.' : 'Nie masz jeszcze żadnych treningów w historii. Dodaj pierwszy wpis!'}
+          {filtersActive
+            ? 'Brak wyników dla wybranych filtrów.'
+            : athlete
+              ? 'Ta osoba nie ma jeszcze żadnych treningów w historii.'
+              : 'Nie masz jeszcze żadnych treningów w historii. Dodaj pierwszy wpis!'}
         </p>
       )}
 
       <div className={styles.list}>
         {items.map((item) => (
-          <WorkoutLogRow key={item.key} item={item} onClick={handleSelectItem} onFillDetails={handleFillDetails} />
+          <WorkoutLogRow key={item.key} item={item} onClick={handleSelectItem} onFillDetails={athlete ? undefined : handleFillDetails} />
         ))}
       </div>
 
@@ -201,17 +213,20 @@ function WorkoutLogPage() {
         />
       )}
 
-      {selectedLog && (
-        <WorkoutLogDetail
-          log={selectedLog}
-          onClose={() => setSelectedLog(null)}
-          onChanged={() => setRefreshKey((k) => k + 1)}
-          onEdit={(l) => {
-            setSelectedLog(null);
-            setEditLog(l);
-          }}
-        />
-      )}
+      {selectedLog &&
+        (athlete ? (
+          <WorkoutLogDetail log={selectedLog} onClose={() => setSelectedLog(null)} readOnly />
+        ) : (
+          <WorkoutLogDetail
+            log={selectedLog}
+            onClose={() => setSelectedLog(null)}
+            onChanged={() => setRefreshKey((k) => k + 1)}
+            onEdit={(l) => {
+              setSelectedLog(null);
+              setEditLog(l);
+            }}
+          />
+        ))}
 
       {editLog && (
         <WorkoutLogForm
@@ -222,21 +237,24 @@ function WorkoutLogPage() {
         />
       )}
 
-      {selectedPlan && (
-        <PlanDetailView
-          plan={selectedPlan}
-          onClose={() => setSelectedPlan(null)}
-          onChanged={() => setRefreshKey((k) => k + 1)}
-          onEdit={(p) => {
-            setSelectedPlan(null);
-            setEditPlan(p);
-          }}
-          onAddJournalEntry={(p) => {
-            setSelectedPlan(null);
-            openDraftFromPlan(p);
-          }}
-        />
-      )}
+      {selectedPlan &&
+        (athlete ? (
+          <PlanDetailView plan={selectedPlan} onClose={() => setSelectedPlan(null)} readOnly />
+        ) : (
+          <PlanDetailView
+            plan={selectedPlan}
+            onClose={() => setSelectedPlan(null)}
+            onChanged={() => setRefreshKey((k) => k + 1)}
+            onEdit={(p) => {
+              setSelectedPlan(null);
+              setEditPlan(p);
+            }}
+            onAddJournalEntry={(p) => {
+              setSelectedPlan(null);
+              openDraftFromPlan(p);
+            }}
+          />
+        ))}
 
       {editPlan && (
         <TrainingPlanForm

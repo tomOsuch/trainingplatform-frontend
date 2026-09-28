@@ -12,11 +12,12 @@ import styles from '../styles/WorkoutLogDetail.module.scss';
 interface WorkoutLogDetailProps {
   log: WorkoutLog;
   onClose: () => void;
-  onEdit: (log: WorkoutLog) => void;
-  onChanged: () => void;
+  onEdit?: (log: WorkoutLog) => void;
+  onChanged?: () => void;
+  readOnly?: boolean;
 }
 
-function WorkoutLogDetail({ log, onClose, onEdit, onChanged }: WorkoutLogDetailProps) {
+function WorkoutLogDetail({ log, onClose, onEdit, onChanged, readOnly = false }: WorkoutLogDetailProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -25,7 +26,7 @@ function WorkoutLogDetail({ log, onClose, onEdit, onChanged }: WorkoutLogDetailP
     setBusy(true);
     try {
       await deleteLog(log.id);
-      onChanged();
+      onChanged?.();
       onClose();
     } catch (err) {
       setError(err instanceof ApiRequestError ? err.message : 'Nie udało się usunąć');
@@ -73,27 +74,31 @@ function WorkoutLogDetail({ log, onClose, onEdit, onChanged }: WorkoutLogDetailP
 
         {error && <p className={styles.error}>{error}</p>}
 
-        <div className={styles.buttons}>
-          <button className={styles.edit} onClick={() => onEdit(log)}>
-            Edytuj
-          </button>
-          {!confirmDelete ? (
-            <button className={styles.delete} onClick={() => setConfirmDelete(true)}>
-              Usuń
-            </button>
-          ) : (
-            <>
-              <button className={styles.delete} onClick={handleDelete} disabled={busy}>
-                Tak, usuń
+        {!readOnly && (
+          <>
+            <div className={styles.buttons}>
+              <button className={styles.edit} onClick={() => onEdit?.(log)}>
+                Edytuj
               </button>
-              <button className={styles.edit} onClick={() => setConfirmDelete(false)}>
-                Nie
-              </button>
-            </>
-          )}
-        </div>
+              {!confirmDelete ? (
+                <button className={styles.delete} onClick={() => setConfirmDelete(true)}>
+                  Usuń
+                </button>
+              ) : (
+                <>
+                  <button className={styles.delete} onClick={handleDelete} disabled={busy}>
+                    Tak, usuń
+                  </button>
+                  <button className={styles.edit} onClick={() => setConfirmDelete(false)}>
+                    Nie
+                  </button>
+                </>
+              )}
+            </div>
 
-        {confirmDelete && <p className={styles.warning}>Tej operacji nie można cofnąć.</p>}
+            {confirmDelete && <p className={styles.warning}>Tej operacji nie można cofnąć.</p>}
+          </>
+        )}
       </div>
     </Modal>
   );

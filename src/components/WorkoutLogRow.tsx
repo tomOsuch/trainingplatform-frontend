@@ -8,7 +8,7 @@ import styles from '../styles/WorkoutLogPage.module.scss';
 interface WorkoutLogRowProps {
   item: JournalItem;
   onClick: (item: JournalItem) => void;
-  onFillDetails: (item: JournalItem) => void;
+  onFillDetails?: (item: JournalItem) => void;
 }
 
 const GRAY = '#94A3B8';
@@ -76,7 +76,7 @@ function WorkoutLogRow({ item, onClick, onFillDetails }: WorkoutLogRowProps) {
         </div>
       </button>
 
-      {needsDetails && (
+      {needsDetails && onFillDetails && (
         <button type="button" className={styles.fillButton} onClick={() => onFillDetails(item)}>
           Uzupełnij szczegóły
         </button>
