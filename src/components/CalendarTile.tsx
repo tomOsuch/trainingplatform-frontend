@@ -1,6 +1,7 @@
 import { CalendarItem } from "../types/workout";
 import { hexToRgba, darkenHex, lightenHex } from "../utils/color";
 import CategoryIcon from "./CategoryIcon";
+import { tileTitle } from "../utils/calendarItems";
 import styles from "../styles/CalendarTile.module.scss";
 
 interface CalendarTileProps {
@@ -29,6 +30,7 @@ function CalendarTile({ item, onClick }: CalendarTileProps) {
         filled ? styles.filled : styles.outlined,
         dashed ? styles.dashed : "",
         item.state === "skipped" ? styles.muted : "",
+        item.fromCoach ? styles.fromCoach : "",
       ].join(" ")}
       style={{
         background: filled ? hexToRgba(color, 0.16) : "#fff",
@@ -36,7 +38,7 @@ function CalendarTile({ item, onClick }: CalendarTileProps) {
         color: darkenHex(color),
       }}
       onClick={() => onClick(item)}
-      title={item.label}
+      title={tileTitle(item)}
     >
       <CategoryIcon name={item.iconName} size={11} strokeWidth={2.4} />
       <span className={cancelled ? styles.cancelledText : styles.text}>

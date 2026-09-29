@@ -87,6 +87,7 @@ function PlanDetailView({ plan: initial, onClose, onEdit, onChanged, onAddJourna
             {time ? `, ${time}` : ''}
           </p>
           {plan.durationMin && <p>Czas trwania: {formatDuration(plan.durationMin)}</p>}
+          {plan.createdByCoach && <p>Ułożony przez trenera{plan.createdByName ? `: ${plan.createdByName}` : ''}</p>}
           {plan.notes && <p className={styles.notes}>{plan.notes}</p>}
         </div>
 

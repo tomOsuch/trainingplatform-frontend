@@ -19,6 +19,8 @@ const previewItem = (category: WorkoutCategory, state: CalendarItemState): Calen
   label: category.name,
   color: category.color,
   state,
+  fromCoach: false,
+  coachName: null,
 });
 
 function AdminCategoriesPage() {

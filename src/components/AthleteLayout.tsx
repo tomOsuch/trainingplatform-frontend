@@ -5,6 +5,7 @@ import { getAthletes } from '../services/coachApi';
 import styles from '../styles/AthleteLayout.module.scss';
 
 const TABS = [
+  { to: 'kalendarz', label: 'Kalendarz' },
   { to: 'dziennik', label: 'Dziennik' },
   { to: 'cele', label: 'Cele' },
   { to: 'statystyki', label: 'Statystyki' },

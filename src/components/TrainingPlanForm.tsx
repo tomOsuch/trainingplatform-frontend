@@ -13,11 +13,12 @@ interface TrainingPlanFormProps {
   categories: WorkoutCategory[];
   initialDate?: string;
   plan?: TrainingPlan;
+  athleteId?: number;
   onClose: () => void;
   onSaved: () => void;
 }
 
-function TrainingPlanForm({ categories, templates, initialDate, plan, onClose, onSaved }: TrainingPlanFormProps) {
+function TrainingPlanForm({ categories, templates, initialDate, plan, athleteId, onClose, onSaved }: TrainingPlanFormProps) {
   const editMode = Boolean(plan);
 
   const [title, setTitle] = useState(plan?.title ?? '');
@@ -85,7 +86,7 @@ function TrainingPlanForm({ categories, templates, initialDate, plan, onClose, o
     setSubmitting(true);
     try {
       if (editMode) await updatePlan(plan!.id, payload);
-      else await createPlan(payload);
+      else await createPlan(payload, athleteId);
       onSaved();
       onClose();
     } catch (err) {

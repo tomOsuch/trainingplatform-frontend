@@ -82,6 +82,8 @@ export interface CalendarItem {
   color: string;
   iconName: string;
   state: CalendarItemState;
+  fromCoach: boolean;
+  coachName: string | null;
 }
 
 export type JournalItemState = 'done' | 'skipped' | 'cancelled';

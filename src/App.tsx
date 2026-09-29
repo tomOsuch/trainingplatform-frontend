@@ -40,7 +40,8 @@ function App() {
               <Route path="/wspolpraca" element={<CooperationPage />} />
               <Route path="/wspolpraca/zaproszenia" element={<Navigate to="/wspolpraca" replace />} />
               <Route path="/podopieczni/:athleteId" element={<AthleteLayout />}>
-                <Route index element={<Navigate to="dziennik" replace />} />
+                <Route index element={<Navigate to="kalendarz" replace />} />
+                <Route path="kalendarz" element={<CalendarPage />} />
                 <Route path="dziennik" element={<WorkoutLogPage />} />
                 <Route path="cele" element={<GoalsPage />} />
                 <Route path="statystyki" element={<StatisticsPage />} />

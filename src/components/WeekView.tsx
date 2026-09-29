@@ -5,6 +5,7 @@ import { hexToRgba, darkenHex, lightenHex } from '../utils/color';
 import CategoryIcon from './CategoryIcon';
 import styles from '../styles/WeekView.module.scss';
 import { layoutDay, PositionedItem } from '../utils/weekLayout';
+import { tileTitle } from '../utils/calendarItems';
 
 const HOUR_HEIGHT = 44;
 const WEEKDAYS = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd'];
@@ -50,6 +51,7 @@ function WeekView({ days, itemsByDay, onSelectItem, onAddForDay }: WeekViewProps
           placement ? styles.block : styles.allDayChip,
           dashed ? styles.dashed : '',
           item.state === 'skipped' ? styles.muted : '',
+          item.fromCoach ? styles.fromCoach : '',
         ].join(' ')}
         style={{
           background: filled ? hexToRgba(color, 0.16) : '#fff',
@@ -64,7 +66,7 @@ function WeekView({ days, itemsByDay, onSelectItem, onAddForDay }: WeekViewProps
           }),
         }}
         onClick={() => onSelectItem(item)}
-        title={item.label}
+        title={tileTitle(item)}
       >
         <CategoryIcon name={item.iconName} size={11} strokeWidth={2.4} />
         <span className={[styles.label, cancelled ? styles.cancelled : ''].join(' ')}>
