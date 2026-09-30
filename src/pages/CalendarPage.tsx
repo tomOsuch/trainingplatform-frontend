@@ -268,6 +268,7 @@ function CalendarPage() {
           templates={templates}
           initialDate={formDate}
           athleteId={athlete?.athleteId}
+          onForbidden={athlete?.onForbidden}
           onClose={() => setFormDate(null)}
           onSaved={() => setRefreshKey((k) => k + 1)}
         />

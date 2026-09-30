@@ -108,5 +108,20 @@ describe('CalendarPage', () => {
 
       await waitFor(() => expect(onForbidden).toHaveBeenCalled());
     });
+
+    test('403 przy zapisie planu też wyprowadza z trybu', async () => {
+      const onForbidden = jest.fn();
+      mockFetch(...dane([]), { status: 403, body: { message: 'Brak uprawnień' } });
+      renderAsCoach(onForbidden);
+
+      await userEvent.click(await screen.findByRole('button', { name: '+ Dodaj trening' }));
+      await screen.findByRole('option', { name: 'Taniec' });
+      await userEvent.type(screen.getByLabelText(/^Tytuł/), 'Rozciąganie');
+      await userEvent.selectOptions(screen.getByLabelText(/^Kategoria/), '1');
+      await userEvent.click(screen.getByRole('button', { name: 'Zapisz' }));
+
+      await waitFor(() => expect(onForbidden).toHaveBeenCalled());
+      expect(screen.queryByText('Brak uprawnień')).not.toBeInTheDocument();
+    });
   });
 });
