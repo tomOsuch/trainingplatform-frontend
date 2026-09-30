@@ -1,14 +1,15 @@
 import { apiFetch } from "./apiClient";
+import { scope } from "./scope";
 import { WorkoutLog, WorkoutLogFilters, WorkoutLogRequest } from "../types/workout";
 
-export async function getLogs(filters: WorkoutLogFilters = {}): Promise<WorkoutLog[]> {
+export async function getLogs(filters: WorkoutLogFilters = {}, athleteId?: number): Promise<WorkoutLog[]> {
   const params = new URLSearchParams();
   if (filters.categoryId) params.set("categoryId", String(filters.categoryId));
   if (filters.from) params.set("from", filters.from);
   if (filters.to) params.set("to", filters.to);
 
   const qs = params.toString();
-  const data = await apiFetch<WorkoutLog[]>(`/workout-logs${qs ? `?${qs}` : ""}`);
+  const data = await apiFetch<WorkoutLog[]>(`${scope(athleteId)}/workout-logs${qs ? `?${qs}` : ""}`);
   return data ?? []; // pusta odpowiedź -> pusta lista
 }
 

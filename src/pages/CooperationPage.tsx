@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Cooperation, CooperationInvitation, InvitationDecision } from '../types/cooperation';
 import {
   answerCooperationInvitation,
@@ -25,6 +26,7 @@ function partnerName(p: Partner): string {
 
 function CooperationPage() {
   const { user } = useAuth();
+  const navState = useLocation().state as { lostAccess?: string } | null;
 
   const [cooperations, setCooperations] = useState<Cooperation[]>([]);
   const [invitations, setInvitations] = useState<CooperationInvitation[]>([]);
@@ -84,6 +86,7 @@ function CooperationPage() {
         </p>
       </div>
 
+      {navState?.lostAccess && <p className={styles.error}>{navState.lostAccess}</p>}
       {error && <p className={styles.error}>{error}</p>}
       {actionError && <p className={styles.error}>{actionError}</p>}
       {loading && <p className={styles.loading}>Ładowanie…</p>}
@@ -145,6 +148,9 @@ function CooperationPage() {
                       </div>
                     </div>
                     <div className={styles.actions}>
+                      <Link to={`/podopieczni/${coop.partnerId}`} className={styles.openLink}>
+                        Otwórz dane →
+                      </Link>
                       <button type="button" className={styles.danger} disabled={busy} onClick={() => setEnding(coop)}>
                         Zakończ
                       </button>

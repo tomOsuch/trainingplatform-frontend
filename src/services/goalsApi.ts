@@ -1,9 +1,10 @@
 import { apiFetch } from './apiClient';
+import { scope } from './scope';
 import { Goal, GoalDetails, GoalEntry, GoalRequest, GoalStatusChange, GoalStatusFilter } from '../types/goal';
 
-export async function getGoals(status?: GoalStatusFilter): Promise<Goal[]> {
+export async function getGoals(status?: GoalStatusFilter, athleteId?: number): Promise<Goal[]> {
   const qs = status ? `?status=${status}` : '';
-  const data = await apiFetch<Goal[]>(`/goals${qs}`);
+  const data = await apiFetch<Goal[]>(`${scope(athleteId)}/goals${qs}`);
   return data ?? [];
 }
 

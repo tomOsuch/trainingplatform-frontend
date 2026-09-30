@@ -18,6 +18,7 @@ import AdminCategoriesPage from './pages/AdminCategoriesPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import TemplatesPage from './pages/TemplatesPage';
 import CooperationPage from './pages/CooperationPage';
+import AthleteLayout from './components/AthleteLayout';
 
 function App() {
   return (
@@ -38,6 +39,13 @@ function App() {
               <Route path="/statystyki" element={<StatisticsPage />} />
               <Route path="/wspolpraca" element={<CooperationPage />} />
               <Route path="/wspolpraca/zaproszenia" element={<Navigate to="/wspolpraca" replace />} />
+              <Route path="/podopieczni/:athleteId" element={<AthleteLayout />}>
+                <Route index element={<Navigate to="kalendarz" replace />} />
+                <Route path="kalendarz" element={<CalendarPage />} />
+                <Route path="dziennik" element={<WorkoutLogPage />} />
+                <Route path="cele" element={<GoalsPage />} />
+                <Route path="statystyki" element={<StatisticsPage />} />
+              </Route>
               <Route path="/profil" element={<ProfilePage />} />
               <Route element={<AdminRoute />}>
                 <Route path="/admin" element={<AdminLayout />}>

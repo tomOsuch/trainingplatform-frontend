@@ -17,8 +17,11 @@ import { buildMonthGrid, buildWeekGrid, startOfWeek, toISODate, MONTH_NAMES, WEE
 import { formatDatePl, weekdayPl } from '../utils/calendar';
 import Modal from '../components/Modal';
 import styles from '../styles/CalendarPage.module.scss';
+import { useAthleteContext } from '../hooks/useAthleteContext';
+import { ApiRequestError } from '../services/apiClient';
 
 function CalendarPage() {
+  const athlete = useAthleteContext();
   const location = useLocation();
   const navState = location.state as { month?: string; anchor?: string; view?: 'month' | 'week' } | null;
 
@@ -67,13 +70,16 @@ function CalendarPage() {
     const to = grid[grid.length - 1].iso;
 
     setError(null);
-    Promise.all([getPlans(from, to), getLogs({ from, to })])
+    Promise.all([getPlans(from, to, athlete?.athleteId), getLogs({ from, to }, athlete?.athleteId)])
       .then(([p, l]) => {
         setPlans(p);
         setLogs(l);
       })
-      .catch((e) => setError(e.message ?? 'Nie udało się pobrać danych'));
-  }, [grid, refreshKey]);
+      .catch((e) => {
+        if (athlete && e instanceof ApiRequestError && e.status === 403) return athlete.onForbidden();
+        setError(e.message ?? 'Nie udało się pobrać danych');
+      });
+  }, [grid, refreshKey, athlete]);
 
   useEffect(() => {
     getCategories()
@@ -157,9 +163,11 @@ function CalendarPage() {
               Tydzień
             </button>
           </div>
-          <Link to="/szablony" state={{ anchor: toISODate(anchor), view }} className={styles.templatesButton}>
-            Szablony
-          </Link>
+          {!athlete && (
+            <Link to="/szablony" state={{ anchor: toISODate(anchor), view }} className={styles.templatesButton}>
+              Szablony
+            </Link>
+          )}
           <button className={styles.addButton} onClick={() => setFormDate(toISODate(new Date()))}>
             + Dodaj trening
           </button>
@@ -259,36 +267,41 @@ function CalendarPage() {
           categories={categories}
           templates={templates}
           initialDate={formDate}
+          athleteId={athlete?.athleteId}
+          onForbidden={athlete?.onForbidden}
           onClose={() => setFormDate(null)}
           onSaved={() => setRefreshKey((k) => k + 1)}
         />
       )}
 
-      {selectedPlan && (
-        <PlanDetailView
-          plan={selectedPlan}
-          onClose={() => setSelectedPlan(null)}
-          onChanged={() => setRefreshKey((k) => k + 1)}
-          onEdit={(p) => {
-            setSelectedPlan(null);
-            setEditPlan(p);
-          }}
-          onAddJournalEntry={(p) => {
-            setSelectedPlan(null);
-            setJournalDraft({
-              initial: {
-                title: p.title,
-                performedDate: p.plannedDate,
-                categoryId: p.categoryId,
-                planId: p.id,
-                ...(p.durationMin && { durationMin: p.durationMin }),
-                ...(p.plannedTime && { performedTime: p.plannedTime.slice(0, 5) }),
-              },
-              planTitle: p.title,
-            });
-          }}
-        />
-      )}
+      {selectedPlan &&
+        (athlete ? (
+          <PlanDetailView plan={selectedPlan} onClose={() => setSelectedPlan(null)} readOnly />
+        ) : (
+          <PlanDetailView
+            plan={selectedPlan}
+            onClose={() => setSelectedPlan(null)}
+            onChanged={() => setRefreshKey((k) => k + 1)}
+            onEdit={(p) => {
+              setSelectedPlan(null);
+              setEditPlan(p);
+            }}
+            onAddJournalEntry={(p) => {
+              setSelectedPlan(null);
+              setJournalDraft({
+                initial: {
+                  title: p.title,
+                  performedDate: p.plannedDate,
+                  categoryId: p.categoryId,
+                  planId: p.id,
+                  ...(p.durationMin && { durationMin: p.durationMin }),
+                  ...(p.plannedTime && { performedTime: p.plannedTime.slice(0, 5) }),
+                },
+                planTitle: p.title,
+              });
+            }}
+          />
+        ))}
 
       {editPlan && (
         <TrainingPlanForm
@@ -309,17 +322,20 @@ function CalendarPage() {
         />
       )}
 
-      {selectedLog && (
-        <WorkoutLogDetail
-          log={selectedLog}
-          onClose={() => setSelectedLog(null)}
-          onChanged={() => setRefreshKey((k) => k + 1)}
-          onEdit={(l) => {
-            setSelectedLog(null);
-            setEditLog(l);
-          }}
-        />
-      )}
+      {selectedLog &&
+        (athlete ? (
+          <WorkoutLogDetail log={selectedLog} onClose={() => setSelectedLog(null)} readOnly />
+        ) : (
+          <WorkoutLogDetail
+            log={selectedLog}
+            onClose={() => setSelectedLog(null)}
+            onChanged={() => setRefreshKey((k) => k + 1)}
+            onEdit={(l) => {
+              setSelectedLog(null);
+              setEditLog(l);
+            }}
+          />
+        ))}
 
       {editLog && (
         <WorkoutLogForm

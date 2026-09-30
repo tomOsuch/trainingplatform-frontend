@@ -20,6 +20,8 @@ export function planToItem(p: TrainingPlan): CalendarItem {
     color: p.categoryColor,
     iconName: p.categoryIconName,
     state: PLAN_STATE[p.status],
+    fromCoach: p.createdByCoach,
+    coachName: p.createdByName,
   };
 }
 
@@ -37,6 +39,8 @@ export function logToItem(l: WorkoutLog): CalendarItem {
     iconName: l.categoryIconName,
     color: l.categoryColor,
     state: "done",
+    fromCoach: false,
+    coachName: null,
   };
 }
 
@@ -53,4 +57,9 @@ export function buildItemsByDay(plans: TrainingPlan[], logs: WorkoutLog[]): Map<
   map.forEach((list) => list.sort((a, b) => (a.time ?? '99').localeCompare(b.time ?? '99')));
 
   return map;
+}
+
+export function tileTitle(item: CalendarItem): string {
+  if (!item.fromCoach) return item.label;
+  return item.coachName ? `${item.label} · od trenera: ${item.coachName}` : `${item.label} · od trenera`;
 }

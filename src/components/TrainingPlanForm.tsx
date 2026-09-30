@@ -13,11 +13,13 @@ interface TrainingPlanFormProps {
   categories: WorkoutCategory[];
   initialDate?: string;
   plan?: TrainingPlan;
+  athleteId?: number;
+  onForbidden?: () => void;
   onClose: () => void;
   onSaved: () => void;
 }
 
-function TrainingPlanForm({ categories, templates, initialDate, plan, onClose, onSaved }: TrainingPlanFormProps) {
+function TrainingPlanForm({ categories, templates, initialDate, plan, athleteId, onForbidden, onClose, onSaved }: TrainingPlanFormProps) {
   const editMode = Boolean(plan);
 
   const [title, setTitle] = useState(plan?.title ?? '');
@@ -85,10 +87,11 @@ function TrainingPlanForm({ categories, templates, initialDate, plan, onClose, o
     setSubmitting(true);
     try {
       if (editMode) await updatePlan(plan!.id, payload);
-      else await createPlan(payload);
+      else await createPlan(payload, athleteId);
       onSaved();
       onClose();
     } catch (err) {
+      if (onForbidden && err instanceof ApiRequestError && err.status === 403) return onForbidden();
       if (err instanceof ApiRequestError && err.errors) setErrors(err.errors);
       else if (err instanceof ApiRequestError) setFormError(err.message);
       else setFormError('Coś poszło nie tak. Spróbuj ponownie.');

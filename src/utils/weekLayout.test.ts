@@ -13,6 +13,8 @@ const item = (time: string | null, durationMin: number | null, label = `t${++seq
   label,
   color: '#9B59B6',
   state: 'planned',
+  fromCoach: false,
+  coachName: null,
 });
 
 const summary = (items: CalendarItem[]) => layoutDay(items).map((p) => ({ label: p.item.label, column: p.column, columns: p.columns }));

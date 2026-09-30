@@ -25,6 +25,8 @@ export interface TrainingPlan {
   durationMin: number | null;
   notes: string | null;
   status: PlanStatus;
+  createdByCoach: boolean;
+  createdByName: string | null;
 }
 
 export interface TrainingPlanRequest {
@@ -80,6 +82,8 @@ export interface CalendarItem {
   color: string;
   iconName: string;
   state: CalendarItemState;
+  fromCoach: boolean;
+  coachName: string | null;
 }
 
 export type JournalItemState = 'done' | 'skipped' | 'cancelled';

@@ -22,6 +22,8 @@ const pastPlan: TrainingPlan = {
   durationMin: 60,
   notes: 'stare notatki',
   status: 'COMPLETED',
+  createdByCoach: false,
+  createdByName: null,
 };
 
 const sampleTemplate = {

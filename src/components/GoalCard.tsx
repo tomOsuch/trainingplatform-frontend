@@ -9,9 +9,9 @@ const NEUTRAL = '#9CA3AF';
 
 interface GoalCardProps {
   goal: Goal;
-  onOpen: (goal: Goal) => void;
-  onAchieve: (goal: Goal) => void;
-  onEdit: (goal: Goal) => void;
+  onOpen?: (goal: Goal) => void;
+  onAchieve?: (goal: Goal) => void;
+  onEdit?: (goal: Goal) => void;
   busy: boolean;
 }
 
@@ -29,65 +29,75 @@ function GoalCard({ goal, onOpen, onAchieve, onEdit, busy }: GoalCardProps) {
     ? { background: hexToRgba(goal.categoryColor, 0.14), color: darkenHex(goal.categoryColor) }
     : { background: '#f3f4f6', color: '#4b5563' };
 
+  const content = (
+    <>
+      <div className={styles.cardTop}>
+        <span className={styles.pill} style={pillStyle}>
+          {goal.categoryIconName ? (
+            <CategoryIcon name={goal.categoryIconName} size={12} />
+          ) : (
+            <span className={styles.dot} style={{ background: goal.categoryColor ?? NEUTRAL }} />
+          )}
+          {goal.categoryName ?? 'Wszystkie kategorie'}
+        </span>
+        {awaitingClose && <span className={styles.badge}>Cel osiągnięty</span>}
+        {achieved && <span className={styles.badgeDone}>Osiągnięty</span>}
+      </div>
+
+      <h2 className={styles.title}>{goal.title}</h2>
+
+      <div
+        className={styles.track}
+        style={{ borderColor: color }}
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={width}
+        aria-label={`Postęp celu: ${goal.title}`}
+      >
+        <div className={styles.fill} style={{ width: `${width}%`, background: color }} />
+      </div>
+
+      <div className={styles.progressLine}>
+        <span className={styles.values}>{formatProgress(goal)}</span>
+        <span className={styles.percent}>{progressPercent(goal)}%</span>
+      </div>
+
+      <div className={styles.meta}>
+        {achieved ? (
+          <span>{achievedLabel(goal)}</span>
+        ) : (
+          <>
+            <span>{periodLabel(goal)}</span>
+            <span>·</span>
+            {deadline ? (
+              <span className={deadline.overdue ? styles.metaWarn : undefined}>{deadline.text}</span>
+            ) : (
+              <span className={styles.metaOpen}>bez terminu</span>
+            )}
+          </>
+        )}
+      </div>
+    </>
+  );
+
   return (
     <div className={cardClass}>
-      <button type="button" className={styles.cardMain} onClick={() => onOpen(goal)}>
-        <div className={styles.cardTop}>
-          <span className={styles.pill} style={pillStyle}>
-            {goal.categoryIconName ? (
-              <CategoryIcon name={goal.categoryIconName} size={12} />
-            ) : (
-              <span className={styles.dot} style={{ background: goal.categoryColor ?? NEUTRAL }} />
-            )}
-            {goal.categoryName ?? 'Wszystkie kategorie'}
-          </span>
-          {awaitingClose && <span className={styles.badge}>Cel osiągnięty</span>}
-          {achieved && <span className={styles.badgeDone}>Osiągnięty</span>}
-        </div>
-
-        <h2 className={styles.title}>{goal.title}</h2>
-
-        <div
-          className={styles.track}
-          style={{ borderColor: color }}
-          role="progressbar"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={width}
-          aria-label={`Postęp celu: ${goal.title}`}
-        >
-          <div className={styles.fill} style={{ width: `${width}%`, background: color }} />
-        </div>
-
-        <div className={styles.progressLine}>
-          <span className={styles.values}>{formatProgress(goal)}</span>
-          <span className={styles.percent}>{progressPercent(goal)}%</span>
-        </div>
-
-        <div className={styles.meta}>
-          {achieved ? (
-            <span>{achievedLabel(goal)}</span>
-          ) : (
-            <>
-              <span>{periodLabel(goal)}</span>
-              <span>·</span>
-              {deadline ? (
-                <span className={deadline.overdue ? styles.metaWarn : undefined}>{deadline.text}</span>
-              ) : (
-                <span className={styles.metaOpen}>bez terminu</span>
-              )}
-            </>
-          )}
-        </div>
-      </button>
+      {onOpen ? (
+        <button type="button" className={styles.cardMain} onClick={() => onOpen(goal)}>
+          {content}
+        </button>
+      ) : (
+        <div className={`${styles.cardMain} ${styles.cardStatic}`}>{content}</div>
+      )}
 
       <div className={styles.cardActions}>
-        {!achieved && (
+        {!achieved && onEdit && (
           <button type="button" className={styles.editButton} onClick={() => onEdit(goal)}>
             Edytuj
           </button>
         )}
-        {awaitingClose && (
+        {awaitingClose && onAchieve && (
           <button type="button" className={styles.achieveButton} onClick={() => onAchieve(goal)} disabled={busy}>
             {busy ? 'Zamykanie…' : 'Oznacz jako osiągnięty'}
           </button>

@@ -1,6 +1,6 @@
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { renderWithProviders, mockFetch } from '../test-utils';
 import StatisticsPage from './StatisticsPage';
 import { Statistics, WeeklyStatistics } from '../types/statistics';
@@ -96,6 +96,16 @@ const renderPage = () =>
     <Routes>
       <Route path="/statystyki" element={<StatisticsPage />} />
       <Route path="/kalendarz" element={<CalendarStub />} />
+    </Routes>,
+    { route: '/statystyki' },
+  );
+
+const renderAsCoach = (onForbidden = jest.fn()) =>
+  renderWithProviders(
+    <Routes>
+      <Route element={<Outlet context={{ athleteId: 12, onForbidden }} />}>
+        <Route path="/statystyki" element={<StatisticsPage />} />
+      </Route>
     </Routes>,
     { route: '/statystyki' },
   );
@@ -241,5 +251,31 @@ describe('StatisticsPage', () => {
 
     expect(screen.queryByRole('list', { name: 'Aktywność tygodniowa' })).not.toBeInTheDocument();
     expect(screen.getByText('Ładowanie…')).toBeInTheDocument();
+  });
+
+  test('w trybie podglądu pyta o dane podopiecznego, nie własne', async () => {
+    const spy = mockFetch(...okres());
+    renderAsCoach();
+
+    await screen.findByText('50%');
+    expect(String(spy.mock.calls[0][0])).toContain('/coach/athletes/12/statistics?');
+    expect(String(spy.mock.calls[1][0])).toContain('/coach/athletes/12/statistics/weekly?');
+  });
+
+  test('w trybie podglądu nie odsyła do kalendarza', async () => {
+    mockFetch(...okres());
+    renderAsCoach();
+
+    expect(await screen.findByText(/4 treningi czekają na rozstrzygnięcie/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /w kalendarzu/ })).not.toBeInTheDocument();
+  });
+
+  test('403 w trybie podglądu wyprowadza z trybu zamiast pokazywać błąd', async () => {
+    const onForbidden = jest.fn();
+    mockFetch({ status: 403, body: { message: 'Brak uprawnień' } }, { status: 200, body: weekly });
+    renderAsCoach(onForbidden);
+
+    await waitFor(() => expect(onForbidden).toHaveBeenCalled());
+    expect(screen.queryByText('Brak uprawnień')).not.toBeInTheDocument();
   });
 });

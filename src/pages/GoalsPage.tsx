@@ -12,6 +12,8 @@ import GoalDetailsModal from '../components/GoalDetailsModal';
 import WorkoutLogDetail from '../components/WorkoutLogDetail';
 import WorkoutLogForm from '../components/WorkoutLogForm';
 import styles from '../styles/GoalsPage.module.scss';
+import { useAthleteContext } from '../hooks/useAthleteContext';
+import { ApiRequestError } from '../services/apiClient';
 
 const TABS: { key: GoalStatusFilter; label: string }[] = [
   { key: 'active', label: 'Aktywne' },
@@ -23,7 +25,13 @@ const EMPTY_TEXT: Record<GoalStatusFilter, string> = {
   achieved: 'Nie masz jeszcze osiągniętych celów.',
 };
 
+const ATHLETE_EMPTY_TEXT: Record<GoalStatusFilter, string> = {
+  active: 'Ta osoba nie ma jeszcze żadnych aktywnych celów.',
+  achieved: 'Ta osoba nie ma jeszcze osiągniętych celów.',
+};
+
 function GoalsPage() {
+  const athlete = useAthleteContext();
   const [status, setStatus] = useState<GoalStatusFilter>('active');
   const [goals, setGoals] = useState<Goal[]>([]);
   const [categories, setCategories] = useState<WorkoutCategory[]>([]);
@@ -42,11 +50,14 @@ function GoalsPage() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    getGoals(status)
+    getGoals(status, athlete?.athleteId)
       .then(setGoals)
-      .catch((e) => setError(e.message ?? 'Nie udało się pobrać celów'))
+      .catch((e) => {
+        if (athlete && e instanceof ApiRequestError && e.status === 403) return athlete.onForbidden();
+        setError(e.message ?? 'Nie udało się pobrać celów');
+      })
       .finally(() => setLoading(false));
-  }, [status, refreshKey]);
+  }, [status, refreshKey, athlete]);
 
   useEffect(() => {
     getCategories()
@@ -90,9 +101,11 @@ function GoalsPage() {
     <div className={styles.page}>
       <div className={styles.header}>
         <h1>Cele</h1>
-        <button className={styles.addButton} onClick={() => setFormOpen(true)}>
-          + Dodaj cel
-        </button>
+        {!athlete && (
+          <button className={styles.addButton} onClick={() => setFormOpen(true)}>
+            + Dodaj cel
+          </button>
+        )}
       </div>
 
       <div className={styles.toolbar}>
@@ -113,16 +126,18 @@ function GoalsPage() {
 
       {error && <p className={styles.error}>{error}</p>}
 
-      {!loading && !error && items.length === 0 && <p className={styles.empty}>{EMPTY_TEXT[status]}</p>}
+      {!loading && !error && items.length === 0 && (
+        <p className={styles.empty}>{athlete ? ATHLETE_EMPTY_TEXT[status] : EMPTY_TEXT[status]}</p>
+      )}
 
       <div className={styles.grid}>
         {items.map((goal) => (
           <GoalCard
             key={goal.id}
             goal={goal}
-            onOpen={setDetailsGoal}
-            onAchieve={handleAchieve}
-            onEdit={setEditGoal}
+            onOpen={athlete ? undefined : setDetailsGoal}
+            onAchieve={athlete ? undefined : handleAchieve}
+            onEdit={athlete ? undefined : setEditGoal}
             busy={busyId === goal.id}
           />
         ))}

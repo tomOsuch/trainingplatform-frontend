@@ -24,4 +24,12 @@ export interface Cooperation {
   since: string;
 }
 
+export interface Athlete {
+  id: number;
+  firstName: string | null;
+  lastName: string | null;
+  email: string;
+  cooperationSince: string;
+}
+
 export type InvitationDecision = 'ACCEPTED' | 'REJECTED';
