@@ -15,11 +15,12 @@ export interface Goal {
   metric: GoalMetric;
   targetValue: number;
   currentValue: number;
+  percent: number;
   startDate: string;
   endDate: string | null;
   targetReached: boolean;
+  achieved: boolean;
   achievedAt: string | null;
-  achievedValue: number | null;
 }
 
 export interface GoalRequest {

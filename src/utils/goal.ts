@@ -18,21 +18,8 @@ const MONTHS_GENITIVE = [
 
 const DAY_MS = 86_400_000;
 
-export function isAchieved(goal: Goal): boolean {
-  return Boolean(goal.achievedAt);
-}
-
-export function progressValue(goal: Goal): number {
-  return isAchieved(goal) ? (goal.achievedValue ?? 0) : goal.currentValue;
-}
-
-export function progressPercent(goal: Goal): number {
-  if (goal.targetValue <= 0) return 0; // backend tego nie dopuszcza, ale dzielenie przez zero psuje cały widok
-  return Math.round((progressValue(goal) / goal.targetValue) * 100);
-}
-
 export function progressWidth(goal: Goal): number {
-  return Math.min(100, Math.max(0, progressPercent(goal)));
+  return Math.min(100, Math.max(0, goal.percent));
 }
 
 export function unitLabel(goal: Goal, value: number): string {
@@ -41,9 +28,9 @@ export function unitLabel(goal: Goal, value: number): string {
 
 export function formatProgress(goal: Goal): string {
   if (goal.metric === 'MINUTES') {
-    return `${formatDuration(progressValue(goal))} / ${formatDuration(goal.targetValue)}`;
+    return `${formatDuration(goal.currentValue)} / ${formatDuration(goal.targetValue)}`;
   }
-  return `${progressValue(goal)} / ${goal.targetValue} ${unitLabel(goal, goal.targetValue)}`;
+  return `${goal.currentValue} / ${goal.targetValue} ${unitLabel(goal, goal.targetValue)}`;
 }
 
 function parseISO(iso: string): Date {
@@ -107,7 +94,7 @@ export function achievedLabel(goal: Goal): string | null {
 
 export function sortGoals(goals: Goal[]): Goal[] {
   return [...goals].sort((a, b) => {
-    if (isAchieved(a) && isAchieved(b)) {
+    if (a.achieved && b.achieved) {
       return (b.achievedAt ?? '').localeCompare(a.achievedAt ?? '');
     }
     if (a.targetReached !== b.targetReached) return a.targetReached ? -1 : 1;
