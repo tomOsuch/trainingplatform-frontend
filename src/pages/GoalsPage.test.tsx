@@ -16,11 +16,12 @@ const base: Goal = {
   metric: 'MINUTES',
   targetValue: 1200, // 20 godzin — tytuł celu mówi o godzinach, więc dane muszą się zgadzać
   currentValue: 720,
+  percent: 60,
   startDate: '2026-09-01',
   endDate: '2026-09-30',
   targetReached: false,
+  achieved: false,
   achievedAt: null,
-  achievedValue: null,
 };
 
 const reached: Goal = {
@@ -30,6 +31,7 @@ const reached: Goal = {
   metric: 'SESSIONS',
   targetValue: 20,
   currentValue: 20,
+  percent: 100,
   targetReached: true,
 };
 
@@ -44,6 +46,7 @@ const openGoal: Goal = {
   metric: 'SESSIONS',
   targetValue: 50,
   currentValue: 7,
+  percent: 14,
   endDate: null,
 };
 
@@ -53,10 +56,11 @@ const achievedGoal: Goal = {
   title: '15 treningów w wakacje',
   metric: 'SESSIONS',
   targetValue: 20,
-  currentValue: 999, // celowo: po zamknięciu liczy się wyłącznie migawka
+  currentValue: 18,
+  percent: 90,
   targetReached: false,
+  achieved: true,
   achievedAt: '2026-09-04T10:12:00',
-  achievedValue: 18,
 };
 
 // strona pobiera też kategorie do formularza — każdy render potrzebuje tej odpowiedzi
@@ -89,7 +93,7 @@ describe('GoalsPage', () => {
     const spy = mockFetch(
       { status: 200, body: [reached] },
       { status: 200, body: [] }, // kategorie
-      { status: 200, body: { ...reached, achievedAt: '2026-09-06T09:00:00', achievedValue: 20 } },
+      { status: 200, body: { ...reached, achieved: true, achievedAt: '2026-09-06T09:00:00' } },
       { status: 200, body: [] }, // odświeżenie listy aktywnych po zamknięciu
     );
     renderWithProviders(<GoalsPage />);
@@ -115,7 +119,6 @@ describe('GoalsPage', () => {
     await screen.findByText('12h / 20h');
     await userEvent.click(screen.getByRole('button', { name: 'Osiągnięte' }));
 
-    // 18 z migawki, nie 999 z currentValue
     expect(await screen.findByText('18 / 20 sesji')).toBeInTheDocument();
     expect(screen.getByText('osiągnięty 4 września')).toBeInTheDocument();
 

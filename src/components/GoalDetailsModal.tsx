@@ -4,7 +4,7 @@ import { changeGoalStatus, getGoalEntries } from '../services/goalsApi';
 import { hexToRgba, darkenHex } from '../utils/color';
 import { formatDatePl, weekdayPl } from '../utils/calendar';
 import { plural } from '../utils/format';
-import { achievedLabel, deadlineLabel, formatProgress, isAchieved, periodLabel, progressPercent, progressWidth } from '../utils/goal';
+import { achievedLabel, deadlineLabel, formatProgress, periodLabel, progressWidth } from '../utils/goal';
 import { formatDuration } from '../utils/format';
 import CategoryIcon from './CategoryIcon';
 import Modal from './Modal';
@@ -43,7 +43,7 @@ function GoalDetailsModal({ goal, onClose, onEdit, onOpenEntry, onChanged }: Goa
     };
   }, [goal.id]);
 
-  const achieved = isAchieved(goal);
+  const achieved = goal.achieved;
   const color = goal.categoryColor ?? ACCENT;
   const width = progressWidth(goal);
   const awaitingClose = !achieved && goal.targetReached;
@@ -98,7 +98,7 @@ function GoalDetailsModal({ goal, onClose, onEdit, onOpenEntry, onChanged }: Goa
 
         <div className={styles.progressLine}>
           <span className={styles.values}>{formatProgress(goal)}</span>
-          <span className={styles.percent}>{progressPercent(goal)}%</span>
+          <span className={styles.percent}>{goal.percent}%</span>
         </div>
 
         <div className={styles.meta}>

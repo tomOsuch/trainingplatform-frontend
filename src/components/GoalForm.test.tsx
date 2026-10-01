@@ -15,11 +15,12 @@ const existing: Goal = {
   metric: 'MINUTES',
   targetValue: 1200,
   currentValue: 720,
+  percent: 60,
   startDate: '2026-09-01',
   endDate: '2026-09-30',
   targetReached: false,
+  achieved: false,
   achievedAt: null,
-  achievedValue: null,
 };
 
 const noop = () => {};

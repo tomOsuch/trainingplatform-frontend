@@ -1,7 +1,7 @@
 import { Goal } from '../types/goal';
 import { hexToRgba, darkenHex } from '../utils/color';
 import CategoryIcon from './CategoryIcon';
-import { achievedLabel, deadlineLabel, formatProgress, isAchieved, periodLabel, progressPercent, progressWidth } from '../utils/goal';
+import { achievedLabel, deadlineLabel, formatProgress, periodLabel, progressWidth } from '../utils/goal';
 import styles from '../styles/GoalsPage.module.scss';
 
 const ACCENT = '#2563eb';
@@ -16,7 +16,7 @@ interface GoalCardProps {
 }
 
 function GoalCard({ goal, onOpen, onAchieve, onEdit, busy }: GoalCardProps) {
-  const achieved = isAchieved(goal);
+  const achieved = goal.achieved;
   const color = goal.categoryColor ?? ACCENT;
   const width = progressWidth(goal);
 
@@ -60,7 +60,7 @@ function GoalCard({ goal, onOpen, onAchieve, onEdit, busy }: GoalCardProps) {
 
       <div className={styles.progressLine}>
         <span className={styles.values}>{formatProgress(goal)}</span>
-        <span className={styles.percent}>{progressPercent(goal)}%</span>
+        <span className={styles.percent}>{goal.percent}%</span>
       </div>
 
       <div className={styles.meta}>

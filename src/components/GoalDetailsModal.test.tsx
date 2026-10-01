@@ -15,16 +15,33 @@ const goal: Goal = {
   metric: 'SESSIONS',
   targetValue: 20,
   currentValue: 12,
+  percent: 60,
   startDate: '2026-09-01',
   endDate: null,
   targetReached: false,
+  achieved: false,
   achievedAt: null,
-  achievedValue: null,
 };
 
 const entries: GoalEntry[] = [
-  { id: 91, title: 'Poranna sesja', performedDate: '2026-09-05', durationMin: 45, categoryName: 'Gimnastyka', categoryColor: '#E74C3C', categoryIconName: 'person-standing' },
-  { id: 90, title: null, performedDate: '2026-09-03', durationMin: null, categoryName: 'Gimnastyka', categoryColor: '#E74C3C', categoryIconName: 'person-standing' },
+  {
+    id: 91,
+    title: 'Poranna sesja',
+    performedDate: '2026-09-05',
+    durationMin: 45,
+    categoryName: 'Gimnastyka',
+    categoryColor: '#E74C3C',
+    categoryIconName: 'person-standing',
+  },
+  {
+    id: 90,
+    title: null,
+    performedDate: '2026-09-03',
+    durationMin: null,
+    categoryName: 'Gimnastyka',
+    categoryColor: '#E74C3C',
+    categoryIconName: 'person-standing',
+  },
 ];
 
 const noop = () => {};
@@ -35,7 +52,7 @@ const open = (props: Partial<React.ComponentProps<typeof GoalDetailsModal>> = {}
 describe('GoalDetailsModal', () => {
   afterEach(() => jest.restoreAllMocks());
 
-   test('pokazuje dane celu natychmiast, jeszcze przed odpowiedzią z listą treningów', async () => {
+  test('pokazuje dane celu natychmiast, jeszcze przed odpowiedzią z listą treningów', async () => {
     mockFetch({ status: 200, body: { entries } });
     open();
 
@@ -77,9 +94,12 @@ describe('GoalDetailsModal', () => {
     const onClose = jest.fn();
     const spy = mockFetch(
       { status: 200, body: { entries } },
-      { status: 200, body: { ...goal, achievedAt: '2026-09-08T09:00:00', achievedValue: 20 } },
+      {
+        status: 200,
+        body: { ...goal, currentValue: 20, percent: 100, targetReached: true, achieved: true, achievedAt: '2026-09-08T09:00:00' },
+      },
     );
-    open({ goal: { ...goal, currentValue: 20, targetReached: true }, onChanged, onClose });
+    open({ goal: { ...goal, currentValue: 20, percent: 100, targetReached: true }, onChanged, onClose });
 
     expect(screen.getByText('Wartość docelowa osiągnięta. Możesz zamknąć ten cel.')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Oznacz jako osiągnięty' }));
@@ -93,9 +113,10 @@ describe('GoalDetailsModal', () => {
 
   test('cel osiągnięty nie ma edycji, ma przywrócenie', async () => {
     const spy = mockFetch({ status: 200, body: { entries } }, { status: 200, body: goal });
-    open({ goal: { ...goal, achievedAt: '2026-09-04T10:12:00', achievedValue: 18 } });
+    open({ goal: { ...goal, currentValue: 18, percent: 90, achieved: true, achievedAt: '2026-09-04T10:12:00' } });
 
     expect(screen.getByText('18 / 20 sesji')).toBeInTheDocument();
+    expect(screen.getByText('90%')).toBeInTheDocument();
     expect(screen.getByText(/postęp zamknięty/)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Edytuj' })).not.toBeInTheDocument();
 

@@ -1,5 +1,5 @@
 import { Goal } from '../types/goal';
-import { deadlineLabel, daysLeft, formatProgress, periodLabel, progressPercent, progressValue, progressWidth, sortGoals } from './goal';
+import { deadlineLabel, daysLeft, formatProgress, periodLabel, progressWidth, sortGoals } from './goal';
 
 const base: Goal = {
   id: 1,
@@ -12,11 +12,12 @@ const base: Goal = {
   metric: 'SESSIONS',
   targetValue: 20,
   currentValue: 5,
+  percent: 25,
   startDate: '2026-09-01',
   endDate: '2026-09-30',
   targetReached: false,
+  achieved: false,
   achievedAt: null,
-  achievedValue: null,
 };
 
 const goal = (patch: Partial<Goal>): Goal => ({ ...base, ...patch });
@@ -26,21 +27,15 @@ const day = (iso: string) => {
 };
 
 describe('postęp celu', () => {
-  test('cel aktywny liczy się na bieżąco, osiągnięty pokazuje migawkę', () => {
-    expect(progressValue(goal({ currentValue: 5 }))).toBe(5);
-
-    const closed = goal({ currentValue: 999, achievedAt: '2026-09-04T10:00:00', achievedValue: 18 });
-    expect(progressValue(closed)).toBe(18);
+  test('cel osiągnięty pokazuje migawkę z currentValue, a nie zero', () => {
+    const closed = goal({ currentValue: 18, percent: 90, achieved: true, achievedAt: '2026-09-04T10:00:00' });
+    expect(formatProgress(closed)).toBe('18 / 20 sesji');
+    expect(progressWidth(closed)).toBe(90);
   });
 
-  test('procent może przekroczyć 100, ale pasek nie wychodzi poza tor', () => {
-    const over = goal({ currentValue: 25, targetValue: 20 });
-    expect(progressPercent(over)).toBe(125);
+  test('procent przychodzi z serwera i może przekroczyć 100, ale pasek nie wychodzi poza tor', () => {
+    const over = goal({ currentValue: 25, targetValue: 20, percent: 125 });
     expect(progressWidth(over)).toBe(100);
-  });
-
-  test('wartość docelowa 0 nie wywraca widoku', () => {
-    expect(progressPercent(goal({ targetValue: 0 }))).toBe(0);
   });
 
   test('jednostka odmienia się od wartości docelowej', () => {
@@ -118,8 +113,8 @@ describe('kolejność celów', () => {
   });
 
   test('osiągnięte idą od najświeższych', () => {
-    const older = goal({ id: 1, achievedAt: '2026-07-31T12:00:00', achievedValue: 20 });
-    const newer = goal({ id: 2, achievedAt: '2026-09-04T10:00:00', achievedValue: 18 });
+    const older = goal({ id: 1, achieved: true, achievedAt: '2026-07-31T12:00:00', currentValue: 20, percent: 100 });
+    const newer = goal({ id: 2, achieved: true, achievedAt: '2026-09-04T10:00:00', currentValue: 18, percent: 90 });
 
     expect(sortGoals([older, newer]).map((g) => g.id)).toEqual([2, 1]);
   });
