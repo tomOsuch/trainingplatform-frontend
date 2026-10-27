@@ -7,6 +7,7 @@ export interface UserProfile {
   lastName: string;
   birthDate: string | null; // "YYYY-MM-DD"
   role: Role;
+  coach: boolean;
 }
 
 export interface UpdateProfileRequest {
@@ -19,6 +20,10 @@ export interface ChangePasswordRequest {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
+}
+
+export interface CoachModeRequest {
+  enabled: boolean;
 }
 
 export interface DeleteAccountRequest {

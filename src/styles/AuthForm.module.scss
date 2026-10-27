@@ -164,3 +164,40 @@
   color: #92400e;
   text-align: center;
 }
+
+.checkRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+
+  input {
+    width: 16px;
+    height: 16px;
+    margin: 2px 0 0;
+    flex-shrink: 0;
+    accent-color: #2563eb;
+    cursor: pointer;
+  }
+
+  &:focus-within {
+    outline: 2px solid #2563eb;
+    outline-offset: 1px;
+  }
+}
+
+.checkText {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  line-height: 1.45;
+}
+
+.checkLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}

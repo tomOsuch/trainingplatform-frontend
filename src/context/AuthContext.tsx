@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from 'react';
 import { LoginRequest, User } from '../types/auth';
+import { UserProfile } from '../types/profile';
 import * as authApi from '../services/authApi';
 import * as profileApi from '../services/profileApi';
 import { setAuthToken, setOnSessionEnd, restoreSession } from '../services/apiClient';
@@ -13,13 +14,12 @@ interface AuthContextValue {
   logout: () => void;
   clearSession: () => void;
   refreshProfile: () => Promise<void>;
+  applyProfile: (profile: UserProfile) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children, restoreOnMount = true }: { children: ReactNode; restoreOnMount?: boolean }) {
-  // token żyje wyłącznie w apiClient — tu trzymamy sam fakt zalogowania,
-  // inaczej po cichym odświeżeniu mielibyśmy nieaktualną kopię
   const [authenticated, setAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [restoring, setRestoring] = useState(restoreOnMount);
@@ -37,18 +37,22 @@ export function AuthProvider({ children, restoreOnMount = true }: { children: Re
     setSessionMessage(null);
   }, [clearSession]);
 
+ const applyProfile = useCallback((profile: UserProfile) => {
+    setUser({
+      userId: profile.id,
+      email: profile.email,
+      role: profile.role,
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      coach: profile.coach,
+    });
+  }, []);
+
   const refreshProfile = useCallback(async () => {
     try {
-      const profile = await profileApi.getProfile();
-      setUser({
-        userId: profile.id,
-        email: profile.email,
-        role: profile.role,
-        firstName: profile.firstName,
-        lastName: profile.lastName,
-      });
+      applyProfile(await profileApi.getProfile());
     } catch {}
-  }, []);
+  }, [applyProfile]);
 
   const login = useCallback(
     async (data: LoginRequest) => {
@@ -104,6 +108,7 @@ export function AuthProvider({ children, restoreOnMount = true }: { children: Re
         logout,
         clearSession,
         refreshProfile,
+        applyProfile,
       }}
     >
       {children}

@@ -6,6 +6,7 @@ export interface RegisterRequest {
   email: string;
   password: string;
   token: string;
+  coach: boolean;
 }
 
 export interface LoginRequest {
@@ -27,6 +28,7 @@ export interface User {
   role: Role;
   firstName?: string;
   lastName?: string;
+  coach?: boolean;
 }
 
 export interface InvitationInfo {
