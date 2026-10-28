@@ -23,6 +23,7 @@ const profile = {
   lastName: "Kowalski",
   birthDate: "1990-05-12",
   role: "USER" as const,
+  coach: false,
 };
 
 jest.mock('../components/NotificationsSettings', () => ({

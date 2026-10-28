@@ -7,10 +7,11 @@ import { toISODate } from '../utils/calendar';
 import styles from '../styles/ProfilePage.module.scss';
 import DeleteAccountDialog from '../components/DeleteAccountDialog';
 import NotificationsSettings from '../components/NotificationsSettings';
+import CoachModeSettings from '../components/CoachModeSettings';
 import { useNavigate } from 'react-router-dom';
 
 function ProfilePage() {
-  const { refreshProfile, clearSession } = useAuth();
+  const { refreshProfile, clearSession, applyProfile } = useAuth();
   const navigate = useNavigate();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -194,6 +195,16 @@ function ProfilePage() {
       <section className={styles.card}>
         <h2>Powiadomienia</h2>
         <NotificationsSettings email={profile.email} />
+      </section>
+      <section className={styles.card}>
+        <h2>Tryb trenera</h2>
+        <CoachModeSettings
+          enabled={profile.coach}
+          onChanged={(updated) => {
+            setProfile(updated);
+            applyProfile(updated);
+          }}
+        />
       </section>
       <section className={[styles.card, styles.dangerCard].join(' ')}>
         <h2>Strefa niebezpieczna</h2>

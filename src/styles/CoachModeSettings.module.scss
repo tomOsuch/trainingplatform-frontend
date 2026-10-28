@@ -1,0 +1,101 @@
+.wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.locked {
+    cursor: default;
+
+    span[aria-hidden='true'] {
+        opacity: 0.45;
+    }
+}
+
+.lock {
+    margin: 0;
+    font-size: 12px;
+    color: #b45309;
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-radius: 8px;
+    padding: 8px 10px;
+    line-height: 1.5;
+
+    a {
+        color: inherit;
+        font-weight: 600;
+    }
+}
+
+.error {
+    margin: 0;
+    font-size: 13px;
+    color: #b91c1c;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 8px 10px;
+    line-height: 1.5;
+}
+
+.success {
+    margin: 0;
+    font-size: 13px;
+    color: #1e8449;
+}
+
+.consequences {
+    margin: 4px 0 16px;
+    padding-left: 18px;
+    font-size: 13px;
+    color: #374151;
+    line-height: 1.6;
+
+    li {
+        margin-bottom: 4px;
+    }
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.secondary,
+.danger {
+    font-family: inherit;
+    font-size: 13px;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    color: #374151;
+}
+
+.danger {
+    background: #b91c1c;
+    border-color: #b91c1c;
+    color: #fff;
+    font-weight: 600;
+}
+
+.secondary:disabled,
+.danger:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+@media (max-width: 520px) {
+    .actions {
+        flex-direction: column;
+    }
+
+    .secondary,
+    .danger {
+        width: 100%;
+    }
+}
