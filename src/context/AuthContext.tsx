@@ -19,9 +19,17 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-export function AuthProvider({ children, restoreOnMount = true }: { children: ReactNode; restoreOnMount?: boolean }) {
-  const [authenticated, setAuthenticated] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+export function AuthProvider({
+  children,
+  restoreOnMount = true,
+  initialUser = null,
+}: {
+  children: ReactNode;
+  restoreOnMount?: boolean;
+  initialUser?: User | null;
+}) {
+  const [authenticated, setAuthenticated] = useState(initialUser !== null);
+  const [user, setUser] = useState<User | null>(initialUser);
   const [restoring, setRestoring] = useState(restoreOnMount);
   const [sessionMessage, setSessionMessage] = useState<string | null>(null);
 
@@ -37,7 +45,7 @@ export function AuthProvider({ children, restoreOnMount = true }: { children: Re
     setSessionMessage(null);
   }, [clearSession]);
 
- const applyProfile = useCallback((profile: UserProfile) => {
+  const applyProfile = useCallback((profile: UserProfile) => {
     setUser({
       userId: profile.id,
       email: profile.email,
