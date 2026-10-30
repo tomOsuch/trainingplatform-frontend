@@ -134,9 +134,8 @@ describe('CooperationPage', () => {
     expect(screen.getByRole('button', { name: 'Tak, wycofaj' })).toBeInTheDocument();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
-});
 
-test('bez trybu trenera nie ma sekcji „Prowadzę", ale zaproszenie od trenera i „Prowadzi mnie" zostają', async () => {
+  test('bez trybu trenera nie ma sekcji „Prowadzę", ale zaproszenie od trenera i „Prowadzi mnie" zostają', async () => {
   mockFetch(...dane([trener], [otrzymane]));
   renderWithProviders(<CooperationPage />, { user: { ...coachUser, coach: false } });
 
@@ -154,4 +153,5 @@ test('dopóki flaga nie jest znana, nie ma ani sekcji „Prowadzę", ani wskazó
   await screen.findByText(/Trenera nie zapraszasz/);
   expect(screen.queryByText(/Nie prowadzisz jeszcze nikogo/)).not.toBeInTheDocument();
   expect(screen.queryByText(/Chcesz prowadzić innych/)).not.toBeInTheDocument();
+});
 });
