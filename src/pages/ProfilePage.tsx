@@ -65,7 +65,9 @@ function ProfilePage() {
         lastName: lastName.trim(),
         ...(birthDate && { birthDate }),
       });
-      setProfile(updated);
+      setProfile((prev) =>
+        prev ? { ...prev, firstName: updated.firstName, lastName: updated.lastName, birthDate: updated.birthDate } : updated,
+      );
       await refreshProfile(); // odświeża imię w Navbarze
       setDataMessage('Dane zostały zapisane');
     } catch (err) {
@@ -201,7 +203,7 @@ function ProfilePage() {
         <CoachModeSettings
           enabled={profile.coach}
           onChanged={(updated) => {
-            setProfile(updated);
+            setProfile((prev) => (prev ? { ...prev, coach: updated.coach } : updated));
             applyProfile(updated);
           }}
         />
