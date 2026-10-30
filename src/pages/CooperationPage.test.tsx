@@ -1,8 +1,9 @@
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders, mockFetch } from '../test-utils';
 import CooperationPage from './CooperationPage';
 import { Cooperation, CooperationInvitation } from '../types/cooperation';
+import { User } from '../types/auth';
 
 const trener: Cooperation = {
   id: 1,
@@ -53,12 +54,21 @@ const dane = (coops: Cooperation[], invs: CooperationInvitation[]) => [
   { status: 200, body: invs },
 ];
 
+const coachUser: User = {
+  userId: 99,
+  email: 'ja@example.com',
+  role: 'USER',
+  firstName: 'Tomasz',
+  lastName: 'Testowy',
+  coach: true,
+};
+
 describe('CooperationPage', () => {
   afterEach(() => jest.restoreAllMocks());
 
   test('rozdziela dane po stronie relacji, nie po partnerze', async () => {
     mockFetch(...dane([trener, podopieczna], [wyslane]));
-    renderWithProviders(<CooperationPage />);
+    renderWithProviders(<CooperationPage />, { user: coachUser });
 
     const podopieczni = await screen.findByRole('list', { name: 'Moi podopieczni' });
     expect(within(podopieczni).getByText('Anna Nowak')).toBeInTheDocument();
@@ -71,7 +81,7 @@ describe('CooperationPage', () => {
 
   test('zaproszenie do przyjęcia żyje w pasku decyzji, nie w sekcji trenerów', async () => {
     mockFetch(...dane([trener], [otrzymane]));
-    renderWithProviders(<CooperationPage />);
+    renderWithProviders(<CooperationPage />, { user: coachUser });
 
     const pasek = await screen.findByRole('region', { name: 'Czeka na Twoją decyzję' });
     expect(within(pasek).getByText('Jan Kowalski chce Cię prowadzić')).toBeInTheDocument();
@@ -86,7 +96,7 @@ describe('CooperationPage', () => {
       { status: 200, body: { ...otrzymane, status: 'ACTIVE' } },
       ...dane([{ ...trener, partnerFirstName: 'Jan', partnerLastName: 'Kowalski' }], []),
     );
-    renderWithProviders(<CooperationPage />);
+    renderWithProviders(<CooperationPage />, { user: coachUser });
 
     await userEvent.click(await screen.findByRole('button', { name: 'Przyjmij' }));
 
@@ -97,7 +107,7 @@ describe('CooperationPage', () => {
 
   test('zakończenie współpracy mówi, że plany zostają', async () => {
     mockFetch(...dane([trener], []));
-    renderWithProviders(<CooperationPage />);
+    renderWithProviders(<CooperationPage />, { user: coachUser });
 
     await userEvent.click(await screen.findByRole('button', { name: 'Zakończ współpracę' }));
 
@@ -109,7 +119,7 @@ describe('CooperationPage', () => {
 
   test('pusta sekcja trenerów tłumaczy, że trenera się nie zaprasza', async () => {
     mockFetch(...dane([], []));
-    renderWithProviders(<CooperationPage />);
+    renderWithProviders(<CooperationPage />, { user: coachUser });
 
     expect(await screen.findByText(/Trenera nie zapraszasz/)).toBeInTheDocument();
     expect(screen.getByText(/Nie prowadzisz jeszcze nikogo/)).toBeInTheDocument();
@@ -117,11 +127,43 @@ describe('CooperationPage', () => {
 
   test('wycofanie zaproszenia pyta o potwierdzenie w wierszu', async () => {
     mockFetch(...dane([], [wyslane]));
-    renderWithProviders(<CooperationPage />);
+    renderWithProviders(<CooperationPage />, { user: coachUser });
 
     await userEvent.click(await screen.findByRole('button', { name: 'Wycofaj' }));
 
     expect(screen.getByRole('button', { name: 'Tak, wycofaj' })).toBeInTheDocument();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  test('bez trybu trenera nie ma sekcji „Prowadzę", ale zaproszenie od trenera i „Prowadzi mnie" zostają', async () => {
+    mockFetch(...dane([trener], [otrzymane]));
+    renderWithProviders(<CooperationPage />, { user: { ...coachUser, coach: false } });
+
+    await screen.findByRole('region', { name: 'Czeka na Twoją decyzję' });
+    expect(screen.getByRole('list', { name: 'Moi trenerzy' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: /Prowadzę/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Zaproś podopiecznego' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'profilu' })).toHaveAttribute('href', '/profil');
+  });
+
+  test('nieznana flaga: ponawia odczyt profilu, a do tego czasu nie pokazuje ani sekcji, ani wskazówki', async () => {
+    const spy = mockFetch(...dane([], []), { status: 500, body: { message: 'Błąd serwera' } });
+    renderWithProviders(<CooperationPage />, { user: { ...coachUser, coach: undefined } });
+
+    await screen.findByText(/Trenera nie zapraszasz/);
+    await waitFor(() => expect(spy.mock.calls.some(([url]) => String(url).endsWith('/profile'))).toBe(true));
+    expect(screen.queryByText(/Nie prowadzisz jeszcze nikogo/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Chcesz prowadzić innych/)).not.toBeInTheDocument();
+  });
+
+  test('udane ponowienie odczytu profilu odsłania sekcję „Prowadzę"', async () => {
+    mockFetch(...dane([podopieczna], []), {
+      status: 200,
+      body: { id: 99, email: 'ja@example.com', firstName: 'Tomasz', lastName: 'Testowy', birthDate: null, role: 'USER', coach: true },
+    });
+    renderWithProviders(<CooperationPage />, { user: { ...coachUser, coach: undefined } });
+
+    const podopieczni = await screen.findByRole('list', { name: 'Moi podopieczni' });
+    expect(within(podopieczni).getByText('Anna Nowak')).toBeInTheDocument();
   });
 });

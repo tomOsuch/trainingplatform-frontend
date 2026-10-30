@@ -2,17 +2,20 @@ import { ReactElement } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { User } from './types/auth';
 
 interface RenderWithProvidersOptions extends Omit<RenderOptions, 'wrapper'> {
   route?: string;
+  user?: User | null;
 }
 
-export function renderWithProviders(ui: ReactElement, { route = '/', ...options }: RenderWithProvidersOptions = {}) {
+export function renderWithProviders(ui: ReactElement, { route = '/', user, ...options }: RenderWithProvidersOptions = {}) {
   return render(ui, {
     wrapper: ({ children }) => (
       <MemoryRouter initialEntries={[route]}>
-        {}
-        <AuthProvider restoreOnMount={false}>{children}</AuthProvider>
+        <AuthProvider restoreOnMount={false} initialUser={user}>
+          {children}
+        </AuthProvider>
       </MemoryRouter>
     ),
     ...options,
@@ -29,7 +32,6 @@ export function mockFetch(...responses: MockResponse[]) {
   const spy = jest.spyOn(global, 'fetch');
 
   responses.forEach(({ status = 200, body, headers = {} }) => {
-
     const lookup = Object.fromEntries(Object.entries(headers).map(([k, v]) => [k.toLowerCase(), v]));
 
     spy.mockResolvedValueOnce({

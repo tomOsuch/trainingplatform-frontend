@@ -60,6 +60,7 @@ function RegisterPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [coach, setCoach] = useState(false);
 
   useEffect(() => {
     if (!token) return;
@@ -108,6 +109,7 @@ function RegisterPage() {
         email: invitation.email,
         password: values.password,
         token,
+        coach,
       });
 
       await login({ email: invitation.email, password: values.password });
@@ -192,6 +194,16 @@ function RegisterPage() {
 
           {renderField('password', 'Hasło', 'password', 'new-password')}
           {renderField('confirmPassword', 'Potwierdź hasło', 'password', 'new-password')}
+
+          <label className={styles.checkRow}>
+            <input type="checkbox" checked={coach} onChange={(e) => setCoach(e.target.checked)} />
+            <span className={styles.checkText}>
+              <span className={styles.checkLabel}>Będę prowadzić innych (tryb trenera)</span>
+              <span className={styles.hint}>
+                Pozwala zapraszać podopiecznych i układać im plany. Możesz to zmienić w każdej chwili w profilu.
+              </span>
+            </span>
+          </label>
 
           {formError && <p className={styles.formError}>{formError}</p>}
 

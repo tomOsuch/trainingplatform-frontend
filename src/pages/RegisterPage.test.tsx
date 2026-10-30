@@ -16,6 +16,7 @@ const sampleProfile = {
   lastName: 'Kowalski',
   birthDate: null,
   role: 'USER' as const,
+  coach: false,
 };
 
 // route można nadpisać, żeby przetestować wejście bez tokenu
@@ -153,8 +154,30 @@ describe('RegisterPage', () => {
         email: 'jan@example.com',
         password: 'haslo12345',
         token: 'zaproszenie-abc',
+        coach: false,
       });
       expect(payload).not.toHaveProperty('confirmPassword');
+    });
+
+    test('tryb trenera jest domyślnie wyłączony, a zaznaczony idzie w żądaniu jako coach: true', async () => {
+      const fetchSpy = mockFetch(
+        { status: 200, body: invitation },
+        { status: 201, body: { ...sampleProfile, coach: true } },
+        { status: 200, body: sampleLoginResponse },
+        { status: 200, body: { ...sampleProfile, coach: true } },
+      );
+      renderRegister();
+
+      const checkbox = await screen.findByRole('checkbox', { name: /Będę prowadzić innych/ });
+      expect(checkbox).not.toBeChecked();
+
+      await fillForm();
+      await userEvent.click(checkbox);
+      await submit();
+      await screen.findByRole('heading', { name: 'Kalendarz' });
+
+      const payload = JSON.parse(fetchSpy.mock.calls[1][1]!.body as string);
+      expect(payload.coach).toBe(true);
     });
 
     test('po sukcesie loguje automatycznie i przekierowuje na kalendarz', async () => {

@@ -25,8 +25,10 @@ function partnerName(p: Partner): string {
 }
 
 function CooperationPage() {
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const navState = useLocation().state as { lostAccess?: string } | null;
+  const isCoach = user?.coach === true;
+  const notCoach = user?.coach === false;
 
   const [cooperations, setCooperations] = useState<Cooperation[]>([]);
   const [invitations, setInvitations] = useState<CooperationInvitation[]>([]);
@@ -54,6 +56,10 @@ function CooperationPage() {
   }, []);
 
   useEffect(load, [load]);
+
+  useEffect(() => {
+    if (user && user.coach === undefined) refreshProfile();
+  }, [user, refreshProfile]);
 
   const myAthletes = cooperations.filter((c) => c.role === 'COACH');
   const myCoaches = cooperations.filter((c) => c.role === 'ATHLETE');
@@ -118,6 +124,7 @@ function CooperationPage() {
             </section>
           )}
 
+          {isCoach && (
           <section className={styles.section}>
             <div className={styles.sectionHead}>
               <h2 className={styles.sectionTitle}>
@@ -191,6 +198,7 @@ function CooperationPage() {
               </ul>
             )}
           </section>
+          )}
 
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>
@@ -229,6 +237,11 @@ function CooperationPage() {
               </ul>
             )}
           </section>
+          {notCoach && (
+            <p className={styles.coachHint}>
+              Chcesz prowadzić innych? Włącz tryb trenera w <Link to="/profil">profilu</Link>.
+            </p>
+          )}
         </>
       )}
 

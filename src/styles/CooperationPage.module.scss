@@ -229,3 +229,18 @@
         flex: 1;
     }
 }
+
+.coachHint {
+    margin: 4px 0 0;
+    border: 1px dashed #e5e7eb;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #6b7280;
+    max-width: 640px;
+
+    a {
+        color: #2563eb;
+        font-weight: 600;
+    }
+}
