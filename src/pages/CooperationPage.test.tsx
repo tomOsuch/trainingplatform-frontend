@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders, mockFetch } from '../test-utils';
 import CooperationPage from './CooperationPage';
@@ -136,22 +136,34 @@ describe('CooperationPage', () => {
   });
 
   test('bez trybu trenera nie ma sekcji „Prowadzę", ale zaproszenie od trenera i „Prowadzi mnie" zostają', async () => {
-  mockFetch(...dane([trener], [otrzymane]));
-  renderWithProviders(<CooperationPage />, { user: { ...coachUser, coach: false } });
+    mockFetch(...dane([trener], [otrzymane]));
+    renderWithProviders(<CooperationPage />, { user: { ...coachUser, coach: false } });
 
-  await screen.findByRole('region', { name: 'Czeka na Twoją decyzję' });
-  expect(screen.getByRole('list', { name: 'Moi trenerzy' })).toBeInTheDocument();
-  expect(screen.queryByRole('heading', { name: /Prowadzę/ })).not.toBeInTheDocument();
-  expect(screen.queryByRole('button', { name: 'Zaproś podopiecznego' })).not.toBeInTheDocument();
-  expect(screen.getByRole('link', { name: 'profilu' })).toHaveAttribute('href', '/profil');
-});
+    await screen.findByRole('region', { name: 'Czeka na Twoją decyzję' });
+    expect(screen.getByRole('list', { name: 'Moi trenerzy' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: /Prowadzę/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Zaproś podopiecznego' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'profilu' })).toHaveAttribute('href', '/profil');
+  });
 
-test('dopóki flaga nie jest znana, nie ma ani sekcji „Prowadzę", ani wskazówki', async () => {
-  mockFetch(...dane([], []));
-  renderWithProviders(<CooperationPage />, { user: { ...coachUser, coach: undefined } });
+  test('nieznana flaga: ponawia odczyt profilu, a do tego czasu nie pokazuje ani sekcji, ani wskazówki', async () => {
+    const spy = mockFetch(...dane([], []), { status: 500, body: { message: 'Błąd serwera' } });
+    renderWithProviders(<CooperationPage />, { user: { ...coachUser, coach: undefined } });
 
-  await screen.findByText(/Trenera nie zapraszasz/);
-  expect(screen.queryByText(/Nie prowadzisz jeszcze nikogo/)).not.toBeInTheDocument();
-  expect(screen.queryByText(/Chcesz prowadzić innych/)).not.toBeInTheDocument();
-});
+    await screen.findByText(/Trenera nie zapraszasz/);
+    await waitFor(() => expect(spy.mock.calls.some(([url]) => String(url).endsWith('/profile'))).toBe(true));
+    expect(screen.queryByText(/Nie prowadzisz jeszcze nikogo/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Chcesz prowadzić innych/)).not.toBeInTheDocument();
+  });
+
+  test('udane ponowienie odczytu profilu odsłania sekcję „Prowadzę"', async () => {
+    mockFetch(...dane([podopieczna], []), {
+      status: 200,
+      body: { id: 99, email: 'ja@example.com', firstName: 'Tomasz', lastName: 'Testowy', birthDate: null, role: 'USER', coach: true },
+    });
+    renderWithProviders(<CooperationPage />, { user: { ...coachUser, coach: undefined } });
+
+    const podopieczni = await screen.findByRole('list', { name: 'Moi podopieczni' });
+    expect(within(podopieczni).getByText('Anna Nowak')).toBeInTheDocument();
+  });
 });

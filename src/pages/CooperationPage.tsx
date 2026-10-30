@@ -25,7 +25,7 @@ function partnerName(p: Partner): string {
 }
 
 function CooperationPage() {
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const navState = useLocation().state as { lostAccess?: string } | null;
   const isCoach = user?.coach === true;
   const notCoach = user?.coach === false;
@@ -56,6 +56,10 @@ function CooperationPage() {
   }, []);
 
   useEffect(load, [load]);
+
+  useEffect(() => {
+    if (user && user.coach === undefined) refreshProfile();
+  }, [user, refreshProfile]);
 
   const myAthletes = cooperations.filter((c) => c.role === 'COACH');
   const myCoaches = cooperations.filter((c) => c.role === 'ATHLETE');
