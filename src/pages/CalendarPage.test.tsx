@@ -22,6 +22,7 @@ const planOdTrenera: TrainingPlan = {
   status: 'PLANNED',
   createdByCoach: true,
   createdByName: 'Jan Kowalski',
+  createdById: 7,
 };
 
 const dane = (plans: TrainingPlan[] = [planOdTrenera]) => [

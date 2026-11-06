@@ -27,6 +27,7 @@ export interface TrainingPlan {
   status: PlanStatus;
   createdByCoach: boolean;
   createdByName: string | null;
+  createdById: number | null;
 }
 
 export interface TrainingPlanRequest {

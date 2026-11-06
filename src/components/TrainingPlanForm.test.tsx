@@ -24,6 +24,7 @@ const pastPlan: TrainingPlan = {
   status: 'COMPLETED',
   createdByCoach: false,
   createdByName: null,
+  createdById: null,
 };
 
 const sampleTemplate = {
