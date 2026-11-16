@@ -19,9 +19,12 @@ import Modal from '../components/Modal';
 import styles from '../styles/CalendarPage.module.scss';
 import { useAthleteContext } from '../hooks/useAthleteContext';
 import { ApiRequestError } from '../services/apiClient';
+import { useAuth } from '../context/AuthContext';
+import { canCoachEditPlan } from '../utils/plan';
 
 function CalendarPage() {
   const athlete = useAthleteContext();
+  const { user } = useAuth();
   const location = useLocation();
   const navState = location.state as { month?: string; anchor?: string; view?: 'month' | 'week' } | null;
 
@@ -55,16 +58,13 @@ function CalendarPage() {
   const [editLog, setEditLog] = useState<WorkoutLog | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // szkic wpisu do dziennika tworzony z ukończonego planu
   const [journalDraft, setJournalDraft] = useState<{
     initial: Partial<WorkoutLogRequest>;
     planTitle: string;
   } | null>(null);
 
-  // 42 dni dla miesiąca, 7 dla tygodnia
   const grid = useMemo(() => (view === 'month' ? buildMonthGrid(anchor) : buildWeekGrid(anchor)), [anchor, view]);
 
-  // plany i wpisy pobieramy równolegle dla całego widocznego zakresu
   useEffect(() => {
     const from = grid[0].iso;
     const to = grid[grid.length - 1].iso;
@@ -91,10 +91,8 @@ function CalendarPage() {
       .catch(() => {});
   }, []);
 
-  // wspólna mapa dni: plany + samodzielne wpisy (te z planId są pomijane)
   const itemsByDay = useMemo(() => buildItemsByDay(plans, logs), [plans, logs]);
 
-  // nawigacja: o miesiąc albo o tydzień, zależnie od widoku
   const shift = (dir: number) =>
     setAnchor((a) =>
       view === 'month' ? new Date(a.getFullYear(), a.getMonth() + dir, 1) : new Date(a.getFullYear(), a.getMonth(), a.getDate() + dir * 7),
@@ -138,6 +136,12 @@ function CalendarPage() {
       ? `${MONTH_NAMES[anchor.getMonth()]} ${anchor.getFullYear()}`
       : `${dm(grid[0].date)} – ${dm(grid[6].date)}.${grid[6].date.getFullYear()}`;
 
+  const openEditPlan = (p: TrainingPlan) => {
+    setSelectedPlan(null);
+    setEditPlan(p);
+  };
+
+  const coachCanEditSelected = athlete !== undefined && selectedPlan !== null && canCoachEditPlan(selectedPlan, user?.userId);
   return (
     <div className={styles.calendar}>
       <div className={styles.toolbar}>
@@ -276,7 +280,12 @@ function CalendarPage() {
 
       {selectedPlan &&
         (athlete ? (
-          <PlanDetailView plan={selectedPlan} onClose={() => setSelectedPlan(null)} readOnly />
+          <PlanDetailView
+            plan={selectedPlan}
+            onClose={() => setSelectedPlan(null)}
+            readOnly
+            onEdit={coachCanEditSelected ? openEditPlan : undefined}
+          />
         ) : (
           <PlanDetailView
             plan={selectedPlan}
@@ -307,6 +316,8 @@ function CalendarPage() {
         <TrainingPlanForm
           categories={categories}
           plan={editPlan}
+          athleteId={athlete?.athleteId}
+          onForbidden={athlete?.onForbidden}
           onClose={() => setEditPlan(null)}
           onSaved={() => setRefreshKey((k) => k + 1)}
         />
