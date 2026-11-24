@@ -91,7 +91,8 @@ function CalendarPage() {
       .catch(() => {});
   }, []);
 
-  const itemsByDay = useMemo(() => buildItemsByDay(plans, logs), [plans, logs]);
+  const viewerId = athlete ? user?.userId : undefined;
+  const itemsByDay = useMemo(() => buildItemsByDay(plans, logs, viewerId), [plans, logs, viewerId]);
 
   const shift = (dir: number) =>
     setAnchor((a) =>

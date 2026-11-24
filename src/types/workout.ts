@@ -85,6 +85,7 @@ export interface CalendarItem {
   state: CalendarItemState;
   fromCoach: boolean;
   coachName: string | null;
+  byViewer?: boolean;
 }
 
 export type JournalItemState = 'done' | 'skipped' | 'cancelled';

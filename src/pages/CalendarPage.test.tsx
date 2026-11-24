@@ -68,7 +68,7 @@ describe('CalendarPage', () => {
       const spy = mockFetch(...dane());
       renderAsCoach();
 
-      await screen.findByTitle('Interwały · od trenera: Jan Kowalski');
+      await screen.findByTitle('Interwały');
       expect(String(spy.mock.calls[0][0])).toContain('/coach/athletes/12/training-plans');
       expect(String(spy.mock.calls[1][0])).toContain('/coach/athletes/12/workout-logs');
       expect(screen.queryByRole('link', { name: 'Szablony' })).not.toBeInTheDocument();
@@ -78,7 +78,7 @@ describe('CalendarPage', () => {
       mockFetch(...dane());
       renderAsCoach();
 
-      await userEvent.click(await screen.findByTitle('Interwały · od trenera: Jan Kowalski'));
+      await userEvent.click(await screen.findByTitle('Interwały'));
 
       const okno = screen.getByRole('dialog', { name: 'Interwały' });
       expect(within(okno).getByText('Ułożony przez trenera: Jan Kowalski')).toBeInTheDocument();
@@ -140,7 +140,7 @@ describe('CalendarPage', () => {
       mockFetch(...dane());
       renderAsCoach(jest.fn(), AUTHOR_ID);
 
-      await userEvent.click(await screen.findByTitle('Interwały · od trenera: Jan Kowalski'));
+      await userEvent.click(await screen.findByTitle('Interwały · ułożony przez Ciebie'));
 
       const okno = screen.getByRole('dialog', { name: 'Interwały' });
       expect(within(okno).getByRole('button', { name: 'Edytuj' })).toBeInTheDocument();
@@ -157,7 +157,7 @@ describe('CalendarPage', () => {
       );
       renderAsCoach(jest.fn(), AUTHOR_ID);
 
-      await userEvent.click(await screen.findByTitle('Interwały · od trenera: Jan Kowalski'));
+      await userEvent.click(await screen.findByTitle('Interwały · ułożony przez Ciebie'));
       await userEvent.click(screen.getByRole('button', { name: 'Edytuj' }));
 
       expect(screen.getByRole('dialog', { name: 'Edytuj trening' })).toBeInTheDocument();
@@ -183,7 +183,7 @@ describe('CalendarPage', () => {
       );
       renderAsCoach(onForbidden, AUTHOR_ID);
 
-      await userEvent.click(await screen.findByTitle('Interwały · od trenera: Jan Kowalski'));
+      await userEvent.click(await screen.findByTitle('Interwały · ułożony przez Ciebie'));
       await userEvent.click(screen.getByRole('button', { name: 'Edytuj' }));
       await userEvent.click(screen.getByRole('button', { name: 'Zapisz' }));
 
@@ -201,7 +201,7 @@ describe('CalendarPage', () => {
       );
       renderAsCoach(onForbidden, AUTHOR_ID);
 
-      await userEvent.click(await screen.findByTitle('Interwały · od trenera: Jan Kowalski'));
+      await userEvent.click(await screen.findByTitle('Interwały · ułożony przez Ciebie'));
       await userEvent.click(screen.getByRole('button', { name: 'Edytuj' }));
       await userEvent.click(screen.getByRole('button', { name: 'Zapisz' }));
 
