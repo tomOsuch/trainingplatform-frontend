@@ -27,6 +27,7 @@ export interface TrainingPlan {
   status: PlanStatus;
   createdByCoach: boolean;
   createdByName: string | null;
+  createdById: number | null;
 }
 
 export interface TrainingPlanRequest {
@@ -84,6 +85,7 @@ export interface CalendarItem {
   state: CalendarItemState;
   fromCoach: boolean;
   coachName: string | null;
+  byViewer?: boolean;
 }
 
 export type JournalItemState = 'done' | 'skipped' | 'cancelled';

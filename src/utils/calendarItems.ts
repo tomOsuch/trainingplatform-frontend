@@ -8,7 +8,8 @@ const PLAN_STATE: Record<PlanStatus, CalendarItemState> = {
   CANCELLED: 'cancelled',
 };
 
-export function planToItem(p: TrainingPlan): CalendarItem {
+export function planToItem(p: TrainingPlan, viewerId?: number): CalendarItem {
+  const byViewer = viewerId !== undefined && p.createdById === viewerId;
   return {
     key: `plan-${p.id}`,
     kind: 'plan',
@@ -20,8 +21,9 @@ export function planToItem(p: TrainingPlan): CalendarItem {
     color: p.categoryColor,
     iconName: p.categoryIconName,
     state: PLAN_STATE[p.status],
-    fromCoach: p.createdByCoach,
+    fromCoach: viewerId === undefined ? p.createdByCoach : byViewer,
     coachName: p.createdByName,
+    byViewer,
   };
 }
 
@@ -30,7 +32,7 @@ export function logToItem(l: WorkoutLog): CalendarItem {
 
   return {
     key: `log-${l.id}`,
-    kind: "log",
+    kind: 'log',
     id: l.id,
     date: l.performedDate,
     time: l.performedTime,
@@ -38,14 +40,14 @@ export function logToItem(l: WorkoutLog): CalendarItem {
     label: l.performedTime || !l.durationMin ? base : `${base} ${formatDuration(l.durationMin)}`,
     iconName: l.categoryIconName,
     color: l.categoryColor,
-    state: "done",
+    state: 'done',
     fromCoach: false,
     coachName: null,
   };
 }
 
-export function buildItemsByDay(plans: TrainingPlan[], logs: WorkoutLog[]): Map<string, CalendarItem[]> {
-  const items = [...plans.map(planToItem), ...logs.filter((l) => l.planId === null).map(logToItem)];
+export function buildItemsByDay(plans: TrainingPlan[], logs: WorkoutLog[], viewerId?: number): Map<string, CalendarItem[]> {
+  const items = [...plans.map((p) => planToItem(p, viewerId)), ...logs.filter((l) => l.planId === null).map(logToItem)];
 
   const map = new Map<string, CalendarItem[]>();
   for (const it of items) {
@@ -60,6 +62,7 @@ export function buildItemsByDay(plans: TrainingPlan[], logs: WorkoutLog[]): Map<
 }
 
 export function tileTitle(item: CalendarItem): string {
+  if (item.byViewer) return `${item.label} · ułożony przez Ciebie`;
   if (!item.fromCoach) return item.label;
   return item.coachName ? `${item.label} · od trenera: ${item.coachName}` : `${item.label} · od trenera`;
 }

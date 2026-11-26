@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useRef, useState } from 'react';
 import { TrainingPlan, TrainingPlanRequest, WorkoutCategory } from '../types/workout';
 import { WorkoutTemplate } from '../types/template';
 import { createPlan, updatePlan, deletePlan } from '../services/trainingPlansApi';
+import { isMyAthlete } from '../services/coachApi';
 import { ApiRequestError } from '../services/apiClient';
 import { toISODate } from '../utils/calendar';
 import { formatDuration, parseDuration } from '../utils/format';
@@ -21,6 +22,7 @@ interface TrainingPlanFormProps {
 
 function TrainingPlanForm({ categories, templates, initialDate, plan, athleteId, onForbidden, onClose, onSaved }: TrainingPlanFormProps) {
   const editMode = Boolean(plan);
+  const canDelete = editMode && athleteId === undefined;
 
   const [title, setTitle] = useState(plan?.title ?? '');
   const [categoryId, setCategoryId] = useState(String(plan?.categoryId ?? ''));
@@ -56,8 +58,6 @@ function TrainingPlanForm({ categories, templates, initialDate, plan, athleteId,
     if (!plannedDate) {
       e.plannedDate = 'Wybierz datę';
     } else if (plannedDate < toISODate(new Date()) && plannedDate !== plan?.plannedDate) {
-      // przeszła data blokuje tylko nowe plany i faktyczną zmianę daty;
-      // edycja innych pól w historycznym planie musi być możliwa
       e.plannedDate = 'Data nie może być przeszła';
     }
 
@@ -86,12 +86,19 @@ function TrainingPlanForm({ categories, templates, initialDate, plan, athleteId,
 
     setSubmitting(true);
     try {
-      if (editMode) await updatePlan(plan!.id, payload);
+      if (editMode) await updatePlan(plan!.id, payload, athleteId);
       else await createPlan(payload, athleteId);
       onSaved();
       onClose();
     } catch (err) {
-      if (onForbidden && err instanceof ApiRequestError && err.status === 403) return onForbidden();
+      if (onForbidden && athleteId !== undefined && err instanceof ApiRequestError && err.status === 403) {
+        if (!editMode) return onForbidden();
+        const stillMine = await isMyAthlete(athleteId).catch(() => true);
+        if (!stillMine) return onForbidden();
+        setFormError(err.message);
+        setSubmitting(false);
+        return;
+      }
       if (err instanceof ApiRequestError && err.errors) setErrors(err.errors);
       else if (err instanceof ApiRequestError) setFormError(err.message);
       else setFormError('Coś poszło nie tak. Spróbuj ponownie.');
@@ -234,12 +241,12 @@ function TrainingPlanForm({ categories, templates, initialDate, plan, athleteId,
           </button>
         </div>
 
-        {editMode && !confirmDelete && (
+        {canDelete && !confirmDelete && (
           <button type="button" className={styles.delete} onClick={() => setConfirmDelete(true)}>
             Usuń trening
           </button>
         )}
-        {editMode && confirmDelete && (
+        {canDelete && confirmDelete && (
           <div className={styles.confirmBox}>
             <span>Na pewno usunąć?</span>
             <button type="button" className={styles.delete} onClick={handleDelete} disabled={submitting}>
